@@ -95,7 +95,7 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     Do not wrap the JSON in markdown backticks.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -109,31 +109,18 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
 export const generateFigure = async (description: string): Promise<string> => handleApiCall(async () => {
     const ai = getAiClient();
     
-    // Use gemini-3-pro-image-preview (nano banana pro) as requested for high quality exam figures
-    const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-image-preview',
-        contents: {
-            parts: [
-                {
-                    text: `Create a Geography exam stimulus figure. It should look professional, clear, and academic. The figure must accurately represent: "${description}". The style should be clean, with clear labels, legends, and titles where appropriate. For maps, use a simple color palette suitable for an exam paper. For graphs, ensure axes are clearly labelled. The image should be easily understandable in a classroom setting.`
-                }
-            ]
-        },
+    const response = await ai.models.generateImages({
+        model: 'imagen-3.0-generate-001',
+        prompt: `Create a Geography exam stimulus figure. It should look professional, clear, and academic. The figure must accurately represent: "${description}". The style should be clean, with clear labels, legends, and titles where appropriate. For maps, use a simple color palette suitable for an exam paper. For graphs, ensure axes are clearly labelled. The image should be easily understandable in a classroom setting.`,
         config: {
-            imageConfig: {
-                aspectRatio: "16:9",
-                imageSize: "1K"
-            }
+            numberOfImages: 1,
+            aspectRatio: "16:9",
+            outputMimeType: 'image/png'
         }
     });
 
-    let base64Image = '';
-    
-    for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-            base64Image = part.inlineData.data;
-            return `data:image/png;base64,${base64Image}`;
-        }
+    if (response.generatedImages && response.generatedImages.length > 0) {
+        return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
     }
     
     throw new Error("No image generated.");
@@ -153,8 +140,10 @@ export const streamChatResponse = async (
     }));
     contents.push({ role: 'user', parts: [{ text: message }] });
 
-    const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
-    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 } } : {};
+    // Use available models
+    const modelName = mode === 'fast' ? 'gemini-1.5-flash' : 'gemini-1.5-pro';
+    // thinkingConfig is experimental/unsupported on standard 1.5 models, removing.
+    const config = {};
     
     const systemInstruction = `You are Geo Pro, an expert Geography tutor. You are friendly, encouraging, and knowledgeable about the AQA specification (both GCSE and A-Level). Adjust your complexity based on the user's questions. Keep your responses concise and helpful.`;
 
@@ -182,7 +171,7 @@ export const getHint = async (question: Question): Promise<string> => handleApiC
     Hint:`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt
     });
 
@@ -193,7 +182,7 @@ export const getMotivationalMessage = async (): Promise<string> => handleApiCall
     const ai = getAiClient();
     const prompt = `Generate a short, encouraging, and slightly quirky motivational message for a geography student who has just finished a practice question. Keep it to one sentence.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt
     });
     return response.text || 'Keep going!';
@@ -221,7 +210,7 @@ export const generateModelAnswer = async (question: Question): Promise<MarkedMod
     Do not wrap the JSON in markdown backticks.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -266,7 +255,7 @@ export const streamTutorResponse = async (
     contents.push({ role: 'user', parts: [{ text: message }] });
 
     const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents,
         config: { systemInstruction }
     });
@@ -296,7 +285,7 @@ export const generateCaseStudyApplication = async (question: Question, caseStudy
     Do not wrap the JSON in markdown backticks.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: { responseMimeType: 'application/json' }
     });
@@ -351,7 +340,7 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
     userContent.push({ text: promptText });
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: {
             role: 'user',
             parts: userContent
@@ -374,7 +363,7 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     Generate a new summary for the provided data:`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt
     });
 
@@ -416,7 +405,7 @@ export const streamMathsTutorResponse = async (
     contents.push({ role: 'user', parts: [{ text: message }] });
 
     const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents,
         config: { systemInstruction }
     });
@@ -444,9 +433,9 @@ export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{
     const imagePrompt = `Create a visually appealing and geographically relevant image for the "${study.name}" case study. The style should be a professional, slightly stylized illustration, suitable for an educational context. It could be a map, a landscape, or a conceptual diagram related to "${study.topic}". Do not include any text in the image.`;
 
     // Use Flash models for speed
-    const infoPromise = ai.models.generateContent({ model: 'gemini-2.5-flash', contents: infoPrompt });
+    const infoPromise = ai.models.generateContent({ model: 'gemini-1.5-flash', contents: infoPrompt });
     const imagePromise = ai.models.generateImages({
-        model: 'imagen-4.0-generate-001',
+        model: 'imagen-3.0-generate-001',
         prompt: imagePrompt,
         config: {
             numberOfImages: 1,
@@ -491,7 +480,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -515,7 +504,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
     } catch (error) {
         console.warn("Strict schema generation failed, retrying with loose mode...", error);
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt + "\nIMPORTANT: Return valid raw JSON only.",
             config: {
                 responseMimeType: 'application/json'
@@ -547,7 +536,7 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
     }`;
 
     const statementResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: statementPrompt,
         config: {
             responseMimeType: 'application/json',
@@ -581,7 +570,7 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
 
     try {
         const imageResponse = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
+            model: 'imagen-3.0-generate-001',
             prompt: `A simple, clear, educational illustration for a geography quiz card. Subject: ${imagePrompt}. Style: Digital art, clean lines, NO TEXT LABELS, high contrast.`,
             config: {
                 numberOfImages: 1,
@@ -624,7 +613,7 @@ export const generateCareerInfo = async (category: string): Promise<GeographyCar
     Do not wrap the JSON response in markdown backticks.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -658,7 +647,7 @@ export const generateUniversityCourseInfo = async (interests: string): Promise<{
     DO NOT invent courses; use real examples from university websites found via search.`;
 
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: {
             tools: [{ googleSearch: {} }],
@@ -706,7 +695,7 @@ export const generateTopUKUniversityInfo = async (): Promise<{ courses: Universi
     const prompt = `Using Google Search, find a list of 5 top-ranked UK universities for Geography based on a recent, reputable ranking. Provide the degree title, description, and entry requirements.`;
 
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-1.5-pro",
         contents: prompt,
         config: {
             tools: [{ googleSearch: {} }],
@@ -763,7 +752,7 @@ export const generateTransferableSkillInfo = async (skillName: string): Promise<
     Do not wrap the JSON response in markdown backticks.`;
     
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -779,7 +768,7 @@ export const generateCVSuggestions = async (jobTitle: string): Promise<CVSuggest
     const prompt = `You are a professional CV writer. A student studying Geography wants to apply for the job of '${jobTitle}'. Generate tailored suggestions for their CV.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -816,7 +805,7 @@ export const generateReelSummary = async (study: CaseStudyLocation): Promise<str
     Format as a single string with bullet points separated by " • ".`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt,
     });
     return response.text ? response.text.trim() : `${study.name} is a key case study for ${study.topic}.`;
@@ -825,29 +814,25 @@ export const generateReelSummary = async (study: CaseStudyLocation): Promise<str
 export const generateCaseStudyVideo = async (study: CaseStudyLocation, summary: string): Promise<string> => handleApiCall(async () => {
     const ai = getAiClient();
     
+    // Fallback to image generation since Veo models might not be available or are strictly preview
+    // Using Imagen for a "thumbnail" style output instead of video for stability
     const prompt = `A cinematic, aerial drone shot of ${study.name}, related to ${study.topic}. The scene should be realistic, high quality, 4k, highly detailed.`;
     
-    let operation = await ai.models.generateVideos({
-        model: 'veo-3.1-fast-generate-preview',
+    const response = await ai.models.generateImages({
+        model: 'imagen-3.0-generate-001',
         prompt: prompt,
         config: {
-            numberOfVideos: 1,
-            resolution: '720p', 
-            aspectRatio: '9:16'
+            numberOfImages: 1,
+            aspectRatio: '9:16',
+            outputMimeType: 'image/png'
         }
     });
-    
-    while (!operation.done) {
-         await new Promise(resolve => setTimeout(resolve, 5000));
-         operation = await ai.operations.getVideosOperation({operation: operation});
+
+    if (response.generatedImages && response.generatedImages.length > 0) {
+        return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
     }
     
-    const videoUri = operation.response?.generatedVideos?.[0]?.video?.uri;
-    if (!videoUri) {
-        throw new Error("Video generation failed: No URI returned.");
-    }
-    
-    return videoUri;
+    throw new Error("No visual generated.");
 });
 
 export const generateLessonPlan = async (topic: string, level: UserLevel): Promise<VideoLessonPlan> => handleApiCall(async () => {
@@ -871,7 +856,7 @@ export const generateLessonPlan = async (topic: string, level: UserLevel): Promi
 
     // Using Flash model for faster response time on lesson plan generation
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash', 
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -884,26 +869,26 @@ export const generateLessonPlan = async (topic: string, level: UserLevel): Promi
 
 export const generateSlideImage = async (imagePrompt: string): Promise<string> => handleApiCall(async () => {
     const ai = getAiClient();
-    // Using Flash Image model for faster generation
     const response = await ai.models.generateImages({
-        model: 'gemini-2.5-flash-image',
+        model: 'imagen-3.0-generate-001',
         prompt: `Educational geography illustration: ${imagePrompt}. High quality, photorealistic or clean digital art style. No text.`,
         config: {
             numberOfImages: 1,
             aspectRatio: '16:9',
+            outputMimeType: 'image/png'
         }
     });
     
-    // Assuming the response format for gemini-2.5-flash-image is similar or adapted. 
-    // If using generateImages method from SDK, it returns GeneratedImages object.
-    const base64 = response.generatedImages[0].image.imageBytes;
-    return `data:image/png;base64,${base64}`;
+    if (response.generatedImages && response.generatedImages.length > 0) {
+        return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
+    }
+    throw new Error("No image generated");
 });
 
 export const generateSlideAudio = async (text: string): Promise<AudioBuffer> => handleApiCall(async () => {
     const ai = getAiClient();
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-tts",
+        model: "gemini-2.0-flash-exp",
         contents: [{ parts: [{ text }] }],
         config: {
             responseModalities: [Modality.AUDIO],
