@@ -1,5 +1,5 @@
 
-import { CommandWord, MathsProblem, StructureGuide, MathsSkill } from './types';
+import { CommandWord, MathsProblem, StructureGuide, MathsSkill, CourseLesson } from './types';
 import { ALL_QUESTIONS } from './database';
 
 export const ALEVEL_UNITS = [
@@ -23,8 +23,7 @@ export const GCSE_UNITS = [
     'Urban Issues and Challenges',
     'The Changing Economic World',
     'The Challenge of Resource Management',
-    'Issue Evaluation',
-    'Fieldwork'
+    'Geographical Applications'
 ];
 
 export const AQA_UNITS = ALEVEL_UNITS; 
@@ -308,7 +307,6 @@ export const MATHS_SKILLS: MathsSkill[] = [
     }
 ];
 
-
 export const MATHS_PROBLEMS: MathsProblem[] = [
     {
         id: 'm1',
@@ -393,7 +391,6 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
     }
 ];
 
-
 export const STRUCTURE_GUIDES: StructureGuide[] = [
     {
         title: '20-MARK ESSAY (A-Level)',
@@ -470,12 +467,21 @@ export const STRUCTURE_GUIDES: StructureGuide[] = [
     },
     {
         title: '6-MARK QUESTION (GCSE)',
-        aoWeighting: 'Usually AO3 (Figure Analysis).',
+        aoWeighting: 'AO1 (Knowledge) & AO2 (Explain/Apply).',
         structureComponents: [
             {
-                title: 'TEA Technique',
-                details: 'Trend (What is the pattern?), Evidence (Quote numbers from the graph/map), Anomaly (What doesn\'t fit?).'
+                title: 'Point 1',
+                details: 'State a reason/factor/impact. Explain it fully using "this means that...". Add an example.'
+            },
+            {
+                title: 'Point 2',
+                details: 'State a second reason/factor/impact. Explain it fully. Link back to the question.'
             }
+        ],
+        extraTips: [
+            'Often uses "Explain" or "Suggest".',
+            'If it asks for "impacts", try to give two distinct ones.',
+            'Use geographical terminology.'
         ],
         levels: ['GCSE']
     },
@@ -490,4 +496,95 @@ export const STRUCTURE_GUIDES: StructureGuide[] = [
         ],
         levels: ['GCSE', 'A-Level']
     }
+];
+
+// --- COURSEWORK STRUCTURE ---
+export const COURSE_LESSONS: CourseLesson[] = [
+    // --- A-LEVEL LESSONS ---
+    // Water and Carbon Cycles (A-Level)
+    { id: '1.1', title: 'Systems framework and their application', chapter: 'Water and Carbon Cycles' },
+    { id: '1.2', title: 'The water cycle', chapter: 'Water and Carbon Cycles' },
+    { id: '1.3', title: 'The carbon cycle', chapter: 'Water and Carbon Cycles' },
+    { id: '1.4', title: 'Water, carbon, climate and life on Earth', chapter: 'Water and Carbon Cycles' },
+
+    // Coastal Systems and Landscapes (A-Level)
+    { id: '3.1', title: 'Introduction to coastal systems and landscapes', chapter: 'Coastal Systems and Landscapes' },
+    { id: '3.2', title: 'Systems and processes in coastal environments', chapter: 'Coastal Systems and Landscapes' },
+    { id: '3.3', title: 'Coastal landscape development', chapter: 'Coastal Systems and Landscapes' },
+    { id: '3.4', title: 'Coastal management', chapter: 'Coastal Systems and Landscapes' },
+    { id: '3.5', title: 'Quantitative and qualitative skills in coastal landscapes', chapter: 'Coastal Systems and Landscapes' },
+
+    // Hazards (A-Level)
+    { id: '5.1', title: 'The concept of a hazard in a geographical context', chapter: 'Hazards' },
+    { id: '5.2', title: 'Plate tectonics', chapter: 'Hazards' },
+    { id: '5.3', title: 'Volcanic hazards', chapter: 'Hazards' },
+    { id: '5.4', title: 'Seismic hazards', chapter: 'Hazards' },
+    { id: '5.5', title: 'Storm (typhoons, hurricanes) hazards', chapter: 'Hazards' },
+    { id: '5.6', title: 'Fires in nature: The nature of wildfires', chapter: 'Hazards' },
+
+    // Global Systems and Global Governance (A-Level)
+    { id: '7.1', title: 'Globalisation', chapter: 'Global Systems and Global Governance' },
+    { id: '7.2', title: 'Global systems', chapter: 'Global Systems and Global Governance' },
+    { id: '7.3', title: 'International trade and access to markets', chapter: 'Global Systems and Global Governance' },
+    { id: '7.4', title: 'Global governance', chapter: 'Global Systems and Global Governance' },
+    { id: '7.5', title: "The 'global commons'", chapter: 'Global Systems and Global Governance' },
+    { id: '7.6', title: 'Globalisation critique', chapter: 'Global Systems and Global Governance' },
+
+    // Changing Places (A-Level)
+    { id: '8.1', title: 'The nature and importance of places', chapter: 'Changing Places' },
+    { id: '8.2', title: 'Changing places: relationships and connections', chapter: 'Changing Places' },
+    { id: '8.3', title: 'Changing places: meaning and representation', chapter: 'Changing Places' },
+    { id: '8.4', title: 'Representations of place: quantitative and qualitative sources', chapter: 'Changing Places' },
+
+    // Contemporary Urban Environments (A-Level)
+    { id: '9.1', title: 'Patterns of urbanisation since 1945', chapter: 'Contemporary Urban Environments' },
+    { id: '9.2', title: 'Urban forms', chapter: 'Contemporary Urban Environments' },
+    { id: '9.3', title: 'Social and economic issues associated with urbanisation', chapter: 'Contemporary Urban Environments' },
+    { id: '9.4', title: 'Urban climate', chapter: 'Contemporary Urban Environments' },
+    { id: '9.5', title: 'Urban drainage', chapter: 'Contemporary Urban Environments' },
+    { id: '9.6', title: 'Urban waste and its disposal', chapter: 'Contemporary Urban Environments' },
+    { id: '9.7', title: 'Other contemporary urban environmental issues', chapter: 'Contemporary Urban Environments' },
+    { id: '9.8', title: 'Sustainable urban development', chapter: 'Contemporary Urban Environments' },
+
+    // --- GCSE LESSONS (Aligned to AQA Textbook) ---
+    // The Challenge of Natural Hazards (Section A)
+    { id: 'G-Ch1', title: 'Natural hazards', chapter: 'The Challenge of Natural Hazards' },
+    { id: 'G-Ch2', title: 'Tectonic hazards', chapter: 'The Challenge of Natural Hazards' },
+    { id: 'G-Ch3', title: 'Weather hazards', chapter: 'The Challenge of Natural Hazards' },
+    { id: 'G-Ch4', title: 'Climate change', chapter: 'The Challenge of Natural Hazards' },
+
+    // The Living World (Section B)
+    { id: 'G-Ch5', title: 'Ecosystems', chapter: 'The Living World' },
+    { id: 'G-Ch6', title: 'Tropical rainforests', chapter: 'The Living World' },
+    { id: 'G-Ch7', title: 'Hot deserts', chapter: 'The Living World' },
+    { id: 'G-Ch8', title: 'Cold environments', chapter: 'The Living World' },
+
+    // Physical Landscapes in the UK (Section C)
+    { id: 'G-Ch9', title: 'The physical diversity of the UK', chapter: 'Physical Landscapes in the UK' },
+    { id: 'G-Ch10', title: 'Coastal landscapes', chapter: 'Physical Landscapes in the UK' },
+    { id: 'G-Ch11', title: 'River landscapes', chapter: 'Physical Landscapes in the UK' },
+    { id: 'G-Ch12', title: 'Glacial landscapes', chapter: 'Physical Landscapes in the UK' },
+
+    // Urban Issues and Challenges (Paper 2, Section A)
+    { id: 'G-Ch13', title: 'The global pattern of urban change', chapter: 'Urban Issues and Challenges' },
+    { id: 'G-Ch14', title: 'Urban growth in Nigeria (Lagos)', chapter: 'Urban Issues and Challenges' },
+    { id: 'G-Ch15', title: 'Urban challenges in the UK (London)', chapter: 'Urban Issues and Challenges' },
+    { id: 'G-Ch16', title: 'Sustainable development of urban areas', chapter: 'Urban Issues and Challenges' },
+
+    // The Changing Economic World (Paper 2, Section B)
+    { id: 'G-Ch17', title: 'Economic development and quality of life', chapter: 'The Changing Economic World' },
+    { id: 'G-Ch18', title: 'Reducing the global development gap', chapter: 'The Changing Economic World' },
+    { id: 'G-Ch19', title: 'Economic development in Nigeria', chapter: 'The Changing Economic World' },
+    { id: 'G-Ch20', title: 'Economic change in the UK', chapter: 'The Changing Economic World' },
+
+    // The Challenge of Resource Management (Paper 2, Section C)
+    { id: 'G-Ch21', title: 'Global resource management', chapter: 'The Challenge of Resource Management' },
+    { id: 'G-Ch22', title: 'Resources in the UK', chapter: 'The Challenge of Resource Management' },
+    { id: 'G-Ch23', title: 'Food', chapter: 'The Challenge of Resource Management' },
+    { id: 'G-Ch24', title: 'Water', chapter: 'The Challenge of Resource Management' },
+    { id: 'G-Ch25', title: 'Energy', chapter: 'The Challenge of Resource Management' },
+
+    // Geographical Applications (Paper 3)
+    { id: 'G-Ch26', title: 'Issue evaluation', chapter: 'Geographical Applications' },
+    { id: 'G-Ch27', title: 'Fieldwork and geographical enquiry', chapter: 'Geographical Applications' }
 ];

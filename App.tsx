@@ -25,6 +25,9 @@ import SwipeQuizView from './components/SwipeQuizView';
 import CareersUniversityView from './components/CareersUniversityView';
 import AdminView from './components/AdminView';
 import RagAnalysisView from './components/RagAnalysisView';
+import RevisionPlannerView from './components/RevisionPlannerView';
+import PodcastView from './components/PodcastView';
+import LearningHubView from './components/LearningHubView'; // Imported
 import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
@@ -221,8 +224,42 @@ const App: React.FC = () => {
                 >
                     <div className="w-full max-w-7xl mx-auto space-y-12">
                         
-                        {/* Section 1: Exam Training */}
+                        {/* Section 1: Learning & Knowledge */}
                         <section className="animate-fade-in">
+                            <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
+                                <span className="text-3xl">🧠</span> Learning & Progress
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <HubCard
+                                    icon={<span className="text-4xl">🎓</span>}
+                                    title="Learning Academy"
+                                    description="Complete interactive lessons, master content with AI tutoring, and track your syllabus progress."
+                                    onClick={() => handleNavigate('learning_hub')}
+                                    shadowColor="shadow-indigo-500/20"
+                                    accentColor="text-indigo-600 hover:text-indigo-700"
+                                    actionText="Start Learning"
+                                />
+                                <HubCard
+                                    icon={<span className="text-4xl">📅</span>}
+                                    title="Revision Planner"
+                                    description="Optimise your memory with spaced repetition scheduling and interactive forgetting curves."
+                                    onClick={() => handleNavigate('revision_planner')}
+                                    shadowColor="shadow-cyan-500/20"
+                                    accentColor="text-cyan-600 hover:text-cyan-700"
+                                />
+                                <HubCard
+                                    icon={<span className="text-4xl">🗂️</span>}
+                                    title="Flashcards & Quizzes"
+                                    description="Master key terms and case studies with digital flashcards and custom quizzes."
+                                    onClick={() => handleNavigate('flashcard_quiz_hub')}
+                                    shadowColor="shadow-fuchsia-500/20"
+                                    accentColor="text-fuchsia-600 hover:text-fuchsia-700"
+                                />
+                            </div>
+                        </section>
+
+                        {/* Section 2: Exam Training */}
+                        <section className="animate-fade-in [animation-delay:0.1s]">
                             <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
                                 <span className="text-3xl">✍️</span> Exam Training Centre
                             </h2>
@@ -240,26 +277,9 @@ const App: React.FC = () => {
                                     title="Skills & Structure"
                                     description="Master command words, essay structures, and essential maths skills."
                                     onClick={() => handleNavigate('skills_practice')}
-                                    shadowColor="shadow-indigo-500/20"
-                                    accentColor="text-indigo-600 hover:text-indigo-700"
+                                    shadowColor="shadow-purple-500/20"
+                                    accentColor="text-purple-600 hover:text-purple-700"
                                 />
-                                <HubCard
-                                    icon={<span className="text-4xl">🔑</span>}
-                                    title="Command Words"
-                                    description="Decode exam questions with definitions and tips for every command word."
-                                    onClick={() => handleNavigate('command_words')}
-                                    shadowColor="shadow-amber-500/20"
-                                    accentColor="text-amber-600 hover:text-amber-700"
-                                />
-                            </div>
-                        </section>
-
-                        {/* Section 2: Knowledge & Progress */}
-                        <section className="animate-fade-in [animation-delay:0.1s]">
-                            <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
-                                <span className="text-3xl">🧠</span> Knowledge & Progress
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 <HubCard
                                     icon={<span className="text-4xl">🚦</span>}
                                     title="RAG Analysis"
@@ -267,14 +287,6 @@ const App: React.FC = () => {
                                     onClick={() => handleNavigate('rag_analysis')}
                                     shadowColor="shadow-orange-500/20"
                                     accentColor="text-orange-600 hover:text-orange-700"
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">🗂️</span>}
-                                    title="Flashcards & Quizzes"
-                                    description="Master key terms and case studies with digital flashcards and custom quizzes."
-                                    onClick={() => handleNavigate('flashcard_quiz_hub')}
-                                    shadowColor="shadow-fuchsia-500/20"
-                                    accentColor="text-fuchsia-600 hover:text-fuchsia-700"
                                 />
                             </div>
                         </section>
@@ -285,6 +297,14 @@ const App: React.FC = () => {
                                 <span className="text-3xl">🚀</span> Interactive & Future
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <HubCard
+                                    icon={<span className="text-4xl">🎙️</span>}
+                                    title="Podcast Studio"
+                                    description="Create custom audio deep-dives on any topic. Hosted by Alex and Sam."
+                                    onClick={() => handleNavigate('podcast_studio')}
+                                    shadowColor="shadow-pink-500/20"
+                                    accentColor="text-pink-600 hover:text-pink-700"
+                                />
                                 <HubCard
                                     icon={<span className="text-4xl">🎮</span>}
                                     title="Game Zone"
@@ -301,14 +321,6 @@ const App: React.FC = () => {
                                     shadowColor="shadow-emerald-500/20"
                                     accentColor="text-emerald-600 hover:text-emerald-700"
                                 />
-                                <HubCard
-                                    icon={<span className="text-4xl">🎓</span>}
-                                    title="Careers & Uni"
-                                    description="Explore future pathways, university courses, and build your geography CV."
-                                    onClick={() => handleNavigate('careers_university')}
-                                    shadowColor="shadow-rose-500/20"
-                                    accentColor="text-rose-600 hover:text-rose-700"
-                                />
                             </div>
                         </section>
 
@@ -317,6 +329,7 @@ const App: React.FC = () => {
                 </HubLayout>
             )}
 
+            {page === 'learning_hub' && <LearningHubView user={user} onBack={() => handleNavigate('dashboard')} />}
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
@@ -336,6 +349,8 @@ const App: React.FC = () => {
             {page === 'command_words' && <CommandWordToolkitView user={user} onBack={() => handleNavigate('dashboard')} />}
             {page === 'careers_university' && <CareersUniversityView onBack={() => handleNavigate('dashboard')} />}
             {page === 'rag_analysis' && <RagAnalysisView user={user} onBack={() => handleNavigate('dashboard')} />}
+            {page === 'revision_planner' && <RevisionPlannerView user={user} onBack={() => handleNavigate('dashboard')} />}
+            {page === 'podcast_studio' && <PodcastView user={user} onBack={() => handleNavigate('dashboard')} />}
             
             {page === 'admin' && isAdmin && <AdminView onImpersonate={handleImpersonate} onBack={() => handleNavigate('dashboard')} />}
 

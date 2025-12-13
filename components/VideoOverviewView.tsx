@@ -93,7 +93,7 @@ const VideoOverviewView: React.FC<VideoOverviewViewProps> = ({ user, onBack }) =
 
     // Initialization
     useEffect(() => {
-        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         return () => {
             if (audioContextRef.current?.state !== 'closed') {
                 audioContextRef.current?.close();
@@ -284,7 +284,7 @@ const VideoOverviewView: React.FC<VideoOverviewViewProps> = ({ user, onBack }) =
         setIsExportingPDF(true);
 
         try {
-            const { jsPDF } = window.jspdf;
+            const { jsPDF } = (window as any).jspdf;
             const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
             const width = doc.internal.pageSize.getWidth();
             const height = doc.internal.pageSize.getHeight();

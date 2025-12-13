@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { CompletedSession } from '../types';
 import { FigureDisplay, AnnotatedAnswerDisplay } from './SharedQuestionComponents';
@@ -15,13 +16,13 @@ const SessionDetailView: React.FC<SessionDetailViewProps> = ({ session, onBack }
     const handleExportPDF = async () => {
         if (!sessionReportRef.current || isExporting) return;
         setIsExporting(true);
-        const { jsPDF } = window.jspdf;
+        const { jsPDF } = (window as any).jspdf;
         const element = sessionReportRef.current;
         
         element.classList.add('exporting-pdf');
 
         try {
-            const canvas = await window.html2canvas(element, { scale: 2, useCORS: true, logging: false });
+            const canvas = await (window as any).html2canvas(element, { scale: 2, useCORS: true, logging: false });
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();

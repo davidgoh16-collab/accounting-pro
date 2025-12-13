@@ -55,31 +55,38 @@ export const CASE_STUDY_LOCATIONS: CaseStudyLocation[] = [
   { name: 'China (One Child Policy)', topic: 'Population and the Environment', geography: 'Human Geography', lat: 35.8, lng: 104.1, details: 'Anti-natalist policy. 400m births prevented. Gender imbalance. 4-2-1 problem.', citation: 'Population Policy', levels: ['A-Level'] },
 
   // --- GCSE: HAZARDS ---
-  { name: 'Typhoon Haiyan', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: 11.0, lng: 125.0, details: 'Super Typhoon (2013). Philippines. Storm surge in Tacloban. 6300+ deaths. Primary vs Secondary effects.', citation: 'Tropical Storm', levels: ['GCSE'] },
-  { name: 'Nepal Earthquake (2015)', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: 28.16, lng: 84.72, details: 'LIC Earthquake. 7.8 Mag. 9000 deaths. Avalanches on Everest. Tourism impacted.', citation: 'Tectonic Hazard in LIC', levels: ['GCSE'] },
-  { name: 'Chile Earthquake (2010)', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: -35.67, lng: -71.54, details: 'HIC/NEE Earthquake. 8.8 Mag. 500 deaths. Strong building codes reducing death toll.', citation: 'Tectonic Hazard in HIC/NEE', levels: ['GCSE'] },
+  { name: 'L\'Aquila, Italy (2009)', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: 42.35, lng: 13.40, details: 'HIC Earthquake. Primary/Secondary effects (308 deaths, heritage sites damaged). Immediate/Long-term responses.', citation: 'Tectonic Hazard in HIC', levels: ['GCSE'] },
+  { name: 'Gorkha, Nepal (2015)', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: 28.16, lng: 84.72, details: 'LIC Earthquake. 7.8 Mag. 8841 deaths. Avalanche on Everest. Tourism impacted. Aid dependence.', citation: 'Tectonic Hazard in LIC', levels: ['GCSE'] },
+  { name: 'Typhoon Haiyan', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: 11.0, lng: 125.0, details: 'Super Typhoon (2013). Philippines. Storm surge in Tacloban. 6190 deaths. Primary vs Secondary effects.', citation: 'Tropical Storm', levels: ['GCSE'] },
+  { name: 'Cumbria Floods (2009)', topic: 'The Challenge of Natural Hazards', geography: 'Physical Geography', lat: 54.66, lng: -3.36, details: 'Cockermouth. Record rainfall. River Derwent. £100m damage. New flood defences (mobile wall).', citation: 'Extreme Weather in UK', levels: ['GCSE'] },
   
   // --- GCSE: LIVING WORLD ---
-  { name: 'Malaysia Rainforest', topic: 'The Living World', geography: 'Physical Geography', lat: 4.21, lng: 101.97, details: 'Deforestation causes: Palm oil, logging, Bakun Dam. Impacts: Biodiversity loss, soil erosion, economic gain.', citation: 'Tropical Rainforest Case Study', levels: ['GCSE'] },
-  { name: 'Thar Desert', topic: 'The Living World', geography: 'Physical Geography', lat: 27.0, lng: 71.0, details: 'Hot Desert. Opportunities: Mining, Tourism (Jaisalmer), Farming (Indira Gandhi Canal). Challenges: Heat, water.', citation: 'Hot Desert Case Study', levels: ['GCSE'] },
+  { name: 'Epping Forest', topic: 'The Living World', geography: 'Physical Geography', lat: 51.66, lng: 0.05, details: 'Deciduous woodland ecosystem in UK. Nutrient cycling, food web, interdependence, sustainable management.', citation: 'UK Ecosystem', levels: ['GCSE'] },
+  { name: 'Amazon Rainforest (Brazil)', topic: 'The Living World', geography: 'Physical Geography', lat: -3.46, lng: -62.21, details: 'Tropical Rainforest. Deforestation causes (cattle, soy, logging, mining). Impacts (soil erosion, indigenous tribes). Sustainable management.', citation: 'Tropical Rainforest Case Study', levels: ['GCSE'] },
+  { name: 'Western Desert (USA)', topic: 'The Living World', geography: 'Physical Geography', lat: 36.0, lng: -115.0, details: 'Hot Desert (Mojave/Sonoran). Opportunities (mineral extraction, energy, tourism). Challenges (extreme temperatures, water supply).', citation: 'Hot Desert Case Study', levels: ['GCSE'] },
+  { name: 'Alaska', topic: 'The Living World', geography: 'Physical Geography', lat: 64.0, lng: -150.0, details: 'Cold Environment. Opportunities (oil, fishing, tourism). Challenges (permafrost, inaccessibility). Trans-Alaskan Pipeline.', citation: 'Cold Environment Case Study', levels: ['GCSE'] },
 
   // --- GCSE: PHYSICAL LANDSCAPES ---
-  { name: 'Holderness Coast', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 53.8, lng: -0.1, details: 'Erosion. Mappleton (rock groynes) vs Cowden (sediment starvation). Fastest eroding coast in Europe.', citation: 'Coastal Management Scheme', levels: ['GCSE'] },
-  { name: 'River Tees', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 54.6, lng: -1.2, details: 'River profile. High Force Waterfall. Meanders near Yarm. Estuary industry.', citation: 'River Valley', levels: ['GCSE'] },
-  { name: 'Banbury', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 52.06, lng: -1.33, details: 'Flood management. Embankments, Biodiversity Action Plan, raising A361 road.', citation: 'Flood Management', levels: ['GCSE'] },
+  { name: 'Dorset Coast', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 50.60, lng: -2.0, details: 'Jurassic Coast. Landforms: Durdle Door (arch), Lulworth Cove, Old Harry Rocks (stacks), Swanage Bay, Chesil Beach.', citation: 'Coastal Landforms', levels: ['GCSE'] },
+  { name: 'Medmerry', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 50.73, lng: -0.83, details: 'Managed Retreat (West Sussex). Realignment scheme to create saltmarsh buffer. Sustainable defence.', citation: 'Coastal Management Scheme', levels: ['GCSE'] },
+  { name: 'River Severn', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 52.0, lng: -2.5, details: 'River Landforms. V-shaped valley (upper), Meanders (middle), Levées/Estuary (lower).', citation: 'River Valley', levels: ['GCSE'] },
+  { name: 'Jubilee River', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 51.50, lng: -0.65, details: 'Flood relief channel for River Thames (Maidenhead/Windsor). Hard engineering. Social/Economic issues.', citation: 'Flood Management Scheme', levels: ['GCSE'] },
+  { name: 'Lake District', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 54.46, lng: -3.08, details: 'Glacial Landforms. Corries (Red Tarn), Arêtes (Striding Edge), Ribbon Lakes (Windermere). Tourism impacts.', citation: 'Glacial Landscapes', levels: ['GCSE'] },
+  { name: 'Isle of Arran', topic: 'Physical Landscapes in the UK', geography: 'Physical Geography', lat: 55.58, lng: -5.15, details: 'Glacial features (Goatfell). Tourism management and conflicts.', citation: 'Glacial Landscape / Tourism', levels: ['GCSE'] },
 
   // --- GCSE: URBAN ISSUES ---
-  { name: 'Rio de Janeiro', topic: 'Urban Issues and Challenges', geography: 'Human Geography', lat: -22.9, lng: -43.1, details: 'NEE City. Favelas (Rocinha). Favela Bairro Project. Crime, pollution, Olympic legacy.', citation: 'City in NEE', levels: ['GCSE'] },
-  { name: 'Bristol', topic: 'Urban Issues and Challenges', geography: 'Human Geography', lat: 51.45, lng: -2.58, details: 'UK Major City. Filwood vs Stoke Bishop (inequality). Temple Quarter regeneration. Green Capital.', citation: 'City in UK', levels: ['GCSE'] },
-  { name: 'Freiburg', topic: 'Urban Issues and Challenges', geography: 'Human Geography', lat: 47.99, lng: 7.84, details: 'Sustainable City. Vauban district. Solar energy. Water conservation.', citation: 'Urban Sustainability', levels: ['GCSE'] },
+  { name: 'Lagos, Nigeria', topic: 'Urban Issues and Challenges', geography: 'Human Geography', lat: 6.52, lng: 3.37, details: 'NEE City. Rural-urban migration. Squatter settlements (Makoko). Informal economy (Olusosun dump). Urban planning (Floating School).', citation: 'City in NEE', levels: ['GCSE'] },
+  { name: 'London', topic: 'Urban Issues and Challenges', geography: 'Human Geography', lat: 51.50, lng: -0.12, details: 'UK Major City. Shoreditch (regeneration/gentrification). Docklands. Crossrail. Urban greening. Stratford (Olympic legacy).', citation: 'City in UK', levels: ['GCSE'] },
+  { name: 'East Village (London)', topic: 'Urban Issues and Challenges', geography: 'Human Geography', lat: 51.54, lng: -0.01, details: 'Sustainable urban living. Olympic legacy. Water recycling, green spaces, energy efficiency.', citation: 'Urban Sustainability', levels: ['GCSE'] },
 
   // --- GCSE: ECONOMIC WORLD ---
-  { name: 'Nigeria', topic: 'The Changing Economic World', geography: 'Human Geography', lat: 9.0, lng: 8.0, details: 'NEE Development. Shell Oil (TNC) impacts. Aid dependency. Shift from agriculture to industry.', citation: 'NEE Country Study', levels: ['GCSE'] },
-  { name: 'Jamaica Tourism', topic: 'The Changing Economic World', geography: 'Human Geography', lat: 18.1, lng: -77.3, details: 'Closing the development gap. Tourism contribution to GDP. Infrastructure vs Environment.', citation: 'Tourism and Development', levels: ['GCSE'] },
-
-  // --- GCSE: RESOURCE MANAGEMENT ---
-  { name: 'Lesotho Highland Water', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -29.6, lng: 28.2, details: 'Water transfer. Katse Dam. Supplying South Africa. Economic benefits vs displacement.', citation: 'Large Scale Water Transfer', levels: ['GCSE'] },
-  { name: 'Chambamontera', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -5.5, lng: -79.0, details: 'Micro-hydro scheme in Peru. Appropriate technology. Rural electrification.', citation: 'Local Sustainable Energy', levels: ['GCSE'] }
+  { name: 'Nigeria', topic: 'The Changing Economic World', geography: 'Human Geography', lat: 9.0, lng: 8.0, details: 'NEE. Economic structure change (oil dependence). TNCs (Shell). Aid. Quality of life improvements.', citation: 'NEE Country Study', levels: ['GCSE'] },
+  { name: 'Tunisia', topic: 'The Changing Economic World', geography: 'Human Geography', lat: 33.88, lng: 9.53, details: 'Closing the development gap via Tourism. Multiplier effect. Infrastructure vs dependence.', citation: 'Tourism and Development', levels: ['GCSE'] },
+  { name: 'Almería, Spain', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 36.83, lng: -2.46, details: 'Large scale agricultural development. Greenhouses (plastic culture). Hydroponics. Migrant labour.', citation: 'Large Scale Agriculture', levels: ['GCSE'] },
+  { name: 'Jamalpur, Bangladesh', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 24.92, lng: 89.94, details: 'Rice-fish culture. Sustainable local food production. Increasing yields and protein.', citation: 'Sustainable Food Production', levels: ['GCSE'] },
+  { name: 'Hitosa, Ethiopia', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 8.15, lng: 39.30, details: 'Local water scheme. Gravity-fed system. Community management. Successes and problems.', citation: 'Local Water Scheme', levels: ['GCSE'] },
+  { name: 'SNWTP (China)', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 35.0, lng: 114.0, details: 'South-North Water Transfer Project. Large scale engineering. Moving water from surplus to deficit areas.', citation: 'Large Scale Water Transfer', levels: ['GCSE'] },
+  { name: 'Micro-hydro, Nepal', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 28.39, lng: 84.12, details: 'Sustainable energy in LIC. Run-of-river. Community owned. Appropriate technology.', citation: 'Sustainable Energy', levels: ['GCSE'] }
 ];
 
 export const TOPIC_COLORS: { [key: string]: string } = {
@@ -100,7 +107,8 @@ export const TOPIC_COLORS: { [key: string]: string } = {
     'Urban Issues and Challenges': '#f59e0b',
     'The Changing Economic World': '#a855f7',
     'The Challenge of Resource Management': '#3b82f6',
-    'Resource Security': '#3b82f6'
+    'Resource Security': '#3b82f6',
+    'Geographical Applications': '#6366f1' // Added color for Paper 3
 };
 
 export const GEOGRAPHY_TYPES = ['All', 'Physical Geography', 'Human Geography'];

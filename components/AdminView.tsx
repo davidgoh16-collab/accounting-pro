@@ -1,18 +1,175 @@
 
-import React, { useState, useEffect } from 'react';
-import { AuthUser, CompletedSession, ChatSessionLog } from '../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress } from '../types';
 import { getAllUsers, db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, doc, getDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
 import SessionDetailView from './SessionDetailView';
+import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
     onImpersonate: (user: AuthUser) => void;
     onBack: () => void;
 }
 
-type Tab = 'overview' | 'sessions' | 'games' | 'chats';
+type Tab = 'overview' | 'sessions' | 'games' | 'chats' | 'learning';
+
+interface TopicProgressStats {
+    total: number;
+    completed: number;
+    avgScore: number;
+}
+
+const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
+    const [progressData, setProgressData] = useState<Record<string, Record<string, LessonProgress>>>({});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProgress = async () => {
+            setLoading(true);
+            try {
+                // Get all unique chapters relevant to the user's level, or all if undefined
+                const relevantLessons = user.level 
+                    ? COURSE_LESSONS // In a real scenario, we might filter COURSE_LESSONS by level here if ids overlapped, but mostly they are distinct enough or we check chapters.
+                    : COURSE_LESSONS; 
+                
+                const allTopics = Array.from(new Set(relevantLessons.map(l => l.chapter)));
+                
+                const newProgress: Record<string, Record<string, LessonProgress>> = {};
+                
+                await Promise.all(allTopics.map(async (topic) => {
+                    const docRef = doc(db, 'users', user.uid, 'learning_progress', topic);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        newProgress[topic] = docSnap.data() as Record<string, LessonProgress>;
+                    }
+                }));
+                setProgressData(newProgress);
+            } catch (error) {
+                console.error("Error fetching learning progress:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProgress();
+    }, [user]);
+
+    const stats = useMemo(() => {
+        let totalLessons = 0;
+        let completedLessons = 0;
+        let totalScore = 0;
+        let scoreCount = 0;
+        
+        // Filter lessons by user level if present to calculate total available correctly
+        // (Assuming COURSE_LESSONS contains everything, we rely on chapter matching)
+        const userLessons = user.level === 'GCSE' 
+            ? COURSE_LESSONS.filter(l => l.id.startsWith('G-')) 
+            : user.level === 'A-Level' 
+                ? COURSE_LESSONS.filter(l => !l.id.startsWith('G-'))
+                : COURSE_LESSONS;
+
+        const topicStats: Record<string, TopicProgressStats> = {};
+
+        userLessons.forEach(lesson => {
+            if (!topicStats[lesson.chapter]) {
+                topicStats[lesson.chapter] = { total: 0, completed: 0, avgScore: 0 };
+            }
+            topicStats[lesson.chapter].total++;
+            totalLessons++;
+
+            const lessonProg = progressData[lesson.chapter]?.[lesson.id];
+            if (lessonProg?.completed) {
+                completedLessons++;
+                topicStats[lesson.chapter].completed++;
+                
+                totalScore += lessonProg.score;
+                scoreCount++;
+                // Accumulate score for topic average calculation later if needed, 
+                // but simpler to just use scoreCount per topic loop if we wanted strict topic avgs.
+            }
+        });
+
+        const overallAvg = scoreCount > 0 ? totalScore / scoreCount : 0;
+
+        return {
+            totalLessons,
+            completedLessons,
+            overallAvg,
+            topicStats
+        };
+    }, [progressData, user.level]);
+
+    if (loading) return <div className="text-center p-8 text-stone-500">Loading learning progress...</div>;
+
+    return (
+        <div className="space-y-8 animate-fade-in">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700">
+                    <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase">Course Progress</p>
+                    <div className="flex items-end gap-2 mt-2">
+                        <span className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">{stats.completedLessons}</span>
+                        <span className="text-lg text-stone-400 mb-1">/ {stats.totalLessons}</span>
+                    </div>
+                    <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2 mt-3">
+                        <div className="bg-indigo-500 h-2 rounded-full transition-all" style={{ width: `${(stats.completedLessons / stats.totalLessons) * 100}%` }}></div>
+                    </div>
+                </div>
+                <div className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700">
+                    <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase">Average Score</p>
+                    <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">{stats.overallAvg.toFixed(0)}%</p>
+                    <p className="text-xs text-stone-400 mt-2">Across completed lessons</p>
+                </div>
+                <div className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700">
+                    <p className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase">Active Topics</p>
+                    <p className="text-4xl font-bold text-amber-500 mt-2">
+                        {Object.values(stats.topicStats).filter((t: TopicProgressStats) => t.completed > 0).length}
+                    </p>
+                    <p className="text-xs text-stone-400 mt-2">Chapters started</p>
+                </div>
+            </div>
+
+            {/* Topic Breakdown */}
+            <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6">
+                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Topic Breakdown</h3>
+                <div className="space-y-6">
+                    {Object.entries(stats.topicStats)
+                        .sort(([, a], [, b]) => (b as TopicProgressStats).completed - (a as TopicProgressStats).completed) // Sort by most active
+                        .map(([topic, data]) => {
+                            const statsData = data as TopicProgressStats;
+                            if (statsData.total === 0) return null;
+                            const percent = (statsData.completed / statsData.total) * 100;
+                            return (
+                                <div key={topic}>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-semibold text-stone-700 dark:text-stone-300 text-sm">{topic}</h4>
+                                        <span className="text-xs font-bold text-stone-500">{statsData.completed}/{statsData.total}</span>
+                                    </div>
+                                    <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-3">
+                                        <div 
+                                            className={`h-full rounded-full transition-all ${percent === 100 ? 'bg-emerald-500' : percent > 0 ? 'bg-indigo-500' : 'bg-stone-300 dark:bg-stone-600'}`} 
+                                            style={{ width: `${percent}%` }}
+                                        ></div>
+                                    </div>
+                                    {/* Expandable Lesson Details could go here */}
+                                    {statsData.completed > 0 && (
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            {Object.entries(progressData[topic] || {}).map(([lessonId, prog]) => (
+                                                <span key={lessonId} className={`text-[10px] px-2 py-1 rounded border ${prog.completed ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
+                                                    {lessonId.replace(/[^0-9.]/g, '')}: {prog.score.toFixed(0)}%
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) => void }> = ({ user, onImpersonate }) => {
     const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -57,6 +214,7 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
             <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-t-3xl shadow-xl flex-shrink-0 overflow-hidden">
                 <div className="flex border-b border-stone-200 dark:border-stone-700 overflow-x-auto">
                     <TabButton id="overview" label="Overview" icon="📊" />
+                    <TabButton id="learning" label="Academy Progress" icon="🎓" />
                     <TabButton id="sessions" label="Practice Sessions" icon="📝" />
                     <TabButton id="games" label="Game Stats" icon="🎮" />
                     <TabButton id="chats" label="Communication Logs" icon="💬" />
@@ -84,6 +242,7 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                         </div>
                     </div>
                 )}
+                {activeTab === 'learning' && <LearningProgressViewer user={user} />}
                 {activeTab === 'sessions' && (
                     viewSession ? 
                     <SessionDetailView session={viewSession} onBack={() => setViewSession(null)} /> :
