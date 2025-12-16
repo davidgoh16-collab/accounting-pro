@@ -276,6 +276,7 @@ export type RevisionMethod = 'Flashcards' | 'Practice Question' | 'Video Lesson'
 export interface RevisionSession {
     id: string;
     topic: string;
+    subTopic?: string;
     date: string;
     method: RevisionMethod;
     durationMinutes: number;

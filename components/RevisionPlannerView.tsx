@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AuthUser, RevisionSession, RevisionMethod } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, COURSE_LESSONS } from '../constants';
 import HubLayout from './HubLayout';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
@@ -36,9 +36,11 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
     const [sessions, setSessions] = useState<RevisionSession[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState<string>('');
+    const [selectedSubTopic, setSelectedSubTopic] = useState<string | null>(null);
     
     // Form State
     const [newTopic, setNewTopic] = useState('');
+    const [newSubTopic, setNewSubTopic] = useState('');
     const [newDate, setNewDate] = useState(toLocalISOString(new Date()));
     const [newMethod, setNewMethod] = useState<RevisionMethod>('Flashcards');
     const [newDuration, setNewDuration] = useState(30);
@@ -46,11 +48,37 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
 
     const availableTopics = user.level === 'GCSE' ? GCSE_UNITS.filter(u => u !== 'All Units') : ALEVEL_UNITS.filter(u => u !== 'All Units');
 
+    // Get granular lessons for the current user level
+    const relevantLessons = useMemo(() => {
+        if (user.level === 'GCSE') return COURSE_LESSONS.filter(l => l.id.startsWith('G-'));
+        return COURSE_LESSONS.filter(l => !l.id.startsWith('G-'));
+    }, [user.level]);
+
+    // Filter available subtopics based on selected unit (newTopic) for the form
+    const formSubTopics = useMemo(() => {
+        return relevantLessons.filter(l => l.chapter === newTopic);
+    }, [newTopic, relevantLessons]);
+
+    // Subtopics for the currently viewed unit (Analysis)
+    const viewSubTopics = useMemo(() => {
+        return relevantLessons.filter(l => l.chapter === selectedTopic);
+    }, [selectedTopic, relevantLessons]);
+
     useEffect(() => {
         if (!selectedTopic && availableTopics.length > 0) {
             setSelectedTopic(availableTopics[0]);
         }
     }, [availableTopics, selectedTopic]);
+
+    // Reset view subtopic when unit changes
+    useEffect(() => {
+        setSelectedSubTopic(null);
+    }, [selectedTopic]);
+
+    // Reset form subtopic when form unit changes
+    useEffect(() => {
+        setNewSubTopic('');
+    }, [newTopic]);
 
     // Fetch Sessions
     useEffect(() => {
@@ -75,6 +103,7 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
         
         const newSession: Omit<RevisionSession, 'id'> = {
             topic: newTopic,
+            subTopic: newSubTopic,
             date: newDate,
             method: newMethod,
             durationMinutes: newDuration,
@@ -87,6 +116,7 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
             const docRef = await addDoc(collection(db, 'users', user.uid, 'revision_sessions'), newSession);
             setSessions(prev => [...prev, { ...newSession, id: docRef.id }].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
             setNewNotes('');
+            setNewSubTopic('');
         } catch (error) {
             console.error("Error adding session:", error);
         }
@@ -116,37 +146,49 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
         }
     };
 
-    // --- Core Memory Calculation ---
-    // This hook calculates the current strength of every topic for the sidebar
+    // --- Core Memory Calculation Helper ---
+    const calculateRetentionStats = (relevantSessions: RevisionSession[]) => {
+        const completed = relevantSessions
+            .filter(s => s.status === 'completed')
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        if (completed.length === 0) {
+            return { percentage: 0, stability: 0 };
+        }
+
+        const today = new Date();
+        const lastSessionDate = new Date(completed[completed.length - 1].date);
+        const daysSinceLastReview = (today.getTime() - lastSessionDate.getTime()) / (1000 * 60 * 60 * 24);
+        
+        // Stability grows exponentially with number of reviews: 2, 5, 12.5, 31...
+        const stability = 2 * Math.pow(2.5, completed.length - 1);
+        
+        let retention = 100 * Math.exp(-Math.max(0, daysSinceLastReview) / stability);
+        retention = Math.max(0, Math.min(100, retention));
+
+        return { percentage: retention, stability };
+    };
+
+    // --- Unit Stats ---
     const topicStats = useMemo(() => {
         const stats: Record<string, { percentage: number, stability: number }> = {};
-        
         availableTopics.forEach(topic => {
-            // Only consider completed sessions for memory strength
-            const completed = sessions
-                .filter(s => s.topic === topic && s.status === 'completed')
-                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-            if (completed.length === 0) {
-                stats[topic] = { percentage: 0, stability: 0 };
-                return;
-            }
-
-            // Calculate current retention based on today
-            const today = new Date();
-            const lastSessionDate = new Date(completed[completed.length - 1].date);
-            const daysSinceLastReview = (today.getTime() - lastSessionDate.getTime()) / (1000 * 60 * 60 * 24);
-            
-            // Stability grows exponentially with number of reviews: 2, 5, 12.5, 31...
-            const stability = 2 * Math.pow(2.5, completed.length - 1);
-            
-            let retention = 100 * Math.exp(-Math.max(0, daysSinceLastReview) / stability);
-            retention = Math.max(0, Math.min(100, retention));
-
-            stats[topic] = { percentage: retention, stability };
+            const topicSessions = sessions.filter(s => s.topic === topic);
+            stats[topic] = calculateRetentionStats(topicSessions);
         });
         return stats;
     }, [sessions, availableTopics]);
+
+    // --- SubTopic Stats (for the selected topic) ---
+    const lessonStats = useMemo(() => {
+        const stats: Record<string, { percentage: number, stability: number }> = {};
+        viewSubTopics.forEach(lesson => {
+            // Filter strictly by subTopic name
+            const lessonSessions = sessions.filter(s => s.subTopic === lesson.title);
+            stats[lesson.title] = calculateRetentionStats(lessonSessions);
+        });
+        return stats;
+    }, [sessions, viewSubTopics]);
 
     // --- Graph Data Generation ---
     const ForgettingCurveGraph = () => {
@@ -156,7 +198,16 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
 
         const dataPoints = useMemo<GraphDataPoint[]>(() => {
             const completedSessions = sessions
-                .filter(s => s.topic === selectedTopic && s.status === 'completed')
+                .filter(s => {
+                    // Filter logic: If selectedSubTopic exists, use it. Otherwise use selectedTopic.
+                    const isCompleted = s.status === 'completed';
+                    if (!isCompleted) return false;
+                    
+                    if (selectedSubTopic) {
+                        return s.subTopic === selectedSubTopic;
+                    }
+                    return s.topic === selectedTopic;
+                })
                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
             const todayStr = toLocalISOString(new Date());
@@ -212,7 +263,7 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
                 });
             }
             return points;
-        }, [sessions, selectedTopic]);
+        }, [sessions, selectedTopic, selectedSubTopic]);
 
         const width = 800;
         const height = 300;
@@ -223,7 +274,11 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
         if (dataPoints.length === 0) return (
             <div className="h-[300px] flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-800 rounded-xl border-2 border-dashed border-stone-300 dark:border-stone-700">
                 <span className="text-4xl mb-2">📉</span>
-                <p className="text-stone-500 dark:text-stone-400 font-semibold">Mark a session as "Completed" to start the curve.</p>
+                <p className="text-stone-500 dark:text-stone-400 font-semibold">
+                    {selectedSubTopic 
+                        ? `No completed sessions for "${selectedSubTopic}" yet.` 
+                        : `No completed sessions for "${selectedTopic}" yet.`}
+                </p>
             </div>
         );
 
@@ -405,8 +460,12 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
                                                     {session.status === 'completed' && <span className="text-xs font-bold">✓</span>}
                                                 </button>
                                                 <div className="flex-grow min-w-0">
-                                                    <p className={`text-sm font-bold truncate ${session.status === 'completed' ? 'text-stone-500 line-through' : 'text-stone-800 dark:text-stone-200'}`}>{session.topic}</p>
-                                                    <p className="text-xs text-stone-500">{session.method} • {session.durationMinutes}m</p>
+                                                    <p className={`text-sm font-bold truncate ${session.status === 'completed' ? 'text-stone-500 line-through' : 'text-stone-800 dark:text-stone-200'}`}>
+                                                        {session.subTopic || session.topic}
+                                                    </p>
+                                                    <p className="text-xs text-stone-500 truncate">
+                                                        {session.subTopic ? session.topic : ''} {session.subTopic ? '•' : ''} {session.method} • {session.durationMinutes}m
+                                                    </p>
                                                 </div>
                                                 <button onClick={() => handleDeleteSession(session.id)} className="text-stone-300 hover:text-red-400 px-2 text-lg">×</button>
                                             </div>
@@ -438,25 +497,40 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
                         <div className="space-y-3">
                             <div>
                                 <label className="text-xs font-bold text-stone-500 uppercase">Date</label>
-                                <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm" />
+                                <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm text-stone-800 dark:text-stone-200" />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-stone-500 uppercase">Topic</label>
-                                <select value={newTopic} onChange={e => setNewTopic(e.target.value)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm">
-                                    <option value="" disabled>Select topic...</option>
+                                <label className="text-xs font-bold text-stone-500 uppercase">Unit / Broad Topic</label>
+                                <select value={newTopic} onChange={e => setNewTopic(e.target.value)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm text-stone-800 dark:text-stone-200">
+                                    <option value="" disabled>Select unit...</option>
                                     {availableTopics.map(t => <option key={t} value={t}>{t}</option>)}
                                 </select>
                             </div>
+                            
+                            {/* Sub Topic Selection */}
+                            <div className={`transition-all duration-300 ${formSubTopics.length > 0 ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                                <label className="text-xs font-bold text-stone-500 uppercase">Lesson / Specific Topic</label>
+                                <select 
+                                    value={newSubTopic} 
+                                    onChange={e => setNewSubTopic(e.target.value)} 
+                                    className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm text-stone-800 dark:text-stone-200"
+                                    disabled={formSubTopics.length === 0}
+                                >
+                                    <option value="">{formSubTopics.length > 0 ? 'Select specific lesson...' : 'Select a unit first'}</option>
+                                    {formSubTopics.map(l => <option key={l.id} value={l.title}>{l.title}</option>)}
+                                </select>
+                            </div>
+
                             <div className="flex gap-2">
                                 <div className="flex-1">
                                     <label className="text-xs font-bold text-stone-500 uppercase">Method</label>
-                                    <select value={newMethod} onChange={e => setNewMethod(e.target.value as RevisionMethod)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm">
+                                    <select value={newMethod} onChange={e => setNewMethod(e.target.value as RevisionMethod)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm text-stone-800 dark:text-stone-200">
                                         {['Flashcards', 'Practice Question', 'Video Lesson', 'Mind Map', 'Textbook'].map(m => <option key={m} value={m}>{m}</option>)}
                                     </select>
                                 </div>
                                 <div className="w-20">
                                     <label className="text-xs font-bold text-stone-500 uppercase">Mins</label>
-                                    <input type="number" value={newDuration} onChange={e => setNewDuration(Number(e.target.value))} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm" />
+                                    <input type="number" value={newDuration} onChange={e => setNewDuration(Number(e.target.value))} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm text-stone-800 dark:text-stone-200" />
                                 </div>
                             </div>
                             <button onClick={handleAddSession} disabled={!newTopic} className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
@@ -475,7 +549,7 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
                     {/* Topic Health Overview */}
                     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-3xl p-6 shadow-lg">
                         <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4 flex items-center gap-2">
-                            <span>🧠</span> Memory Health
+                            <span>🧠</span> Memory Health (By Unit)
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 max-h-[220px] overflow-y-auto custom-scrollbar pr-2">
                             {availableTopics.map(topic => {
@@ -502,17 +576,65 @@ const RevisionPlannerView: React.FC<RevisionPlannerViewProps> = ({ user, onBack 
                         </div>
                     </div>
 
+                    {/* Lesson Breakdown (New Section) */}
+                    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-3xl p-6 shadow-lg">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+                                <span>📚</span> Lesson Breakdown: {selectedTopic}
+                            </h3>
+                            {selectedSubTopic && (
+                                <button onClick={() => setSelectedSubTopic(null)} className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                                    Show Unit Overview
+                                </button>
+                            )}
+                        </div>
+                        
+                        <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
+                            {viewSubTopics.length === 0 ? (
+                                <p className="text-sm text-stone-500 italic">No specific lessons found for this unit.</p>
+                            ) : (
+                                viewSubTopics.map(lesson => {
+                                    const { percentage } = lessonStats[lesson.title] || { percentage: 0 };
+                                    const isSelected = selectedSubTopic === lesson.title;
+                                    const colorClass = getMemoryColor(percentage);
+
+                                    return (
+                                        <button 
+                                            key={lesson.id} 
+                                            onClick={() => setSelectedSubTopic(lesson.title)}
+                                            className={`flex-shrink-0 w-40 p-3 rounded-xl border text-left transition-all ${isSelected ? 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-300 ring-1 ring-cyan-400' : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                                        >
+                                            <div className="text-xs font-bold text-stone-700 dark:text-stone-300 truncate mb-2" title={lesson.title}>
+                                                {lesson.title}
+                                            </div>
+                                            <div className="flex justify-between items-end">
+                                                <div className={`text-xs font-bold ${colorClass.split(' ')[1]}`}>{percentage.toFixed(0)}%</div>
+                                                <div className="w-12 h-1.5 bg-stone-200 dark:bg-stone-600 rounded-full overflow-hidden">
+                                                    <div className={`h-full ${colorClass.split(' ')[0]}`} style={{ width: `${percentage}%` }}></div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+
                     {/* Forgetting Curve Graph */}
                     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-3xl p-6 shadow-lg">
                         <div className="flex justify-between items-center mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Forgetting Curve: {selectedTopic}</h3>
+                                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Forgetting Curve: {selectedSubTopic || selectedTopic}</h3>
                                 <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-                                    Current Stability: <span className="font-bold text-emerald-600">{topicStats[selectedTopic]?.stability.toFixed(1)} days</span>
+                                    Current Stability: <span className="font-bold text-emerald-600">
+                                        {(selectedSubTopic ? lessonStats[selectedSubTopic]?.stability : topicStats[selectedTopic]?.stability)?.toFixed(1) || '0.0'} days
+                                    </span>
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{topicStats[selectedTopic]?.percentage.toFixed(0)}%</p>
+                                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                                    {(selectedSubTopic ? lessonStats[selectedSubTopic]?.percentage : topicStats[selectedTopic]?.percentage)?.toFixed(0) || '0'}%
+                                </p>
                                 <p className="text-xs font-bold uppercase text-stone-400 tracking-wider">Retention</p>
                             </div>
                         </div>

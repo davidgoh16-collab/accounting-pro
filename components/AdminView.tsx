@@ -155,11 +155,13 @@ const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
                                     {/* Expandable Lesson Details could go here */}
                                     {statsData.completed > 0 && (
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                            {Object.entries(progressData[topic] || {}).map(([lessonId, prog]) => (
-                                                <span key={lessonId} className={`text-[10px] px-2 py-1 rounded border ${prog.completed ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
-                                                    {lessonId.replace(/[^0-9.]/g, '')}: {prog.score.toFixed(0)}%
+                                            {Object.entries(progressData[topic] || {}).map(([lessonId, prog]) => {
+                                                const progress = prog as LessonProgress;
+                                                return (
+                                                <span key={lessonId} className={`text-[10px] px-2 py-1 rounded border ${progress.completed ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
+                                                    {lessonId.replace(/[^0-9.]/g, '')}: {progress.score.toFixed(0)}%
                                                 </span>
-                                            ))}
+                                            )})}
                                         </div>
                                     )}
                                 </div>
