@@ -169,6 +169,7 @@ const LearningHubView: React.FC<LearningHubViewProps> = ({ user, onBack }) => {
             <ActiveLessonView 
                 lesson={activeLesson} 
                 user={user} 
+                initialProgress={progressData[activeLesson.chapter]?.[activeLesson.id]}
                 onComplete={handleLessonComplete}
                 onBack={() => setActiveLesson(null)}
             />

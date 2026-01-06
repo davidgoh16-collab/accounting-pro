@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { CourseLesson, LessonContent, AuthUser, LessonBlock, KeyTerm } from '../types';
+import { CourseLesson, LessonContent, AuthUser, LessonBlock, KeyTerm, LessonProgress } from '../types';
 import { generateLessonContent, generateSlideImage } from '../services/geminiService';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import { KEY_TERMS } from '../knowledge-database';
 interface ActiveLessonViewProps {
     lesson: CourseLesson;
     user: AuthUser;
+    initialProgress?: LessonProgress;
     onComplete: (score: number) => void;
     onBack: () => void;
 }
@@ -64,11 +65,11 @@ const ImageModal: React.FC<{ imageUrl: string; onClose: () => void }> = ({ image
     </div>
 );
 
-const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onComplete, onBack }) => {
+const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initialProgress, onComplete, onBack }) => {
     const [content, setContent] = useState<LessonContent | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+    const [currentBlockIndex, setCurrentBlockIndex] = useState(initialProgress?.lastBlockIndex || 0);
     const [blockImages, setBlockImages] = useState<Record<number, string>>({}); 
     
     // Activity States
@@ -79,8 +80,9 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
     
     const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     
-    const [score, setScore] = useState(0);
+    const [score, setScore] = useState(initialProgress?.rawScore || 0);
     const [totalActivities, setTotalActivities] = useState(0);
     
     const [selectedTerm, setSelectedTerm] = useState<KeyTerm | null>(null);
@@ -95,15 +97,20 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
             setLoading(true);
             setError(null);
             try {
-                await setDoc(doc(db, 'users', user.uid, 'learning_progress', lesson.chapter), {
-                    [lesson.id]: {
-                        completed: false,
-                        score: 0,
-                        lastAccessed: new Date().toISOString()
-                    }
-                }, { merge: true });
-
-                const data = await generateLessonContent(lesson.title, lesson.chapter, user.level || 'A-Level', lesson.id);
+                // If we have saved content, load it to ensure consistency
+                let data: LessonContent;
+                if (initialProgress?.savedContent) {
+                    data = initialProgress.savedContent;
+                } else {
+                    await setDoc(doc(db, 'users', user.uid, 'learning_progress', lesson.chapter), {
+                        [lesson.id]: {
+                            completed: false,
+                            score: 0,
+                            lastAccessed: new Date().toISOString()
+                        }
+                    }, { merge: true });
+                    data = await generateLessonContent(lesson.title, lesson.chapter, user.level || 'A-Level', lesson.id);
+                }
                 
                 if (isMounted.current) {
                     setContent(data);
@@ -119,8 +126,8 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
                     setBlockImages(preLoadedImages);
                     setLoading(false);
 
-                    // Initialize first block
-                    initializeBlockState(data.blocks[0]);
+                    // Initialize state for current block (whether it's 0 or restored index)
+                    initializeBlockState(data.blocks[currentBlockIndex]);
 
                     const needsGenerationIndices = data.blocks
                         .map((b, i) => ((b.type === 'info' || b.type === 'diagram_match') && b.imagePrompt && !b.staticImageUrl) ? i : -1)
@@ -149,7 +156,7 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
         };
         fetchContent();
         return () => { isMounted.current = false; };
-    }, [lesson, user]);
+    }, [lesson, user, initialProgress]); // initialProgress only used on mount logic
 
     const initializeBlockState = (block: LessonBlock) => {
         setUserAnswer('');
@@ -165,7 +172,6 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
         if (block?.type === 'fill_in_blank' && block.correctBlanks) {
             setFillBlanksAnswers(new Array(block.correctBlanks.length).fill(''));
         }
-        // Diagram match doesn't need shuffle, items are the labels to pick from
     };
 
     useEffect(() => {
@@ -211,6 +217,29 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
         });
     };
 
+    const handleSave = async () => {
+        if (!content) return;
+        setIsSaving(true);
+        try {
+            await setDoc(doc(db, 'users', user.uid, 'learning_progress', lesson.chapter), {
+                [lesson.id]: {
+                    completed: false, // Incomplete if saving mid-way
+                    score: totalActivities > 0 ? (score / totalActivities) * 100 : 0, // Current rough percentage
+                    lastAccessed: new Date().toISOString(),
+                    lastBlockIndex: currentBlockIndex,
+                    rawScore: score,
+                    savedContent: content // Save content to ensure consistency on resume
+                }
+            }, { merge: true });
+            alert("Progress saved! You can resume this lesson later.");
+        } catch (e) {
+            console.error("Error saving progress", e);
+            alert("Failed to save progress.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const handleNext = () => {
         if (!content) return;
         if (currentBlockIndex >= content.blocks.length - 1) {
@@ -229,7 +258,10 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
                 [lesson.id]: {
                     completed: passed, 
                     score: finalPercentage,
-                    completedAt: new Date().toISOString()
+                    completedAt: new Date().toISOString(),
+                    lastBlockIndex: 0, // Reset for next time
+                    rawScore: 0,
+                    // We can keep savedContent or remove it depending on whether we want re-generation
                 }
             }, { merge: true });
             onComplete(finalPercentage);
@@ -254,15 +286,10 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
         } else if (block.type === 'text_input') {
             const userText = userAnswer.trim().toLowerCase();
             const correctText = block.correctAnswer?.trim().toLowerCase() || "";
-            
-            // Validation Logic:
             if (block.keywords && block.keywords.length > 0) {
-                // Must contain at least 50% of keywords to be correct.
-                // This prevents random answers from being marked correct while allowing flexibility.
                 const matchingCount = block.keywords.filter(keyword => userText.includes(keyword.toLowerCase())).length;
                 correct = matchingCount >= Math.ceil(block.keywords.length / 2);
             } else {
-                // Fallback for when AI doesn't generate keywords (should be rare)
                 correct = userText === correctText || (correctText.length > 5 && userText.includes(correctText));
             }
         } else {
@@ -288,6 +315,7 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
                 <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
                 <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Preparing Lesson...</h2>
                 <p className="text-stone-500 dark:text-stone-400">Our AI teacher is structuring your content.</p>
+                {initialProgress?.savedContent && <p className="text-xs text-indigo-500 mt-2">Resuming your previous session...</p>}
             </div>
         );
     }
@@ -316,9 +344,18 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, onCom
                     <button onClick={onBack} className="text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 font-bold text-sm">
                         &larr; Exit Lesson
                     </button>
-                    <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">
-                        Block {currentBlockIndex + 1} of {content.blocks.length}
-                    </span>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={handleSave} 
+                            disabled={isSaving}
+                            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors disabled:opacity-50"
+                        >
+                            {isSaving ? 'Saving...' : '💾 Save Progress'}
+                        </button>
+                        <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">
+                            Block {currentBlockIndex + 1} of {content.blocks.length}
+                        </span>
+                    </div>
                 </div>
                 <div className="w-full h-2 bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
                     <div className="h-full bg-indigo-500 transition-all duration-500 ease-out" style={{ width: `${progress}%` }}></div>

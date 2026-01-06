@@ -24,6 +24,7 @@ export type Page =
     | 'rag_analysis' 
     | 'revision_planner' 
     | 'podcast_studio' 
+    | 'video_learning'
     | 'admin';
 
 export interface AuthUser {
@@ -321,4 +322,27 @@ export interface LessonProgress {
     score: number;
     completedAt?: string;
     lastAccessed?: string;
+    lastBlockIndex?: number;
+    rawScore?: number;
+    savedContent?: LessonContent;
+}
+
+export interface VideoResource {
+    id: string;
+    title: string;
+    videoId: string;
+    level: UserLevel;
+}
+
+export interface VideoQuizContent {
+    multipleChoice: {
+        question: string;
+        options: string[];
+        correctAnswer: string;
+        explanation: string;
+    }[];
+    openEnded: {
+        question: string;
+        sampleAnswer: string;
+    }[];
 }

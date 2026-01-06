@@ -1,5 +1,5 @@
 
-import { CommandWord, MathsProblem, StructureGuide, MathsSkill, CourseLesson } from './types';
+import { CommandWord, MathsProblem, StructureGuide, MathsSkill, CourseLesson, VideoResource } from './types';
 import { ALL_QUESTIONS } from './database';
 
 export const ALEVEL_UNITS = [
@@ -29,6 +29,44 @@ export const GCSE_UNITS = [
 export const AQA_UNITS = ALEVEL_UNITS; 
 
 export const QUESTIONS = ALL_QUESTIONS;
+
+export const VIDEO_LIBRARY: VideoResource[] = [
+    { id: 'v1', title: 'SnapRevise: The Ultimate A-level Geography Resource', videoId: '5wJURQ3FetE', level: 'A-Level' },
+    { id: 'v2', title: 'System Frameworks & Types of Feedback', videoId: '7kvltkvO4Wk', level: 'A-Level' },
+    { id: 'v3', title: 'The Water Cycle', videoId: 'W3G2z7z9XBU', level: 'A-Level' },
+    { id: 'v4', title: 'Water Balance', videoId: 'Y5ygf5tgL8c', level: 'A-Level' },
+    { id: 'v5', title: 'The Carbon Cycle', videoId: 'xKMTaJCJ6Ww', level: 'A-Level' },
+    { id: 'v6', title: 'Carbon Budget', videoId: '6smbaPNisPk', level: 'A-Level' },
+    { id: 'v7', title: 'The Impact of the Water and Carbon Cycle on the Atmosphere', videoId: 'Ttuw_oBBT9s', level: 'A-Level' },
+    { id: 'v8', title: 'Introduction to Coasts', videoId: 'Ak2vhd8IZ6E', level: 'A-Level' },
+    { id: 'v9', title: 'Coasts: Sediment Budgets', videoId: 'rVc5gqxi0-I', level: 'A-Level' },
+    { id: 'v10', title: 'Coasts: Geomorphological Processes', videoId: '_JG_yE3XQ7g', level: 'A-Level' },
+    { id: 'v11', title: 'Coasts: Landscape Development', videoId: 'dY_WTVmoQIg', level: 'A-Level' },
+    { id: 'v12', title: 'Coasts: Eustatic and Isostatic Sea Level Change', videoId: 'joYo0m-TaRs', level: 'A-Level' },
+    { id: 'v13', title: 'Coasts: Coastal Management', videoId: 'PlJ7QpDhqo0', level: 'A-Level' },
+    { id: 'v14', title: 'Coasts Case Study: Nile Delta', videoId: '3HxZNACWC98', level: 'A-Level' },
+    { id: 'v15', title: 'Introduction to Glaciation', videoId: 'D-pjVNIROzM', level: 'A-Level' },
+    { id: 'v16', title: 'Glaciation: Periglacial Landforms', videoId: 'CuIC2FUHlso', level: 'A-Level' },
+    { id: 'v17', title: 'Natural Hazards', videoId: 'ieY0ymVv-nw', level: 'A-Level' },
+    { id: 'v18', title: 'The Theory of Plate Tectonics', videoId: 'SYHMLtHQRmI', level: 'A-Level' },
+    { id: 'v19', title: 'Natural Hazards: Volcanoes', videoId: 'JMdSAOUthBQ', level: 'A-Level' },
+    { id: 'v20', title: 'Introduction to Places', videoId: 'hdZXR_eC60I', level: 'A-Level' },
+    { id: 'v21', title: 'Changing Places', videoId: 'J1GCsi7FYZQ', level: 'A-Level' },
+    { id: 'v22', title: 'Urbanisation: Patterns and Growth', videoId: 'uVkytXbkWIw', level: 'A-Level' },
+    { id: 'v23', title: 'Urbanisation: Issues', videoId: 'ME9s21yrORU', level: 'A-Level' },
+    { id: 'v24', title: 'The Urban Heat Island', videoId: 'kJ4x7F5oErw', level: 'A-Level' },
+    { id: 'v25', title: 'Urban Case Study: London', videoId: 'xoKreMRQYo4', level: 'A-Level' },
+    { id: 'v26', title: 'Urban Case Study: Rio de Janeiro', videoId: 'gFJTVOreh08', level: 'A-Level' },
+    { id: 'v27', title: 'Deserts', videoId: 'Q2gTVr7uXOA', level: 'A-Level' },
+    { id: 'v28', title: 'Globalisation', videoId: 'K-cymvzbE9I', level: 'A-Level' },
+    { id: 'v29', title: 'Factors Affecting Globalisation', videoId: '4Nx2BezF0Bo', level: 'A-Level' },
+    { id: 'v30', title: 'Global Trade', videoId: 'bbYwU3EGWjI', level: 'A-Level' },
+    { id: 'v31', title: 'Transnational Corporations', videoId: 'U6MgUVehl2A', level: 'A-Level' },
+    { id: 'v32', title: 'Global Governance', videoId: 'PGFue66Fgz4', level: 'A-Level' },
+    { id: 'v33', title: 'Global Commons', videoId: 'ThhrwcWG_v0', level: 'A-Level' },
+    { id: 'v34', title: 'Human Population and the Environment', videoId: 'a3En6Vpl_ds', level: 'A-Level' },
+    { id: 'v35', title: 'International Migration', videoId: 'muqHF7u5AQQ', level: 'A-Level' },
+];
 
 export const COMMAND_WORDS: CommandWord[] = [
   // --- A-LEVEL SPECIFIC ---

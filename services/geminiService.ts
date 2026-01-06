@@ -1,7 +1,7 @@
 
 // ... (imports remain the same)
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData } from "../types";
+import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database"; // Added import
@@ -281,7 +281,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
     3. **"sorting"**: Reordering steps.
        - 'items': ["Step 1", "Step 2", "Step 3"] (Provide in CORRECT order)
     4. **"diagram_match"**: Labelling a diagram.
-       - 'imagePrompt': "Diagram of X with 4 distinct parts labelled 1, 2, 3, 4"
+       - 'imagePrompt': "Diagram of X where the key distinct parts are labelled ONLY with numbers (e.g. 1, 2, 3, 4) pointing to them. The image MUST NOT contain the text names of the features, only the numbers."
        - 'items': ["Label for 1", "Label for 2", "Label for 3", "Label for 4"] (In order 1-4)
        - 'question': "Match the labels to the numbered parts of the diagram."
     5. **"text_input"**: Short answer.
@@ -331,4 +331,38 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         console.log("Raw text:", response.text);
         throw new Error("Failed to generate valid lesson content.");
     }
+});
+
+export const generateVideoQuestions = async (videoTitle: string, level: string): Promise<VideoQuizContent> => handleApiCall(async () => {
+    const ai = getAiClient();
+    const prompt = `Based on the A-Level Geography video titled "${videoTitle}", generate a short quiz to test understanding.
+    
+    Create:
+    1. 3 Multiple Choice Questions (with 4 options, 1 correct answer, and explanation).
+    2. 2 Open-Ended "Discussion" Questions (with a sample model answer for checking).
+
+    Context: The user is a student studying ${level} Geography. The questions should be relevant to the likely content of a video with this title.
+
+    Return ONLY a JSON object with this structure:
+    {
+      "multipleChoice": [
+        { "question": "...", "options": ["A", "B", "C", "D"], "correctAnswer": "The correct option text", "explanation": "..." }
+      ],
+      "openEnded": [
+        { "question": "...", "sampleAnswer": "..." }
+      ]
+    }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+    });
+
+    const parsed = JSON.parse(cleanJson(response.text || '{}'));
+    // Ensure structure is valid even if partial
+    return {
+        multipleChoice: parsed.multipleChoice || [],
+        openEnded: parsed.openEnded || []
+    } as VideoQuizContent;
 });

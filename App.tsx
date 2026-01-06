@@ -27,7 +27,8 @@ import AdminView from './components/AdminView';
 import RagAnalysisView from './components/RagAnalysisView';
 import RevisionPlannerView from './components/RevisionPlannerView';
 import PodcastView from './components/PodcastView';
-import LearningHubView from './components/LearningHubView'; // Imported
+import LearningHubView from './components/LearningHubView'; 
+import VideoLearningView from './components/VideoLearningView'; // Imported
 import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
@@ -240,6 +241,15 @@ const App: React.FC = () => {
                                     actionText="Start Learning"
                                 />
                                 <HubCard
+                                    icon={<span className="text-4xl">🎬</span>}
+                                    title="Video Learning"
+                                    description="Watch curated A-Level videos with AI-powered interactive quizzes to check understanding."
+                                    onClick={() => handleNavigate('video_learning')}
+                                    shadowColor="shadow-red-500/20"
+                                    accentColor="text-red-600 hover:text-red-700"
+                                    actionText="Watch & Learn"
+                                />
+                                <HubCard
                                     icon={<span className="text-4xl">📅</span>}
                                     title="Revision Planner"
                                     description="Optimise your memory with spaced repetition scheduling and interactive forgetting curves."
@@ -330,6 +340,7 @@ const App: React.FC = () => {
             )}
 
             {page === 'learning_hub' && <LearningHubView user={user} onBack={() => handleNavigate('dashboard')} />}
+            {page === 'video_learning' && <VideoLearningView user={user} onBack={() => handleNavigate('dashboard')} />} 
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}

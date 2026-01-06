@@ -58,6 +58,11 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         try {
             const item = deck[index];
             const questionData = await generateQuizQuestion(item);
+            
+            if (!questionData || !Array.isArray(questionData.options)) {
+                throw new Error("Invalid question format received from AI");
+            }
+
             // Shuffle options
             const shuffledOptions = shuffleArray(questionData.options);
             setCurrentQuestion({ ...questionData, options: shuffledOptions });
