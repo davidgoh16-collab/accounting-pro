@@ -335,7 +335,10 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
 
 export const generateVideoQuestions = async (videoTitle: string, level: string): Promise<VideoQuizContent> => handleApiCall(async () => {
     const ai = getAiClient();
-    const prompt = `Based on the A-Level Geography video titled "${videoTitle}", generate a short quiz to test understanding.
+    // Use A-Level specific wording only if the level is A-Level
+    const levelContext = level === 'A-Level' ? 'A-Level Geography' : 'Geography';
+
+    const prompt = `Based on the ${levelContext} video titled "${videoTitle}", generate a short quiz to test understanding.
     
     Create:
     1. 3 Multiple Choice Questions (with 4 options, 1 correct answer, and explanation).
@@ -346,7 +349,7 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
     Return ONLY a JSON object with this structure:
     {
       "multipleChoice": [
-        { "question": "...", "options": ["A", "B", "C", "D"], "correctAnswer": "The correct option text", "explanation": "..." }
+        { "question": "...", "options": ["Option A", "Option B", "Option C", "Option D"], "correctAnswer": "Exact Text of Correct Option", "explanation": "..." }
       ],
       "openEnded": [
         { "question": "...", "sampleAnswer": "..." }
@@ -354,15 +357,20 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro', // Switched to Pro for better JSON adherence
         contents: prompt,
         config: { responseMimeType: 'application/json' }
     });
 
-    const parsed = JSON.parse(cleanJson(response.text || '{}'));
-    // Ensure structure is valid even if partial
-    return {
-        multipleChoice: parsed.multipleChoice || [],
-        openEnded: parsed.openEnded || []
-    } as VideoQuizContent;
+    try {
+        const parsed = JSON.parse(cleanJson(response.text || '{}'));
+        // Ensure structure is valid even if partial
+        return {
+            multipleChoice: parsed.multipleChoice || [],
+            openEnded: parsed.openEnded || []
+        } as VideoQuizContent;
+    } catch (error) {
+        console.error("Failed to parse video quiz JSON:", response.text);
+        throw new Error("Invalid AI response format");
+    }
 });

@@ -20,11 +20,13 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
 
     const filteredVideos = useMemo(() => {
         return VIDEO_LIBRARY.filter(v => 
-            v.title.toLowerCase().includes(searchTerm.toLowerCase())
+            v.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (v.level === user.level || !v.level) // Filter by level or show if no level specified
         );
-    }, [searchTerm]);
+    }, [searchTerm, user.level]);
 
     useEffect(() => {
+        let isMounted = true;
         if (selectedVideo) {
             setLoadingQuiz(true);
             setQuizContent(null);
@@ -33,15 +35,17 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
             
             generateVideoQuestions(selectedVideo.title, user.level || 'A-Level')
                 .then(content => {
-                    setQuizContent(content);
+                    if (isMounted) setQuizContent(content);
                 })
                 .catch(err => {
                     console.error("Failed to generate quiz", err);
+                    if (isMounted) setQuizContent(null);
                 })
                 .finally(() => {
-                    setLoadingQuiz(false);
+                    if (isMounted) setLoadingQuiz(false);
                 });
         }
+        return () => { isMounted = false; };
     }, [selectedVideo, user.level]);
 
     const handleAnswerSelect = (qIndex: number, option: string) => {
