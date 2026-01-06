@@ -14,6 +14,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
     const [selectedVideo, setSelectedVideo] = useState<VideoResource | null>(null);
     const [quizContent, setQuizContent] = useState<VideoQuizContent | null>(null);
     const [loadingQuiz, setLoadingQuiz] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({}); // Index -> Answer
     const [openEndedRevealed, setOpenEndedRevealed] = useState<Record<number, boolean>>({});
     const [searchTerm, setSearchTerm] = useState('');
@@ -30,6 +31,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
         if (selectedVideo) {
             setLoadingQuiz(true);
             setQuizContent(null);
+            setError(null);
             setQuizAnswers({});
             setOpenEndedRevealed({});
             
@@ -39,7 +41,10 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                 })
                 .catch(err => {
                     console.error("Failed to generate quiz", err);
-                    if (isMounted) setQuizContent(null);
+                    if (isMounted) {
+                        setQuizContent(null);
+                        setError(err.message || "Unknown error occurred");
+                    }
                 })
                 .finally(() => {
                     if (isMounted) setLoadingQuiz(false);
@@ -203,7 +208,8 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 text-stone-500">
-                                        <p>Unable to load quiz content.</p>
+                                        <p className="font-semibold mb-2">Unable to load quiz content.</p>
+                                        {error && <p className="text-red-500 text-sm bg-red-50 dark:bg-red-900/20 p-2 rounded inline-block border border-red-200 dark:border-red-800">{error}</p>}
                                     </div>
                                 )}
                             </div>
