@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
-    const apiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    // Fallback to the provided key if no environment variable is set
+    const apiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || "AIzaSyCwdd6lWeIh3AatGlI8mk47y_Q9sJFCofc";
     return {
       server: {
         port: 3000,
