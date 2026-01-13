@@ -59,7 +59,7 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     Format as JSON object: { "examYear": 2024, "questionNumber": "01.X", "unit": "${params.unit}", "title": "string", "prompt": "string", "marks": number, "figureDescription": "string", "ao": { "ao1": number, "ao2": number, "ao3": number, "ao4": number }, "caseStudy": { "title": "string", "content": "string" }, "markScheme": { "title": "string", "content": "string" } }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-pro',
+        model: 'gemini-2.5-pro',
         contents: fullPrompt,
         config: { responseMimeType: 'application/json' }
     });
@@ -70,7 +70,7 @@ export const generateFigure = async (description: string): Promise<string> => ha
     const ai = getAiClient();
     try {
         const response = await ai.models.generateImages({
-            model: 'imagen-3.0-generate-001',
+            model: 'imagen-4.0-generate-001',
             prompt: `Geography exam figure: ${description}`,
             config: { numberOfImages: 1, aspectRatio: "16:9" }
         });
@@ -88,32 +88,28 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     const ai = getAiClient();
     const contents = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
-    const modelName = mode === 'fast' ? 'gemini-1.5-flash' : 'gemini-1.5-pro';
-    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 } } : {}; // thinkingConfig might not be supported in 1.5-pro standard, but removing strict checking for now.
+    const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
+    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 } } : {};
     const systemInstruction = `You are Geo Pro, an expert Geography tutor.`;
-    // Note: thinkingConfig is usually for specific experimental models. If it fails, we might need to remove it.
-    // Safest to remove thinkingConfig for standard models or use 2.0-flash-thinking-exp if available.
-    // For now, I will remove thinkingConfig to ensure stability with 1.5-pro.
-    const safeConfig = {};
-    const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...safeConfig, systemInstruction } });
+    const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...config, systemInstruction } });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const getHint = async (question: Question): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Hint for: ${question.prompt}` });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Hint for: ${question.prompt}` });
     return response.text || 'Think about the command word.';
 };
 
 export const getMotivationalMessage = async (): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Motivational msg for student.` });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Motivational msg for student.` });
     return response.text || 'Keep going!';
 };
 
 export const generateModelAnswer = async (question: Question): Promise<MarkedModelAnswer> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Model answer for ${question.prompt}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Model answer for ${question.prompt}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
@@ -122,31 +118,31 @@ export const streamTutorResponse = async (question: Question, history: ChatMessa
     const systemInstruction = `You are an interactive Geography tutor...`;
     const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
-    const responseStream = await ai.models.generateContentStream({ model: 'gemini-1.5-pro', contents, config: { systemInstruction } });
+    const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents, config: { systemInstruction } });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const generateCaseStudyApplication = async (question: Question, caseStudyName: string): Promise<{ summary: string; application: string }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Apply ${caseStudyName} to ${question.prompt}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Apply ${caseStudyName} to ${question.prompt}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Mark answer: ${studentAnswer}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Mark answer: ${studentAnswer}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateSessionSummary = async (question: Question, feedback: AIFeedback): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Summarize session.` });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summarize session.` });
     return response.text?.trim() || 'Session complete.';
 };
 
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
     const ai = getAiClient();
-    const responseStream = await ai.models.generateContentStream({ model: 'gemini-1.5-pro', contents: [{role: 'user', parts: [{text: message}]}] });
+    const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents: [{role: 'user', parts: [{text: message}]}] });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
@@ -154,11 +150,11 @@ export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{
     const ai = getAiClient();
     // Handling parallel calls safely
     try {
-        const info = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Summary of ${study.name}` });
+        const info = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summary of ${study.name}` });
 
         let imageUrl = "https://placehold.co/600x400?text=Case+Study+Image";
         try {
-            const img = await ai.models.generateImages({ model: 'imagen-3.0-generate-001', prompt: `Image of ${study.name}`, config: { numberOfImages: 1 } });
+            const img = await ai.models.generateImages({ model: 'imagen-4.0-generate-001', prompt: `Image of ${study.name}`, config: { numberOfImages: 1 } });
             if (img.generatedImages && img.generatedImages.length > 0) {
                 imageUrl = `data:image/png;base64,${img.generatedImages[0].image.imageBytes}`;
             }
@@ -194,7 +190,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
@@ -226,7 +222,7 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
@@ -238,37 +234,37 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
 
 export const generateCareerInfo = async (category: string): Promise<GeographyCareer[]> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Careers in ${category}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Careers in ${category}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '[]'));
 };
 
 export const generateUniversityCourseInfo = async (interests: string): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Uni courses for ${interests}`, config: { tools: [{googleSearch: {}}] } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Uni courses for ${interests}`, config: { tools: [{googleSearch: {}}] } });
     return { courses: [], sources: [] }; 
 };
 
 export const generateTopUKUniversityInfo = async (): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Top 5 UK Geog unis`, config: { tools: [{googleSearch: {}}] } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Top 5 UK Geog unis`, config: { tools: [{googleSearch: {}}] } });
     return { courses: [], sources: [] }; 
 };
 
 export const generateTransferableSkillInfo = async (skillName: string): Promise<TransferableSkill> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Skill info ${skillName}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Skill info ${skillName}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateCVSuggestions = async (jobTitle: string): Promise<CVSuggestions> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `CV for ${jobTitle}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `CV for ${jobTitle}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateReelSummary = async (study: CaseStudyLocation): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Reel summary ${study.name}` });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Reel summary ${study.name}` });
     return response.text || '';
 };
 
@@ -278,7 +274,7 @@ export const generateCaseStudyVideo = async (study: CaseStudyLocation, summary: 
 
 export const generateLessonPlan = async (topic: string, level: UserLevel): Promise<VideoLessonPlan> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Lesson plan for ${topic}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Lesson plan for ${topic}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
@@ -286,7 +282,7 @@ export const generateSlideImage = async (imagePrompt: string): Promise<string> =
     const ai = getAiClient();
     try {
         const response = await ai.models.generateImages({
-            model: 'imagen-3.0-generate-001',
+            model: 'imagen-4.0-generate-001',
             prompt: imagePrompt,
             config: { numberOfImages: 1, aspectRatio: "16:9" }
         });
@@ -306,7 +302,7 @@ export const generateSlideAudio = async (text: string): Promise<AudioBuffer> => 
 
 export const generatePodcastScript = async (topic: string, level: string): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Podcast script ${topic}` });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Podcast script ${topic}` });
     return response.text || '';
 };
 
@@ -385,7 +381,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-pro',
+        model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -431,7 +427,7 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-pro', // Switched to Pro for better JSON adherence
+        model: 'gemini-2.5-pro', // Switched to Pro for better JSON adherence
         contents: prompt,
         config: { responseMimeType: 'application/json' }
     });
