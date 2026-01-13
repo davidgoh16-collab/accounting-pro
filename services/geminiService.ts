@@ -31,12 +31,23 @@ const cleanJson = (text: string): string => {
     // Remove markdown code blocks if present
     let clean = text.replace(/```json\n?/g, '').replace(/```/g, '');
     
-    // Attempt to extract the JSON object if there's surrounding text
-    const firstOpen = clean.indexOf('{');
-    const lastClose = clean.lastIndexOf('}');
+    // Attempt to extract the JSON object or array if there's surrounding text
+    const firstCurly = clean.indexOf('{');
+    const firstSquare = clean.indexOf('[');
+
+    let start = -1;
+    let end = -1;
+
+    if (firstCurly !== -1 && (firstSquare === -1 || firstCurly < firstSquare)) {
+        start = firstCurly;
+        end = clean.lastIndexOf('}');
+    } else if (firstSquare !== -1) {
+        start = firstSquare;
+        end = clean.lastIndexOf(']');
+    }
     
-    if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-        clean = clean.substring(firstOpen, lastClose + 1);
+    if (start !== -1 && end !== -1 && end > start) {
+        clean = clean.substring(start, end + 1);
     }
     
     return clean.trim();
@@ -205,6 +216,56 @@ export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{
         return { summary: "Details unavailable.", imageUrl: "https://placehold.co/600x400?text=Error" };
     }
 };
+
+export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promise<CaseStudyQuizQuestion[]> => handleApiCall(async () => {
+    if (items.length === 0) return [];
+
+    const ai = getAiClient();
+    const itemsContext = items.map((item, index) =>
+        `Item ${index + 1}: ${item.name} (${item.type})\nContext: ${item.details}`
+    ).join('\n\n');
+
+    const prompt = `Create a quiz with ${items.length} multiple-choice questions, one for each of the following items.
+
+    ${itemsContext}
+
+    Instruction:
+    - Return a JSON ARRAY of objects.
+    - Each object must correspond to one item in the order provided.
+    - Format for each object:
+    {
+      "sourceName": "Exact Name of the Item",
+      "question": "string",
+      "options": ["string", "string", "string", "string"],
+      "correctAnswer": "string",
+      "explanation": "string"
+    }
+    - "correctAnswer" must be EXACTLY identical to one of the "options".
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            systemInstruction: STRICT_AQA_CONTEXT,
+            responseMimeType: 'application/json'
+        }
+    });
+
+    const jsonText = cleanJson(response.text || '[]');
+    try {
+        const parsed = JSON.parse(jsonText);
+        if (Array.isArray(parsed)) {
+            return parsed;
+        } else if (parsed.questions && Array.isArray(parsed.questions)) {
+             return parsed.questions;
+        }
+        return [];
+    } catch (e) {
+        console.error("Failed to parse batch quiz questions", e);
+        return [];
+    }
+});
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
     const ai = getAiClient();

@@ -225,6 +225,7 @@ export interface GameSessionResult {
 }
 
 export interface CaseStudyQuizQuestion {
+    sourceName?: string;
     question: string;
     options: string[];
     correctAnswer: string;
