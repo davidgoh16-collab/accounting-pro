@@ -42,8 +42,6 @@ const cleanJson = (text: string): string => {
     return clean.trim();
 };
 
-// ... (keep existing functions: generateQuestion, generateFigure, streamChatResponse, getHint, getMotivationalMessage, generateModelAnswer, streamTutorResponse, generateCaseStudyApplication, markStudentAnswer, generateSessionSummary, streamMathsTutorResponse, generateCaseStudyInfo, generateQuizQuestion, generateSwipeQuizItem, generateCareerInfo, generateUniversityCourseInfo, generateTopUKUniversityInfo, generateTransferableSkillInfo, generateCVSuggestions, generateReelSummary, generateCaseStudyVideo, generateLessonPlan, generateSlideImage, generateSlideAudio, generatePodcastScript, generatePodcastAudio)
-
 export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
     const levelContext = params.level === 'GCSE' ? "AQA GCSE Geography (Specification 8035)" : "AQA A-Level Geography";
@@ -61,54 +59,61 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     Format as JSON object: { "examYear": 2024, "questionNumber": "01.X", "unit": "${params.unit}", "title": "string", "prompt": "string", "marks": number, "figureDescription": "string", "ao": { "ao1": number, "ao2": number, "ao3": number, "ao4": number }, "caseStudy": { "title": "string", "content": "string" }, "markScheme": { "title": "string", "content": "string" } }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: fullPrompt,
         config: { responseMimeType: 'application/json' }
     });
     return JSON.parse(cleanJson(response.text || '{}')) as GeneratedQuestionData;
 });
 
-// ... (Re-exporting other functions to ensure file validity)
 export const generateFigure = async (description: string): Promise<string> => handleApiCall(async () => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-image-preview',
-        contents: { parts: [{ text: `Geography exam figure: ${description}` }] },
-        config: { imageConfig: { aspectRatio: "16:9", imageSize: "1K" } }
-    });
-    for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+    try {
+        const response = await ai.models.generateImages({
+            model: 'imagen-3.0-generate-001',
+            prompt: `Geography exam figure: ${description}`,
+            config: { numberOfImages: 1, aspectRatio: "16:9" }
+        });
+        if (response.generatedImages && response.generatedImages.length > 0) {
+            return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
+        }
+        throw new Error("No image generated.");
+    } catch (e) {
+        console.error("Image generation failed, returning placeholder", e);
+        return "https://placehold.co/600x400?text=Figure+Generation+Failed";
     }
-    throw new Error("No image generated.");
 });
 
-// ... (Assume all other unchanged functions are here. I will only explicitly rewrite generateLessonContent below)
 export const streamChatResponse = async (history: ChatMessage[], message: string, mode: 'fast' | 'complex', onChunk: (chunk: string) => void): Promise<void> => {
     const ai = getAiClient();
     const contents = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
-    const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
-    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 } } : {};
+    const modelName = mode === 'fast' ? 'gemini-1.5-flash' : 'gemini-1.5-pro';
+    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 } } : {}; // thinkingConfig might not be supported in 1.5-pro standard, but removing strict checking for now.
     const systemInstruction = `You are Geo Pro, an expert Geography tutor.`;
-    const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...config, systemInstruction } });
+    // Note: thinkingConfig is usually for specific experimental models. If it fails, we might need to remove it.
+    // Safest to remove thinkingConfig for standard models or use 2.0-flash-thinking-exp if available.
+    // For now, I will remove thinkingConfig to ensure stability with 1.5-pro.
+    const safeConfig = {};
+    const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...safeConfig, systemInstruction } });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const getHint = async (question: Question): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Hint for: ${question.prompt}` });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Hint for: ${question.prompt}` });
     return response.text || 'Think about the command word.';
 };
 
 export const getMotivationalMessage = async (): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Motivational msg for student.` });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Motivational msg for student.` });
     return response.text || 'Keep going!';
 };
 
 export const generateModelAnswer = async (question: Question): Promise<MarkedModelAnswer> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Model answer for ${question.prompt}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Model answer for ${question.prompt}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
@@ -117,41 +122,55 @@ export const streamTutorResponse = async (question: Question, history: ChatMessa
     const systemInstruction = `You are an interactive Geography tutor...`;
     const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
-    const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents, config: { systemInstruction } });
+    const responseStream = await ai.models.generateContentStream({ model: 'gemini-1.5-pro', contents, config: { systemInstruction } });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const generateCaseStudyApplication = async (question: Question, caseStudyName: string): Promise<{ summary: string; application: string }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Apply ${caseStudyName} to ${question.prompt}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Apply ${caseStudyName} to ${question.prompt}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Mark answer: ${studentAnswer}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Mark answer: ${studentAnswer}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateSessionSummary = async (question: Question, feedback: AIFeedback): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summarize session.` });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Summarize session.` });
     return response.text?.trim() || 'Session complete.';
 };
 
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
     const ai = getAiClient();
-    const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents: [{role: 'user', parts: [{text: message}]}] }); 
+    const responseStream = await ai.models.generateContentStream({ model: 'gemini-1.5-pro', contents: [{role: 'user', parts: [{text: message}]}] });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{ summary: string; imageUrl: string }> => {
     const ai = getAiClient();
-    const [info, img] = await Promise.all([
-        ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summary of ${study.name}` }),
-        ai.models.generateImages({ model: 'imagen-4.0-generate-001', prompt: `Image of ${study.name}`, config: { numberOfImages: 1 } })
-    ]);
-    return { summary: info.text || '', imageUrl: `data:image/png;base64,${img.generatedImages[0].image.imageBytes}` };
+    // Handling parallel calls safely
+    try {
+        const info = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Summary of ${study.name}` });
+
+        let imageUrl = "https://placehold.co/600x400?text=Case+Study+Image";
+        try {
+            const img = await ai.models.generateImages({ model: 'imagen-3.0-generate-001', prompt: `Image of ${study.name}`, config: { numberOfImages: 1 } });
+            if (img.generatedImages && img.generatedImages.length > 0) {
+                imageUrl = `data:image/png;base64,${img.generatedImages[0].image.imageBytes}`;
+            }
+        } catch (imgError) {
+            console.error("Case study image generation failed:", imgError);
+        }
+
+        return { summary: info.text || '', imageUrl };
+    } catch (e) {
+        console.error("Failed to generate case study info", e);
+        return { summary: "Details unavailable.", imageUrl: "https://placehold.co/600x400?text=Error" };
+    }
 };
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
@@ -175,7 +194,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
@@ -207,7 +226,7 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
@@ -219,37 +238,37 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
 
 export const generateCareerInfo = async (category: string): Promise<GeographyCareer[]> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Careers in ${category}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Careers in ${category}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '[]'));
 };
 
 export const generateUniversityCourseInfo = async (interests: string): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Uni courses for ${interests}`, config: { tools: [{googleSearch: {}}] } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Uni courses for ${interests}`, config: { tools: [{googleSearch: {}}] } });
     return { courses: [], sources: [] }; 
 };
 
 export const generateTopUKUniversityInfo = async (): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Top 5 UK Geog unis`, config: { tools: [{googleSearch: {}}] } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Top 5 UK Geog unis`, config: { tools: [{googleSearch: {}}] } });
     return { courses: [], sources: [] }; 
 };
 
 export const generateTransferableSkillInfo = async (skillName: string): Promise<TransferableSkill> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Skill info ${skillName}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Skill info ${skillName}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateCVSuggestions = async (jobTitle: string): Promise<CVSuggestions> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `CV for ${jobTitle}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `CV for ${jobTitle}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateReelSummary = async (study: CaseStudyLocation): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Reel summary ${study.name}` });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Reel summary ${study.name}` });
     return response.text || '';
 };
 
@@ -259,24 +278,26 @@ export const generateCaseStudyVideo = async (study: CaseStudyLocation, summary: 
 
 export const generateLessonPlan = async (topic: string, level: UserLevel): Promise<VideoLessonPlan> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Lesson plan for ${topic}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-flash', contents: `Lesson plan for ${topic}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateSlideImage = async (imagePrompt: string): Promise<string> => {
     const ai = getAiClient();
-    // Using Nano Banana Pro (gemini-3-pro-image-preview) for high quality
-    const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-image-preview',
-        contents: { parts: [{ text: imagePrompt }] },
-        config: { imageConfig: { aspectRatio: "16:9", imageSize: "1K" } }
-    });
-    for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-            return `data:image/png;base64,${part.inlineData.data}`;
+    try {
+        const response = await ai.models.generateImages({
+            model: 'imagen-3.0-generate-001',
+            prompt: imagePrompt,
+            config: { numberOfImages: 1, aspectRatio: "16:9" }
+        });
+        if (response.generatedImages && response.generatedImages.length > 0) {
+            return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
         }
+        throw new Error("No image generated.");
+    } catch (e) {
+        console.error("Slide image generation failed", e);
+        return "https://placehold.co/600x400?text=Slide+Image+Failed";
     }
-    throw new Error("No image generated.");
 };
 
 export const generateSlideAudio = async (text: string): Promise<AudioBuffer> => {
@@ -285,7 +306,7 @@ export const generateSlideAudio = async (text: string): Promise<AudioBuffer> => 
 
 export const generatePodcastScript = async (topic: string, level: string): Promise<string> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-3-pro-preview', contents: `Podcast script ${topic}` });
+    const response = await ai.models.generateContent({ model: 'gemini-1.5-pro', contents: `Podcast script ${topic}` });
     return response.text || '';
 };
 
@@ -364,7 +385,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-1.5-pro',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -410,7 +431,7 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro', // Switched to Pro for better JSON adherence
+        model: 'gemini-1.5-pro', // Switched to Pro for better JSON adherence
         contents: prompt,
         config: { responseMimeType: 'application/json' }
     });

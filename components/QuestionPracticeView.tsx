@@ -1262,13 +1262,13 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                                                     <div className="bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800">
                                                         <h4 className="font-bold text-emerald-900 dark:text-emerald-300">Strengths</h4>
                                                         <ul className="list-disc list-inside text-sm text-emerald-700 dark:text-emerald-400 mt-1 space-y-1">
-                                                            {aiFeedback.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                                                            {(aiFeedback.strengths || []).map((s, i) => <li key={i}>{s}</li>)}
                                                         </ul>
                                                     </div>
                                                      <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
                                                         <h4 className="font-bold text-amber-900 dark:text-amber-300">Improvements</h4>
                                                         <ul className="list-disc list-inside text-sm text-amber-700 dark:text-amber-400 mt-1 space-y-1">
-                                                            {aiFeedback.improvements.map((s, i) => <li key={i}>{s}</li>)}
+                                                            {(aiFeedback.improvements || []).map((s, i) => <li key={i}>{s}</li>)}
                                                         </ul>
                                                     </div>
                                                 </div>
