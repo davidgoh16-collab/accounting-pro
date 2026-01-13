@@ -112,7 +112,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
     if (quizState === 'loading' && !error) {
         return (
              <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent flex flex-col items-center justify-center">
-                 <button onClick={onBack} className="fixed top-4 left-4 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm text-stone-600 dark:text-stone-300 font-bold">Back</button>
+                 <button onClick={onBack} className="fixed top-24 left-4 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm text-stone-600 dark:text-stone-300 font-bold">Back</button>
                  <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 bg-fuchsia-500 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
                     <div className="w-4 h-4 bg-fuchsia-500 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
@@ -126,7 +126,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
     if (quizState === 'finished') {
         return (
             <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent flex flex-col items-center justify-center text-center">
-                <button onClick={onBack} className="fixed top-4 left-4 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm text-stone-600 dark:text-stone-300 font-bold">Back</button>
+                <button onClick={onBack} className="fixed top-24 left-4 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm text-stone-600 dark:text-stone-300 font-bold">Back</button>
                 <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-8 max-w-lg w-full">
                     <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100">{error ? 'Quiz Ended' : 'Quiz Complete!'}</h1>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
@@ -149,7 +149,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent flex flex-col items-center">
             <button 
                 onClick={onBack}
-                className="fixed top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-white dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
+                className="fixed top-24 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-white dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
             >
                 <span>&larr;</span> Back
             </button>
