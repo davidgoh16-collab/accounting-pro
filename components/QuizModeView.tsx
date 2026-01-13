@@ -87,7 +87,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         if (selectedAnswer || !currentQuestion) return;
         
         setSelectedAnswer(answer);
-        const correct = answer === currentQuestion.correctAnswer;
+        const correct = answer.trim() === currentQuestion.correctAnswer.trim();
         setIsCorrect(correct);
         if (correct) {
             setScore(prev => prev + 1);

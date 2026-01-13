@@ -6,6 +6,8 @@ import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../data
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database"; // Added import
 
+const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
+
 const getAiClient = (): GoogleGenAI => {
     const API_KEY = process.env.API_KEY;
     if (API_KEY) {
@@ -154,13 +156,64 @@ export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Quiz Q for ${item.name}`, config: { responseMimeType: 'application/json' } });
+    const prompt = `Create a single multiple-choice quiz question for the topic/term: "${item.name}".
+
+    Context:
+    ${item.details}
+
+    Instruction:
+    - Create a challenging question suitable for A-Level/GCSE Geography.
+    - Provide 4 distinct options.
+    - Ensure the "correctAnswer" is EXACTLY identical to one of the "options".
+
+    Format (JSON):
+    {
+      "question": "string",
+      "options": ["string", "string", "string", "string"],
+      "correctAnswer": "string",
+      "explanation": "string"
+    }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            systemInstruction: STRICT_AQA_CONTEXT,
+            responseMimeType: 'application/json'
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<SwipeQuizItem> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Swipe item for ${study.name}`, config: { responseMimeType: 'application/json' } });
+    const prompt = `Create a "True/False" style statement for the case study: "${study.name}".
+
+    Context:
+    ${study.details}
+
+    Instruction:
+    - Create a short, punchy statement about this case study.
+    - It can be factually correct (True) or a plausible misconception (False).
+    - "correctAnswer" must be a boolean: true if the statement is factually correct, false otherwise.
+
+    Format (JSON):
+    {
+      "caseStudyName": "${study.name}",
+      "topic": "${study.topic}",
+      "statement": "string",
+      "correctAnswer": boolean,
+      "imageUrl": "string" (leave empty, handled by frontend)
+    }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            systemInstruction: STRICT_AQA_CONTEXT,
+            responseMimeType: 'application/json'
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
