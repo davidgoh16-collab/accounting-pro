@@ -18,7 +18,13 @@ const sanitizeFirestoreData = (data: any): any => {
         const sanitized: any = {};
         for (const key in data) {
             if (Object.prototype.hasOwnProperty.call(data, key)) {
-                sanitized[key] = sanitizeFirestoreData(data[key]);
+                // Firestore keys cannot contain dots
+                if (key.includes('.')) {
+                    const newKey = key.replace(/\./g, '_');
+                    sanitized[newKey] = sanitizeFirestoreData(data[key]);
+                } else {
+                    sanitized[key] = sanitizeFirestoreData(data[key]);
+                }
             }
         }
         return sanitized;
