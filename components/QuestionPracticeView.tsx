@@ -13,7 +13,16 @@ const sanitizeFirestoreData = (data: any): any => {
     if (data === undefined) return null;
     if (data === null) return null;
     if (data instanceof Date) return data;
-    if (Array.isArray(data)) return data.map(sanitizeFirestoreData);
+    if (Array.isArray(data)) {
+        return data.map(item => {
+            const sanitizedItem = sanitizeFirestoreData(item);
+            if (Array.isArray(sanitizedItem)) {
+                // Firestore doesn't support nested arrays. Convert to object.
+                return { ...sanitizedItem };
+            }
+            return sanitizedItem;
+        });
+    }
     if (typeof data === 'object') {
         const sanitized: any = {};
         for (const key in data) {

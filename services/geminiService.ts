@@ -130,7 +130,44 @@ export const generateCaseStudyApplication = async (question: Question, caseStudy
 
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Mark answer: ${studentAnswer}`, config: { responseMimeType: 'application/json' } });
+    const prompt = `You are an expert AQA Geography examiner. Mark the following student answer.
+
+    Question Context:
+    - Title: "${question.title}"
+    - Prompt: "${question.prompt}"
+    - Marks Available: ${question.marks}
+    - Level: ${question.level}
+
+    Mark Scheme / Guidance:
+    ${question.markScheme?.content || 'No specific mark scheme provided. Use expert judgment based on AQA standards.'}
+
+    Student Answer:
+    "${studentAnswer}"
+
+    ${attachment ? '(Note: The student also provided an image/document attachment which you should consider if visible)' : ''}
+
+    Provide output in strict JSON format matching this structure:
+    {
+        "score": number,
+        "totalMarks": ${question.marks},
+        "overallComment": "string",
+        "strengths": ["string", "string"],
+        "improvements": ["string", "string"],
+        "annotatedAnswer": [
+            { "text": "segment from student answer", "ao": "AO1|AO2|AO3|Generic", "feedback": "specific comment" }
+        ]
+    }
+
+    Ensure "annotatedAnswer" reconstructs the student's answer with feedback interleaved or attached to segments.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json'
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
