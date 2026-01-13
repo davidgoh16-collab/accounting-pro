@@ -190,14 +190,14 @@ const App: React.FC = () => {
         if (level === 'GCSE') {
             return {
                 bgClass: "bg-slate-50 dark:bg-slate-950", 
-                bgPattern: "bg-[url('https://www.transparenttextures.com/patterns/hexellence.png')]",
+                bgPattern: "bg-[url('/grid.svg')]",
                 hubGradient: "bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600",
                 subtitle: "Your GCSE Geography Hub (AQA 8035)"
             };
         }
         return {
             bgClass: "bg-stone-100 dark:bg-stone-950", 
-            bgPattern: "bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]",
+            bgPattern: "bg-[url('/grid.svg')]",
             hubGradient: "bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400",
             subtitle: "Your A-Level Geography Hub"
         };

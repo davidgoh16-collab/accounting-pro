@@ -37,7 +37,7 @@ export const AnnotatedAnswerDisplay: React.FC<{ title: string; segments: AnswerS
         <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">{title}</h2>
         <div className="mt-4 p-4 border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800/50 rounded-lg">
             <div className="whitespace-pre-wrap leading-relaxed text-stone-800 dark:text-stone-200">
-                {segments.map((segment, index) => (
+                {(segments || []).map((segment, index) => (
                     segment.ao !== 'Generic' ? (
                         <span key={index} className="relative group">
                             <span className={`px-1 py-0.5 rounded border transition-all duration-200 ease-in-out cursor-help ${aoStyles[segment.ao]}`}>

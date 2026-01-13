@@ -9,6 +9,23 @@ import { db } from '../firebase';
 import { FigureDisplay, AnnotatedAnswerDisplay } from './SharedQuestionComponents';
 import SessionDetailView from './SessionDetailView';
 
+const sanitizeFirestoreData = (data: any): any => {
+    if (data === undefined) return null;
+    if (data === null) return null;
+    if (data instanceof Date) return data;
+    if (Array.isArray(data)) return data.map(sanitizeFirestoreData);
+    if (typeof data === 'object') {
+        const sanitized: any = {};
+        for (const key in data) {
+            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                sanitized[key] = sanitizeFirestoreData(data[key]);
+            }
+        }
+        return sanitized;
+    }
+    return data;
+};
+
 // ... (keep all existing types and helper components like BuggedQuestion, StructuredPlanInput, etc.)
 
 interface BugAnnotations {
@@ -564,8 +581,16 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
             }
 
             const newQuestion: Question = {
-                ...questionData,
                 id: `gen-${Date.now()}`,
+                examYear: questionData.examYear,
+                questionNumber: questionData.questionNumber,
+                unit: questionData.unit,
+                title: questionData.title,
+                prompt: questionData.prompt,
+                marks: questionData.marks,
+                ao: questionData.ao,
+                caseStudy: questionData.caseStudy,
+                markScheme: questionData.markScheme,
                 figures: figures,
                 level: user.level || 'A-Level'
             };
@@ -691,7 +716,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
             };
 
             const sessionsRef = collection(db, 'users', user.uid, 'sessions');
-            await addDoc(sessionsRef, newSession);
+            await addDoc(sessionsRef, sanitizeFirestoreData(newSession));
             
             // Remove draft if it exists as we completed it
             if (currentDraftId) {
@@ -728,7 +753,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
         };
 
         try {
-            await setDoc(doc(db, 'users', user.uid, 'drafts', draftId), draftData);
+            await setDoc(doc(db, 'users', user.uid, 'drafts', draftId), sanitizeFirestoreData(draftData));
             if (!currentDraftId) setCurrentDraftId(draftId);
             setLastSavedTime(new Date());
             if (!silent) alert("Progress saved successfully!");
