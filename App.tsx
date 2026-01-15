@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel } from './types';
 import { onAuthChange, signOutUser, db } from './firebase';
 import { User } from 'firebase/auth';
-import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
 import LoginView from './components/LoginView';
 import Header from './components/Header';
@@ -107,22 +107,21 @@ const App: React.FC = () => {
         window.scrollTo(0, 0);
     }, [page]);
 
+    // Updated to use onSnapshot for real-time updates
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const docRef = doc(db, 'settings', 'global');
-                const snap = await getDoc(docRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.featureToggles) {
-                        setFeatureFlags(prev => ({ ...prev, ...data.featureToggles }));
-                    }
+        const docRef = doc(db, 'settings', 'global');
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.featureToggles) {
+                    setFeatureFlags(prev => ({ ...prev, ...data.featureToggles }));
                 }
-            } catch (e) {
-                console.error("Failed to load settings", e);
             }
-        };
-        fetchSettings();
+        }, (error) => {
+            console.error("Failed to listen for settings:", error);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
