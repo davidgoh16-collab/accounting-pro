@@ -88,6 +88,15 @@ const App: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [showLevelSelector, setShowLevelSelector] = useState(false);
 
+    const [featureFlags, setFeatureFlags] = useState({
+        birdGame: true,
+        blockBlast: true,
+        practiceQuizzes: true,
+        swipeQuizzes: false,
+        aiTutor: true,
+        ragAssessment: true
+    });
+
     const checkAdmin = (email: string | null, uid: string) => {
         const adminUIDs = ['JxQuyECQcIcrx2xe3xmp6vSSt6j2', 'YEAWHlpT9vSYNkQni3OU3Sr87wd2'];
         if (adminUIDs.includes(uid)) return true;
@@ -97,6 +106,24 @@ const App: React.FC = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [page]);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const docRef = doc(db, 'settings', 'global');
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.featureToggles) {
+                        setFeatureFlags(prev => ({ ...prev, ...data.featureToggles }));
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load settings", e);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     useEffect(() => {
         const unsubscribe = onAuthChange(async (firebaseUser) => {
@@ -264,6 +291,7 @@ const App: React.FC = () => {
                                     onClick={() => handleNavigate('flashcard_quiz_hub')}
                                     shadowColor="shadow-fuchsia-500/20"
                                     accentColor="text-fuchsia-600 hover:text-fuchsia-700"
+                                    disabled={!featureFlags.practiceQuizzes}
                                 />
                             </div>
                         </section>
@@ -297,6 +325,7 @@ const App: React.FC = () => {
                                     onClick={() => handleNavigate('rag_analysis')}
                                     shadowColor="shadow-orange-500/20"
                                     accentColor="text-orange-600 hover:text-orange-700"
+                                    disabled={!featureFlags.ragAssessment}
                                 />
                             </div>
                         </section>
@@ -345,7 +374,7 @@ const App: React.FC = () => {
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
             
-            {page === 'games_hub' && <GamesHubView onNavigate={handleNavigate} onStartGame={handleStartGame} user={user} />}
+            {page === 'games_hub' && <GamesHubView onNavigate={handleNavigate} onStartGame={handleStartGame} user={user} featureFlags={featureFlags} />}
             {page === 'flappy_geo' && <GameModeView topic={selectedGameTopic} user={user} onExit={() => handleNavigate('games_hub')} />}
             {page === 'block_blast' && <BlockBlastView topic={selectedGameTopic} user={user} onExit={() => handleNavigate('games_hub')} />}
             {page === 'swipe_quiz' && <SwipeQuizView topic={selectedGameTopic} user={user} onBack={() => handleNavigate('games_hub')} />}
@@ -365,7 +394,7 @@ const App: React.FC = () => {
             
             {page === 'admin' && isAdmin && <AdminView onImpersonate={handleImpersonate} onBack={() => handleNavigate('dashboard')} />}
 
-            <Chatbot />
+            {featureFlags.aiTutor && <Chatbot />}
         </div>
     );
 };

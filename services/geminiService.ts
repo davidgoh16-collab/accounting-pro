@@ -1,10 +1,11 @@
 
-// ... (imports remain the same)
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
-import { KEY_TERMS } from "../knowledge-database"; // Added import
+import { KEY_TERMS } from "../knowledge-database";
+import { auth, db } from '../firebase';
+import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 
 const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
 
@@ -18,8 +19,46 @@ const getAiClient = (): GoogleGenAI => {
     }
 };
 
+const checkDailyLimit = async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        // 1. Get Global Limit
+        const settingsRef = doc(db, 'settings', 'global');
+        const settingsSnap = await getDoc(settingsRef);
+        const limit = settingsSnap.exists() ? settingsSnap.data().dailyRequestLimit : 50; // Default 50
+
+        if (limit === -1) return; // Unlimited
+
+        // 2. Get User Usage
+        const today = new Date().toISOString().split('T')[0];
+        const usageRef = doc(db, 'users', user.uid, 'usage_stats', today);
+        const usageSnap = await getDoc(usageRef);
+
+        const currentUsage = usageSnap.exists() ? usageSnap.data().count : 0;
+
+        if (currentUsage >= limit) {
+            throw new Error(`Daily AI limit of ${limit} reached. Upgrade or try again tomorrow.`);
+        }
+
+        // 3. Increment
+        if (!usageSnap.exists()) {
+            await setDoc(usageRef, { count: 1, date: today });
+        } else {
+            await updateDoc(usageRef, { count: increment(1) });
+        }
+    } catch (e: any) {
+        console.error("Usage limit check failed:", e);
+        // If it's our limit error, rethrow it. If it's a network/firestore error, maybe let it slide?
+        // For now, rethrow so we fail safe.
+        throw e;
+    }
+};
+
 const handleApiCall = async <T>(apiCall: () => Promise<T>): Promise<T> => {
     try {
+        await checkDailyLimit();
         return await apiCall();
     } catch (e: any) {
         console.error("Gemini API call failed:", e);
@@ -77,9 +116,14 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     return JSON.parse(cleanJson(response.text || '{}')) as GeneratedQuestionData;
 });
 
-export const generateFigure = async (description: string): Promise<string> => handleApiCall(async () => {
-    const ai = getAiClient();
+export const generateFigure = async (description: string): Promise<string> => {
+    // We try to check limit, but if figure fails, we return placeholder.
+    // However, if limit is reached, we probably want to throw so the user knows why?
+    // The previous implementation returned a placeholder on ANY error.
+    // Let's check limit first.
     try {
+        await checkDailyLimit();
+        const ai = getAiClient();
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: `Geography exam figure: ${description}`,
@@ -89,13 +133,17 @@ export const generateFigure = async (description: string): Promise<string> => ha
             return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
         }
         throw new Error("No image generated.");
-    } catch (e) {
-        console.error("Image generation failed, returning placeholder", e);
+    } catch (e: any) {
+        console.error("Image generation failed or limit reached", e);
+        if (e.message && e.message.includes("Daily AI limit")) {
+            throw e; // Propagate limit error
+        }
         return "https://placehold.co/600x400?text=Figure+Generation+Failed";
     }
-});
+};
 
 export const streamChatResponse = async (history: ChatMessage[], message: string, mode: 'fast' | 'complex', onChunk: (chunk: string) => void): Promise<void> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const contents = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
@@ -107,24 +155,30 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
 };
 
 export const getHint = async (question: Question): Promise<string> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Hint for: ${question.prompt}` });
     return response.text || 'Think about the command word.';
 };
 
 export const getMotivationalMessage = async (): Promise<string> => {
+    // Motivational message is 'cheap', maybe skip limit?
+    // Let's include it for consistency, or skip to be nice. I'll include it.
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Motivational msg for student.` });
     return response.text || 'Keep going!';
 };
 
 export const generateModelAnswer = async (question: Question): Promise<MarkedModelAnswer> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Model answer for ${question.prompt}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const streamTutorResponse = async (question: Question, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const systemInstruction = `You are an interactive Geography tutor...`;
     const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
@@ -134,12 +188,14 @@ export const streamTutorResponse = async (question: Question, history: ChatMessa
 };
 
 export const generateCaseStudyApplication = async (question: Question, caseStudyName: string): Promise<{ summary: string; application: string }> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Apply ${caseStudyName} to ${question.prompt}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const prompt = `You are an expert AQA Geography examiner. Mark the following student answer.
 
@@ -183,18 +239,22 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
 };
 
 export const generateSessionSummary = async (question: Question, feedback: AIFeedback): Promise<string> => {
+    // Summary is generated automatically after marking. It should count as part of the flow.
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summarize session.` });
     return response.text?.trim() || 'Session complete.';
 };
 
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents: [{role: 'user', parts: [{text: message}]}] });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{ summary: string; imageUrl: string }> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     // Handling parallel calls safely
     try {
@@ -268,6 +328,7 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
 });
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const prompt = `Create a single multiple-choice quiz question for the topic/term: "${item.name}".
 
@@ -299,6 +360,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
 };
 
 export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<SwipeQuizItem> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const prompt = `Create a "True/False" style statement for the case study: "${study.name}".
 
@@ -331,36 +393,42 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
 };
 
 export const generateCareerInfo = async (category: string): Promise<GeographyCareer[]> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Careers in ${category}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '[]'));
 };
 
 export const generateUniversityCourseInfo = async (interests: string): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Uni courses for ${interests}`, config: { tools: [{googleSearch: {}}] } });
     return { courses: [], sources: [] }; 
 };
 
 export const generateTopUKUniversityInfo = async (): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Top 5 UK Geog unis`, config: { tools: [{googleSearch: {}}] } });
     return { courses: [], sources: [] }; 
 };
 
 export const generateTransferableSkillInfo = async (skillName: string): Promise<TransferableSkill> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Skill info ${skillName}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateCVSuggestions = async (jobTitle: string): Promise<CVSuggestions> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `CV for ${jobTitle}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateReelSummary = async (study: CaseStudyLocation): Promise<string> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Reel summary ${study.name}` });
     return response.text || '';
@@ -371,14 +439,16 @@ export const generateCaseStudyVideo = async (study: CaseStudyLocation, summary: 
 };
 
 export const generateLessonPlan = async (topic: string, level: UserLevel): Promise<VideoLessonPlan> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Lesson plan for ${topic}`, config: { responseMimeType: 'application/json' } });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateSlideImage = async (imagePrompt: string): Promise<string> => {
-    const ai = getAiClient();
     try {
+        await checkDailyLimit();
+        const ai = getAiClient();
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: imagePrompt,
@@ -388,8 +458,11 @@ export const generateSlideImage = async (imagePrompt: string): Promise<string> =
             return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
         }
         throw new Error("No image generated.");
-    } catch (e) {
+    } catch (e: any) {
         console.error("Slide image generation failed", e);
+        if (e.message && e.message.includes("Daily AI limit")) {
+            throw e;
+        }
         return "https://placehold.co/600x400?text=Slide+Image+Failed";
     }
 };
@@ -399,6 +472,7 @@ export const generateSlideAudio = async (text: string): Promise<AudioBuffer> => 
 };
 
 export const generatePodcastScript = async (topic: string, level: string): Promise<string> => {
+    await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Podcast script ${topic}` });
     return response.text || '';

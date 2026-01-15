@@ -10,6 +10,11 @@ interface GamesHubViewProps {
     onNavigate: (page: Page) => void;
     onStartGame: (page: Page, topic: string) => void;
     user: AuthUser;
+    featureFlags?: {
+        birdGame: boolean;
+        blockBlast: boolean;
+        swipeQuizzes: boolean;
+    };
 }
 
 const TopicSelectionModal: React.FC<{
@@ -66,7 +71,7 @@ const TopicSelectionModal: React.FC<{
     );
 };
 
-const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, user }) => {
+const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, user, featureFlags }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedGame, setSelectedGame] = useState<{ page: Page, title: string } | null>(null);
 
@@ -98,6 +103,7 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                         shadowColor="shadow-teal-500/20"
                         accentColor="text-teal-600 hover:text-teal-700"
                         actionText="Play Now"
+                        disabled={featureFlags?.birdGame === false}
                     />
                     <HubCard
                         icon={<span className="text-4xl">🧱</span>}
@@ -107,6 +113,7 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                         shadowColor="shadow-rose-500/20"
                         accentColor="text-rose-600 hover:text-rose-700"
                         actionText="Play Now"
+                        disabled={featureFlags?.blockBlast === false}
                     />
                     <HubCard
                         icon={<span className="text-4xl">↔️</span>}
@@ -116,6 +123,7 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                         shadowColor="shadow-fuchsia-500/20"
                         accentColor="text-fuchsia-600 hover:text-fuchsia-700"
                         actionText="Play Now"
+                        disabled={featureFlags?.swipeQuizzes === false}
                     />
                     <div className="lg:col-span-3">
                         <HubCard

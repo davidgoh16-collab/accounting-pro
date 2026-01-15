@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress } from '../types';
 import { getAllUsers, db } from '../firebase';
-import { collection, getDocs, query, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
 import SessionDetailView from './SessionDetailView';
@@ -20,6 +20,130 @@ interface TopicProgressStats {
     completed: number;
     avgScore: number;
 }
+
+const FeatureSettingsPanel: React.FC = () => {
+    const [limit, setLimit] = useState<number>(50);
+    const [toggles, setToggles] = useState({
+        birdGame: true,
+        blockBlast: true,
+        practiceQuizzes: true,
+        swipeQuizzes: false,
+        aiTutor: true,
+        ragAssessment: true
+    });
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const docRef = doc(db, 'settings', 'global');
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    setLimit(data.dailyRequestLimit ?? 50);
+                    setToggles(prev => ({ ...prev, ...data.featureToggles }));
+                }
+            } catch (e) {
+                console.error("Failed to load settings", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await setDoc(doc(db, 'settings', 'global'), {
+                dailyRequestLimit: limit,
+                featureToggles: toggles
+            }, { merge: true });
+            alert("Settings saved successfully!");
+        } catch (e) {
+            console.error("Failed to save settings", e);
+            alert("Failed to save settings.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const toggleFeature = (key: keyof typeof toggles) => {
+        setToggles(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    if (loading) return <div className="p-8 text-center">Loading settings...</div>;
+
+    return (
+        <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-8 max-w-4xl mx-auto animate-fade-in">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100">Feature Control & Limits</h2>
+                    <p className="text-stone-500 dark:text-stone-400">Manage feature availability and cost controls.</p>
+                </div>
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition disabled:opacity-50"
+                >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+            </div>
+
+            <div className="space-y-6">
+                {/* Cost Control */}
+                <div className="bg-stone-50 dark:bg-stone-800 p-6 rounded-2xl border border-stone-200 dark:border-stone-700">
+                    <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-4">
+                        <span>💰</span> Cost Control
+                    </h3>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="font-semibold text-stone-700 dark:text-stone-200">Daily AI Request Limit (Per User)</p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400">Limits the number of AI interactions (Tutor, Marking, Hints) a student can make per day. Set to -1 for unlimited.</p>
+                        </div>
+                        <input
+                            type="number"
+                            value={limit}
+                            onChange={(e) => setLimit(parseInt(e.target.value))}
+                            className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
+                        />
+                    </div>
+                </div>
+
+                {/* Feature Toggles */}
+                <div className="bg-stone-50 dark:bg-stone-800 p-6 rounded-2xl border border-stone-200 dark:border-stone-700">
+                    <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-6">
+                        <span>⚙️</span> Feature Toggles
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                            { key: 'birdGame', label: 'T&T Bird Game', desc: 'Arcade style revision game.' },
+                            { key: 'blockBlast', label: 'Block Blast Game', desc: 'Tetris style revision game.' },
+                            { key: 'practiceQuizzes', label: 'Practice Quizzes', desc: 'Standard multiple choice quizzes.' },
+                            { key: 'swipeQuizzes', label: 'Swipe Quizzes', desc: 'Tinder-style True/False quizzes.' },
+                            { key: 'aiTutor', label: 'AI Tutor & Feedback', desc: 'Gemini-powered feedback and hints.' },
+                            { key: 'ragAssessment', label: 'RAG Self-Assessment', desc: 'Topic confidence tracking.' },
+                        ].map((feature) => (
+                            <div key={feature.key} className="flex items-center justify-between p-4 bg-white dark:bg-stone-700 rounded-xl border border-stone-200 dark:border-stone-600">
+                                <div>
+                                    <p className="font-bold text-stone-800 dark:text-stone-100">{feature.label}</p>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400">{feature.desc}</p>
+                                </div>
+                                <button
+                                    onClick={() => toggleFeature(feature.key as keyof typeof toggles)}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${toggles[feature.key as keyof typeof toggles] ? 'bg-blue-600' : 'bg-stone-300 dark:bg-stone-500'}`}
+                                >
+                                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${toggles[feature.key as keyof typeof toggles] ? 'left-7' : 'left-1'}`} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
     const [progressData, setProgressData] = useState<Record<string, Record<string, LessonProgress>>>({});
@@ -351,6 +475,7 @@ const ChatLogViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 };
 
 const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
+    const [viewMode, setViewMode] = useState<'students' | 'settings'>('students');
     const [users, setUsers] = useState<AuthUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState<AuthUser | null>(null);
@@ -397,82 +522,100 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                         <h1 className="text-3xl lg:text-4xl font-bold text-stone-800 dark:text-stone-100">Admin Centre</h1>
                         <p className="text-stone-600 dark:text-stone-400 mt-2">Monitor student progress, review activity logs, and inspect performance.</p>
                     </div>
+                    <div className="flex gap-2 bg-white/80 dark:bg-stone-800/80 p-1 rounded-xl shadow-sm border border-stone-200 dark:border-stone-700">
+                        <button
+                            onClick={() => setViewMode('students')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'students' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                        >
+                            Students
+                        </button>
+                        <button
+                            onClick={() => setViewMode('settings')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'settings' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                        >
+                            Settings
+                        </button>
+                    </div>
                 </header>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[85vh]">
-                    {/* Sidebar User List */}
-                    <div className="lg:col-span-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col overflow-hidden">
-                        <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-white/50 dark:bg-stone-800/50">
-                            <input 
-                                type="text" 
-                                placeholder="Search students..." 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-2 bg-stone-100 dark:bg-stone-800 border-transparent focus:bg-white dark:focus:bg-stone-900 border focus:border-indigo-500 rounded-lg text-sm transition-all text-stone-800 dark:text-stone-200"
-                            />
-                            <div className="flex gap-2 mt-3">
-                                {(['All', 'GCSE', 'A-Level'] as const).map(level => (
-                                    <button
-                                        key={level}
-                                        onClick={() => setLevelFilter(level)}
-                                        className={`flex-1 py-1.5 text-xs font-bold rounded-md border transition-colors ${
-                                            levelFilter === level 
-                                            ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-700' 
-                                            : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'
-                                        }`}
-                                    >
-                                        {level}
-                                    </button>
-                                ))}
+                {viewMode === 'settings' ? (
+                    <FeatureSettingsPanel />
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[85vh]">
+                        {/* Sidebar User List */}
+                        <div className="lg:col-span-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col overflow-hidden">
+                            <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-white/50 dark:bg-stone-800/50">
+                                <input
+                                    type="text"
+                                    placeholder="Search students..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full px-4 py-2 bg-stone-100 dark:bg-stone-800 border-transparent focus:bg-white dark:focus:bg-stone-900 border focus:border-indigo-500 rounded-lg text-sm transition-all text-stone-800 dark:text-stone-200"
+                                />
+                                <div className="flex gap-2 mt-3">
+                                    {(['All', 'GCSE', 'A-Level'] as const).map(level => (
+                                        <button
+                                            key={level}
+                                            onClick={() => setLevelFilter(level)}
+                                            className={`flex-1 py-1.5 text-xs font-bold rounded-md border transition-colors ${
+                                                levelFilter === level
+                                                ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-700'
+                                                : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'
+                                            }`}
+                                        >
+                                            {level}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                            {isLoading ? (
-                                <div className="p-4 text-center text-stone-500">Loading users...</div>
-                            ) : filteredUsers.length === 0 ? (
-                                <div className="p-4 text-center text-stone-500 text-sm">No students found matching filters.</div>
-                            ) : (
-                                filteredUsers.map(user => (
-                                    <button 
-                                        key={user.uid}
-                                        onClick={() => setSelectedUser(user)}
-                                        className={`w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 ${selectedUser?.uid === user.uid ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'}`}
-                                    >
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${selectedUser?.uid === user.uid ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'}`}>
-                                            {user.displayName ? user.displayName[0].toUpperCase() : '?'}
-                                        </div>
-                                        <div className="overflow-hidden">
-                                            <p className="font-bold text-sm truncate">{user.displayName || 'Unnamed'}</p>
-                                            <div className="flex items-center gap-1">
-                                                <p className={`text-xs truncate ${selectedUser?.uid === user.uid ? 'text-indigo-100' : 'text-stone-400'}`}>{user.email}</p>
-                                                {user.level && (
-                                                    <span className={`text-[10px] px-1.5 rounded-full font-bold ${selectedUser?.uid === user.uid ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-500'}`}>
-                                                        {user.level}
-                                                    </span>
-                                                )}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                                {isLoading ? (
+                                    <div className="p-4 text-center text-stone-500">Loading users...</div>
+                                ) : filteredUsers.length === 0 ? (
+                                    <div className="p-4 text-center text-stone-500 text-sm">No students found matching filters.</div>
+                                ) : (
+                                    filteredUsers.map(user => (
+                                        <button
+                                            key={user.uid}
+                                            onClick={() => setSelectedUser(user)}
+                                            className={`w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 ${selectedUser?.uid === user.uid ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'}`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${selectedUser?.uid === user.uid ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'}`}>
+                                                {user.displayName ? user.displayName[0].toUpperCase() : '?'}
                                             </div>
-                                        </div>
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                        <div className="p-3 bg-stone-50 dark:bg-stone-800 text-center text-xs text-stone-400 border-t border-stone-200 dark:border-stone-700">
-                            {filteredUsers.length} Students Found
-                        </div>
-                    </div>
-
-                    {/* Main Content Area */}
-                    <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
-                         {selectedUser ? (
-                            <StudentInspector user={selectedUser} onImpersonate={onImpersonate} />
-                         ) : (
-                            <div className="flex-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
-                                <span className="text-6xl mb-4 opacity-50">👋</span>
-                                <p className="text-xl font-semibold">Select a student to inspect their activity.</p>
+                                            <div className="overflow-hidden">
+                                                <p className="font-bold text-sm truncate">{user.displayName || 'Unnamed'}</p>
+                                                <div className="flex items-center gap-1">
+                                                    <p className={`text-xs truncate ${selectedUser?.uid === user.uid ? 'text-indigo-100' : 'text-stone-400'}`}>{user.email}</p>
+                                                    {user.level && (
+                                                        <span className={`text-[10px] px-1.5 rounded-full font-bold ${selectedUser?.uid === user.uid ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-500'}`}>
+                                                            {user.level}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))
+                                )}
                             </div>
-                         )}
+                            <div className="p-3 bg-stone-50 dark:bg-stone-800 text-center text-xs text-stone-400 border-t border-stone-200 dark:border-stone-700">
+                                {filteredUsers.length} Students Found
+                            </div>
+                        </div>
+
+                        {/* Main Content Area */}
+                        <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
+                             {selectedUser ? (
+                                <StudentInspector user={selectedUser} onImpersonate={onImpersonate} />
+                             ) : (
+                                <div className="flex-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+                                    <span className="text-6xl mb-4 opacity-50">👋</span>
+                                    <p className="text-xl font-semibold">Select a student to inspect their activity.</p>
+                                </div>
+                             )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
              <style>{`.animate-fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }`}</style>
         </div>
