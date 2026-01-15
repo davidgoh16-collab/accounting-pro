@@ -221,6 +221,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
     
     const [caseStudyDetails, setCaseStudyDetails] = useState<{ [key: string]: { summary: string; application: string } }>({});
     const [loadingCaseStudy, setLoadingCaseStudy] = useState<string | null>(null);
+    const [questionCount, setQuestionCount] = useState(0);
     
     const [isSaving, setIsSaving] = useState(false);
     const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
@@ -586,12 +587,21 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
         setCurrentDraftId(null);
 
         try {
+            // Alternating figure logic: Even counts (0, 2, 4) get a figure, Odd counts (1, 3, 5) do not.
+            const includeFigure = questionCount % 2 === 0;
+
             setGenerationStatus('1/2: Crafting your question...');
             // Pass user level to generation service
-            const questionData = await generateQuestion({ unit: unitFilter, marks: marksFilter, level: user.level || 'A-Level' });
+            const questionData = await generateQuestion({
+                unit: unitFilter,
+                marks: marksFilter,
+                level: user.level || 'A-Level',
+                includeFigure: includeFigure
+            });
             
             let figures: Question['figures'] = [];
-            if (questionData.figureDescription) {
+            // Only generate figure if requested AND description provided
+            if (includeFigure && questionData.figureDescription) {
                 setGenerationStatus('2/2: Generating stimulus figure...');
                 const imageUrl = await generateFigure(questionData.figureDescription);
                 figures.push({ name: questionData.figureDescription, url: imageUrl });
@@ -613,6 +623,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
             };
             
             setCurrentQuestion(newQuestion);
+            setQuestionCount(prev => prev + 1);
 
         } catch (error) {
             console.error("Failed to generate question:", error);
