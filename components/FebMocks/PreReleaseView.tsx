@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, MessageCircle, FileQuestion, Send, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageCircle, FileQuestion, Send, ZoomIn, ZoomOut, Maximize, LayoutTemplate, Image as ImageIcon } from 'lucide-react';
 import { chatWithPreRelease, generatePreReleaseQuestion } from '../../services/geminiService';
 import { ChatMessage, GeneratedQuestionData } from '../../types';
+import DigitalPreReleaseView from './DigitalPreReleaseView';
 
 const PRE_RELEASE_PAGES = [
     '/assets/prerelease/page1.jpg',
@@ -16,6 +17,7 @@ const PRE_RELEASE_PAGES = [
 
 const PreReleaseView: React.FC = () => {
     const [pageIndex, setPageIndex] = useState(0);
+    const [viewMode, setViewMode] = useState<'original' | 'digital'>('original');
     const [mode, setMode] = useState<'chat' | 'question'>('chat');
     const [zoom, setZoom] = useState(1);
 
@@ -101,45 +103,69 @@ const PreReleaseView: React.FC = () => {
     };
 
     return (
-        <div className="grid lg:grid-cols-2 gap-6 h-[80vh]">
-            {/* Left: Image Viewer */}
-            <div className="bg-stone-900 rounded-2xl overflow-hidden relative flex flex-col shadow-2xl">
-                <div className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-white text-sm font-bold">
-                    Page {pageIndex + 1} / {PRE_RELEASE_PAGES.length}
+        <div className="grid lg:grid-cols-2 gap-6 h-[85vh]">
+            {/* Left: Content Viewer */}
+            <div className="flex flex-col gap-4 h-full min-h-0">
+                {/* View Mode Toggle */}
+                <div className="bg-white/50 dark:bg-stone-900/50 backdrop-blur-md p-1.5 rounded-xl border border-stone-200 dark:border-stone-700 self-center flex gap-2 shadow-sm">
+                    <button
+                        onClick={() => setViewMode('original')}
+                        className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${viewMode === 'original' ? 'bg-white dark:bg-stone-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                    >
+                        <ImageIcon size={16} />
+                        Original Booklet
+                    </button>
+                    <button
+                        onClick={() => setViewMode('digital')}
+                        className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-bold transition-all ${viewMode === 'digital' ? 'bg-white dark:bg-stone-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                    >
+                        <LayoutTemplate size={16} />
+                        Digital Interactive
+                    </button>
                 </div>
 
-                <div className="absolute top-4 right-4 z-10 flex gap-2">
-                    <button onClick={() => setZoom(z => Math.max(1, z - 0.5))} className="p-2 bg-black/50 text-white rounded-full hover:bg-black/70"><ZoomOut size={16} /></button>
-                    <button onClick={() => setZoom(z => Math.min(3, z + 0.5))} className="p-2 bg-black/50 text-white rounded-full hover:bg-black/70"><ZoomIn size={16} /></button>
-                </div>
+                {viewMode === 'digital' ? (
+                    <DigitalPreReleaseView pageIndex={pageIndex} onPageChange={setPageIndex} />
+                ) : (
+                    <div className="bg-stone-900 rounded-2xl overflow-hidden relative flex flex-col shadow-2xl h-full border border-stone-700">
+                        <div className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-white text-sm font-bold">
+                            Page {pageIndex + 1} / {PRE_RELEASE_PAGES.length}
+                        </div>
 
-                <div className="flex-1 overflow-auto flex items-center justify-center bg-stone-900 p-4">
-                    <div style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s' }} className="origin-center">
-                        <img
-                            src={PRE_RELEASE_PAGES[pageIndex]}
-                            alt={`Page ${pageIndex + 1}`}
-                            className="max-w-full max-h-full object-contain shadow-lg"
-                        />
+                        <div className="absolute top-4 right-4 z-10 flex gap-2">
+                            <button onClick={() => setZoom(z => Math.max(1, z - 0.5))} className="p-2 bg-black/50 text-white rounded-full hover:bg-black/70"><ZoomOut size={16} /></button>
+                            <button onClick={() => setZoom(z => Math.min(3, z + 0.5))} className="p-2 bg-black/50 text-white rounded-full hover:bg-black/70"><ZoomIn size={16} /></button>
+                        </div>
+
+                        <div className="flex-1 overflow-auto flex items-center justify-center bg-stone-900 p-4 custom-scrollbar">
+                            <div style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s' }} className="origin-center">
+                                <img
+                                    src={PRE_RELEASE_PAGES[pageIndex]}
+                                    alt={`Page ${pageIndex + 1}`}
+                                    className="max-w-full max-h-full object-contain shadow-lg"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-stone-800 p-4 flex justify-between items-center z-10 border-t border-stone-700">
+                            <button
+                                onClick={() => setPageIndex(p => Math.max(0, p - 1))}
+                                disabled={pageIndex === 0}
+                                className="p-2 rounded-lg bg-stone-700 text-stone-300 disabled:opacity-50 hover:bg-stone-600 transition"
+                            >
+                                <ChevronLeft />
+                            </button>
+                            <span className="text-stone-400 text-sm font-mono">GCSE PAPER 3 INSERT</span>
+                            <button
+                                onClick={() => setPageIndex(p => Math.min(PRE_RELEASE_PAGES.length - 1, p + 1))}
+                                disabled={pageIndex === PRE_RELEASE_PAGES.length - 1}
+                                className="p-2 rounded-lg bg-stone-700 text-stone-300 disabled:opacity-50 hover:bg-stone-600 transition"
+                            >
+                                <ChevronRight />
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div className="bg-stone-800 p-4 flex justify-between items-center z-10 border-t border-stone-700">
-                    <button
-                        onClick={() => setPageIndex(p => Math.max(0, p - 1))}
-                        disabled={pageIndex === 0}
-                        className="p-2 rounded-lg bg-stone-700 text-stone-300 disabled:opacity-50 hover:bg-stone-600 transition"
-                    >
-                        <ChevronLeft />
-                    </button>
-                    <span className="text-stone-400 text-sm font-mono">GCSE PAPER 3 INSERT</span>
-                    <button
-                        onClick={() => setPageIndex(p => Math.min(PRE_RELEASE_PAGES.length - 1, p + 1))}
-                        disabled={pageIndex === PRE_RELEASE_PAGES.length - 1}
-                        className="p-2 rounded-lg bg-stone-700 text-stone-300 disabled:opacity-50 hover:bg-stone-600 transition"
-                    >
-                        <ChevronRight />
-                    </button>
-                </div>
+                )}
             </div>
 
             {/* Right: Interaction Panel */}

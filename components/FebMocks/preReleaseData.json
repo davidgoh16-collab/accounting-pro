@@ -1,0 +1,926 @@
+[
+  {
+    "pageNumber": 1,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "GCSE GEOGRAPHY",
+        "chartType": "none",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "Resources for Paper 3 Geographical applications",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Pre-release resources booklet",
+        "chartType": "none",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "This booklet contains three resources as follows:",
+        "chartType": "none"
+      },
+      {
+        "type": "list",
+        "content": [
+          "Figure 1 – Energy in the UK: pages 2–3",
+          "Figure 2 – Towards a renewable energy future in the UK: pages 4–5",
+          "Figure 3 – The Morecambe Bay and Duddon Estuary tidal gateway project: pages 6–7"
+        ],
+        "chartType": "none"
+      }
+    ]
+  },
+  {
+    "pageNumber": 2,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "Figure 1"
+      },
+      {
+        "type": "heading",
+        "content": "Energy in the UK"
+      },
+      {
+        "type": "heading",
+        "content": "Energy consumption in the UK"
+      },
+      {
+        "type": "paragraph",
+        "content": "Energy plays an important part in every aspect of our daily lives, either directly or indirectly. Without energy our homes would have no heating or lighting and communication systems would not function. Our access to food, water and consumer products is dependent on a reliable energy supply."
+      },
+      {
+        "type": "heading",
+        "content": "Energy consumption in the UK (1990–2021)"
+      },
+      {
+        "type": "chart_data",
+        "chartType": "line",
+        "content": "Energy consumption broken down by sector over time (1990-2021), in Million tonnes of oil equivalent.",
+        "chartData": [
+          {
+            "label": "1990",
+            "value": 15,
+            "category": "Services"
+          },
+          {
+            "label": "1990",
+            "value": 45,
+            "category": "Transport"
+          },
+          {
+            "label": "1990",
+            "value": 45,
+            "category": "Industry"
+          },
+          {
+            "label": "1990",
+            "value": 45,
+            "category": "Domestic"
+          },
+          {
+            "label": "1995",
+            "value": 15,
+            "category": "Services"
+          },
+          {
+            "label": "1995",
+            "value": 45,
+            "category": "Transport"
+          },
+          {
+            "label": "1995",
+            "value": 40,
+            "category": "Industry"
+          },
+          {
+            "label": "1995",
+            "value": 45,
+            "category": "Domestic"
+          },
+          {
+            "label": "2000",
+            "value": 15,
+            "category": "Services"
+          },
+          {
+            "label": "2000",
+            "value": 50,
+            "category": "Transport"
+          },
+          {
+            "label": "2000",
+            "value": 35,
+            "category": "Industry"
+          },
+          {
+            "label": "2000",
+            "value": 50,
+            "category": "Domestic"
+          },
+          {
+            "label": "2005",
+            "value": 15,
+            "category": "Services"
+          },
+          {
+            "label": "2005",
+            "value": 55,
+            "category": "Transport"
+          },
+          {
+            "label": "2005",
+            "value": 30,
+            "category": "Industry"
+          },
+          {
+            "label": "2005",
+            "value": 60,
+            "category": "Domestic"
+          },
+          {
+            "label": "2010",
+            "value": 20,
+            "category": "Services"
+          },
+          {
+            "label": "2010",
+            "value": 50,
+            "category": "Transport"
+          },
+          {
+            "label": "2010",
+            "value": 25,
+            "category": "Industry"
+          },
+          {
+            "label": "2010",
+            "value": 55,
+            "category": "Domestic"
+          },
+          {
+            "label": "2015",
+            "value": 20,
+            "category": "Services"
+          },
+          {
+            "label": "2015",
+            "value": 45,
+            "category": "Transport"
+          },
+          {
+            "label": "2015",
+            "value": 25,
+            "category": "Industry"
+          },
+          {
+            "label": "2015",
+            "value": 45,
+            "category": "Domestic"
+          },
+          {
+            "label": "2021",
+            "value": 20,
+            "category": "Services"
+          },
+          {
+            "label": "2021",
+            "value": 40,
+            "category": "Transport"
+          },
+          {
+            "label": "2021",
+            "value": 20,
+            "category": "Industry"
+          },
+          {
+            "label": "2021",
+            "value": 45,
+            "category": "Domestic"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": "Total energy consumption in the UK fell due to the impact of the Covid-19 pandemic in 2020. This was due to many business activities and schools being forced to close during lockdown and the travel restrictions that were put in place. Overall, energy consumption, when adjusted for temperature, was down by 13% in 2020 compared with 2019."
+      },
+      {
+        "type": "chart_data",
+        "chartType": "pie",
+        "content": "UK total energy mix, 2020 percentages.",
+        "chartData": [
+          {
+            "label": "Oil",
+            "value": 40,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Natural gas",
+            "value": 36,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Renewables",
+            "value": 15,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Nuclear energy",
+            "value": 6,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Coal",
+            "value": 3,
+            "category": "Energy Source"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "content": "Energy security"
+      },
+      {
+        "type": "paragraph",
+        "content": "Energy security is having an uninterrupted and affordable energy supply which is able to sustain people's lives and daily activities."
+      },
+      {
+        "type": "chart_data",
+        "chartType": "pie",
+        "content": "UK electricity energy mix, 2020 percentages.",
+        "chartData": [
+          {
+            "label": "Gas",
+            "value": 40,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Renewables",
+            "value": 39,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Nuclear",
+            "value": 15,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Oil",
+            "value": 4,
+            "category": "Energy Source"
+          },
+          {
+            "label": "Coal",
+            "value": 2,
+            "category": "Energy Source"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": "Energy security is important because it helps to ensure economic and political stability. It has an important link to food supply and economic development. Disruptions to energy supply and increasing energy prices can have a serious effect on living standards."
+      },
+      {
+        "type": "heading",
+        "content": "The 4 'A's of energy security"
+      },
+      {
+        "type": "image_description",
+        "content": "A diagram illustrating 'The 4 'A's of energy security'. At the center is an oval shape with the text 'The 4 'A's of energy security'. Four lines radiate from this central oval, each pointing to one of the 'A's: 'Availability' (top), 'Accessibility' (right), 'Affordability' (bottom), and 'Acceptability (safety and environmental concerns)' (left)."
+      },
+      {
+        "type": "heading",
+        "content": "Factors affecting energy security"
+      },
+      {
+        "type": "list",
+        "content": [
+          "Physical environment – Some areas have the geological and physical conditions necessary for the development of energy resources.",
+          "Costs – Economic and political factors can affect the price of energy.",
+          "Technology – Technological developments can create new energy sources or make existing energy sources more efficient.",
+          "Political factors – Energy resources are globally traded. Consequently, political factors such as international conflicts and environmental concerns can affect energy supply."
+        ]
+      }
+    ]
+  },
+  {
+    "pageNumber": 3,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "Figure 1 continued",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Energy in the UK",
+        "chartType": "none",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "chart_data",
+        "content": "The balance between import and export of energy in the UK (1970–2020)",
+        "chartType": "line",
+        "chartData": [
+          {
+            "label": "1970",
+            "value": 52,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "1975",
+            "value": 50,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "1980",
+            "value": 10,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "1985",
+            "value": -20,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "1990",
+            "value": -10,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "1995",
+            "value": -15,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "2000",
+            "value": -5,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "2005",
+            "value": 10,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "2010",
+            "value": 25,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "2015",
+            "value": 35,
+            "category": "Net Energy Balance"
+          },
+          {
+            "label": "2020",
+            "value": 30,
+            "category": "Net Energy Balance"
+          }
+        ],
+        "image_description": "A line graph showing the UK's energy import and export balance from 1970 to 2020. The Y-axis represents energy imports (%) from 0 to 60 above the zero line, and energy exports (%) from 0 to 30 below the zero line. The X-axis represents years from 1970 to 2020. Annotations highlight 'Heavy reliance on imported energy' (early 1970s), 'Significant oil and gas production in the North Sea' (1980s-early 2000s when exports peaked), and 'North Sea oil and gas production declines' (mid-2000s onwards leading to increased imports)."
+      },
+      {
+        "type": "chart_data",
+        "content": "Electricity capacity in the UK (2004–2022)",
+        "chartType": "line",
+        "chartData": [
+          {
+            "label": "2004",
+            "value": 72,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2006",
+            "value": 78,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2008",
+            "value": 79,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2010",
+            "value": 82,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2012",
+            "value": 83,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2014",
+            "value": 80,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2016",
+            "value": 76,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2018",
+            "value": 70,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2020",
+            "value": 68,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2022",
+            "value": 69,
+            "category": "Total electricity capacity"
+          },
+          {
+            "label": "2004",
+            "value": 59,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2006",
+            "value": 60,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2008",
+            "value": 59,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2010",
+            "value": 58,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2012",
+            "value": 58,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2014",
+            "value": 56,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2016",
+            "value": 54,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2018",
+            "value": 53,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2020",
+            "value": 52,
+            "category": "Electricity demand"
+          },
+          {
+            "label": "2022",
+            "value": 51,
+            "category": "Electricity demand"
+          }
+        ],
+        "image_description": "A line graph displaying electricity capacity and demand in the UK from 2004 to 2022, measured in GWh (Gigawatt hours) on the Y-axis (0-100). The X-axis represents years from 2004 to 2022. 'Total electricity capacity' is shown with a solid line, generally fluctuating around 70-80 GWh. 'Electricity demand' is shown with a dashed line, generally declining from around 60 GWh to 50 GWh over the period."
+      },
+      {
+        "type": "map_data",
+        "content": "Wind and solar share of electricity generation in Europe (2021)",
+        "chartType": "none",
+        "chartData": [
+          {
+            "label": "Norway",
+            "value": 7.5,
+            "category": "5 – 9.9%"
+          },
+          {
+            "label": "Denmark",
+            "value": 51.9,
+            "category": "More than 25%"
+          },
+          {
+            "label": "Ireland",
+            "value": 32.9,
+            "category": "More than 25%"
+          },
+          {
+            "label": "UK",
+            "value": 25.2,
+            "category": "More than 25%"
+          },
+          {
+            "label": "Netherlands",
+            "value": 24.6,
+            "category": "10 – 25%"
+          },
+          {
+            "label": "Portugal",
+            "value": 31.5,
+            "category": "More than 25%"
+          },
+          {
+            "label": "Spain",
+            "value": 32.9,
+            "category": "More than 25%"
+          },
+          {
+            "label": "France",
+            "value": 9.4,
+            "category": "5 – 9.9%"
+          },
+          {
+            "label": "Germany",
+            "value": 28.8,
+            "category": "More than 25%"
+          },
+          {
+            "label": "Sweden",
+            "value": 16.6,
+            "category": "10 – 25%"
+          },
+          {
+            "label": "Finland",
+            "value": 11.8,
+            "category": "10 – 25%"
+          },
+          {
+            "label": "Russia",
+            "value": 0.5,
+            "category": "Less than 5%"
+          },
+          {
+            "label": "Poland",
+            "value": 11.2,
+            "category": "10 – 25%"
+          },
+          {
+            "label": "Lithuania",
+            "value": 30,
+            "category": "More than 25%"
+          },
+          {
+            "label": "Ukraine",
+            "value": 3,
+            "category": "Less than 5%"
+          },
+          {
+            "label": "Romania",
+            "value": 14,
+            "category": "10 – 25%"
+          },
+          {
+            "label": "Italy",
+            "value": 16,
+            "category": "10 – 25%"
+          },
+          {
+            "label": "Luxembourg",
+            "value": 43.4,
+            "category": "More than 25%"
+          },
+          {
+            "label": "Greece",
+            "value": 28.7,
+            "category": "More than 25%"
+          }
+        ],
+        "image_description": "A choropleth map of Europe showing the share of wind and solar in electricity generation for 2021. Countries are shaded according to a key: yellow for 'Less than 5%', light green for '5 – 9.9%', dark green for '10 – 25%', and very dark green/black for 'More than 25%'. Specific percentages are labeled for many countries including Denmark (51.9%), UK (25.2%), Germany (28.8%), Spain (32.9%), and Greece (28.7%) having high shares, while Russia (0.5%) and Ukraine (3.0%) have low shares."
+      }
+    ]
+  },
+  {
+    "pageNumber": 4,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "Figure 2"
+      },
+      {
+        "type": "heading",
+        "content": "Towards a renewable energy future in the UK"
+      },
+      {
+        "type": "heading",
+        "content": "Renewable energy sources in the UK, 2021"
+      },
+      {
+        "type": "paragraph",
+        "content": "What is renewable energy? Renewable energy comes from sources that won't run out, including:"
+      },
+      {
+        "type": "list",
+        "content": [
+          "the wind",
+          "the sun",
+          "the waves and tides",
+          "natural underground heat",
+          "energy crops, wood and waste."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": "Total renewable energy used = 24.36 million tonnes of oil equivalent"
+      },
+      {
+        "type": "chart_data",
+        "chartType": "pie",
+        "chartData": [
+          {
+            "label": "Bioenergy",
+            "value": 61
+          },
+          {
+            "label": "Wind",
+            "value": 28
+          },
+          {
+            "label": "Solar and geothermal",
+            "value": 5
+          },
+          {
+            "label": "Heat pumps",
+            "value": 4
+          },
+          {
+            "label": "Hydro",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "type": "image_description",
+        "content": "A colorful diagram illustrating various types of renewable energy sources. The diagram is titled 'Renewable energy' and depicts a landscape with mountains, a river, houses, and diverse energy generation facilities. Specific energy sources shown and described are: \n\n**Biomass energy:** Illustrated by a truck collecting wood and a factory, with the text 'Biomass is plant and animal matter (eg wood, straw, sewage and waste food), or trees grown for fuel. Burning biomass can produce heat and electricity.' \n\n**Hydroelectric energy:** Depicted as a dam and power lines, with the text 'Hydroelectric energy is generated from moving water.' \n\n**Solar energy:** Shown as solar panels on the roofs of houses, with the text 'The sun's light and heat can be captured by solar panels and turned into electricity or used to heat water.' \n\n**Hydrogen fuel cells:** Represented by a red bus and a small building with power lines, accompanied by the text 'Hydrogen fuel cells can work like batteries, and can power vehicles.' \n\n**Tidal energy:** Illustrated by a marine turbine in the water, with the text 'Every day, the tide goes in and out, as the sea rises and falls. Marine turbines can use this movement to generate electric power.' \n\n**Geothermal energy:** Shown as a power station emitting steam, sourced from deep underground, with the text 'Geothermal power stations use heat from deep underground to generate electricity.' \n\n**Wind energy:** Depicted as several wind turbines on land and in the sea, with the text 'Groups of wind turbines – or wind farms – are being built on land and out at sea.' \n\n**Wave energy:** Illustrated as a device floating on the water with a connecting cable, with the text 'The energy in waves can be used to generate electricity.'"
+      },
+      {
+        "type": "heading",
+        "content": "What are the advantages of renewable energy?"
+      },
+      {
+        "type": "list",
+        "content": [
+          "Renewable energy sources: will not run out and are seen as sustainable; may be less affected by international disputes; cause very little air pollution and consequently do not affect air quality or add significantly to climate change issues.",
+          "The development of renewable technology can create job opportunities.",
+          "Renewable technology requires less costly maintenance than fossil fuel power stations.",
+          "Increasing the use of renewable energy can reduce the fluctuation in energy prices and increase energy security."
+        ]
+      },
+      {
+        "type": "heading",
+        "content": "What are the disadvantages of renewable energy?"
+      },
+      {
+        "type": "list",
+        "content": [
+          "Some renewable energy sources are dependent on weather conditions.",
+          "Some renewable technologies are less efficient in terms of producing electricity than traditional methods.",
+          "The initial cost of large-scale renewable projects can be high.",
+          "Some types of renewable energy developments require a lot of space and may have environmental impacts.",
+          "The manufacture and recycling of some renewable components may create environmental issues."
+        ]
+      }
+    ]
+  },
+  {
+    "pageNumber": 5,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "Figure 2 continued",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Proposed tidal power project for Morecambe Bay and the Duddon Estuary",
+        "chartType": "none",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "Northern Tidal Power Gateways (NTPG) have put forward plans for a multi-billion pound tidal barrage scheme across Morecambe Bay and the Duddon Estuary in North West England. The scheme is a multi-use project which will generate electricity and also provide a transport link between Lancashire and the Lake District. NTPG suggest that the development will generate clean, renewable energy for the next 100 years. It is estimated that when fully operational the tidal barrage scheme could generate enough energy for up to 2 million homes, and the whole project will create 13 000 jobs and opportunities for a number of local businesses. Each barrage will contain navigation locks to allow boats to pass through, as well as ‘fish passes’ for the local marine life. A local politician who supports the scheme said “The UK has one of the largest tidal ranges in the world, yet we use so little of it. We have huge, untapped tidal energy potential and this scheme could provide reliable, green energy for years to come, as well as providing a significant economic boost to the area.” However, there are local concerns about the potential cost of the project and the possible environmental impact on one of the most important areas of tidal mudflats and salt marsh in the UK.",
+        "chartType": "none"
+      },
+      {
+        "type": "image_description",
+        "content": "An aerial photograph of Morecambe Bay, showing a wide expanse of water, sandbanks, and the coastline with some urban development. The water transitions to land in the foreground, with faint structures visible along the shore.",
+        "chartType": "none"
+      },
+      {
+        "type": "map_data",
+        "content": "A map showing the Morecambe Bay and Duddon Estuary region. Key geographical features include Bootle, Sandscale Haws nature reserve, Haverigg, Duddon Estuary, Duddon barrage, Furness Peninsula, Barrow-in-Furness, South Walney nature reserve, Leighton Moss nature reserve, Morecambe Bay, Morecambe, Heysham, Lancaster, Heysham nature reserve. Proposed barrages are indicated by a red line: Duddon barrage near Haverigg and Morecambe Bay barrage between Barrow-in-Furness and Heysham. The map also shows major roads (grey lines) and the M6 motorway (blue line). Nature reserves are marked with yellow and green icons. A scale bar indicates distances up to 20 km. A small inset map shows the location of this region within the UK, specifically highlighting the northwest of England.",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Worth a trip – North West England's Morecambe Bay",
+        "chartType": "none",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "Scientists suggest that Morecambe Bay is an important physical environment because it is the largest area of tidal mudflats in the UK. Visitors will tell you that the huge, ever-changing skies and shifting sands have inspired poets, painters and nature lovers for generations, and that seafood from the waters of the bay can be enjoyed in many local cafes and restaurants. Whatever you are looking for, you’ll probably find it here; from quiet sandy beaches and historical sites to hiking and cycling routes, and opportunities for bird watching. Morecambe Bay’s unique ecosystem is a protected environment, which is a designated wetland area of international importance because of its amazing range of wildlife. It is a breeding ground for large numbers of wading birds, ducks and geese. In the summer months you can visit the Royal Society for the Protection of Birds (RSPB) reserve at Leighton Moss or the South Walney nature reserve, where you can see seals on the sandbars at low tide.",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "Adapted from TripAdvisor",
+        "chartType": "none"
+      }
+    ]
+  },
+  {
+    "pageNumber": 6,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "Figure 3",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "The Morecambe Bay and Duddon Estuary tidal gateway project",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Delivering green energy and infrastructural benefits",
+        "chartType": "none",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "The £10 billion tidal gateway project will generate renewable energy and create a transport link across Morecambe Bay between Heysham and the Furness Peninsula, as well as a shorter crossing for the Duddon Estuary.",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "The 130 turbines will generate enough energy for 2 million homes, as much as a nuclear power station. The road crossings will reduce journey times from North Lancashire to West Cumbria by 75%, saving both time and money. It is estimated that there will be around 9 million journeys over the crossings annually, reducing traffic on the M6, which currently suffers from serious congestion in the summer. The reduction in travel distances will save 750 000 litres of fuel each year and provide cost savings of over £200 million for local people and businesses. The tidal barrage could also provide a route for power and communication cables.",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "The project is expected to provide a range of opportunities, including the development of new industries and expansion of existing businesses. Up to 13 000 jobs will be created and the improved access to the Lake District will boost the local tourist industry. All of these opportunities will contribute to the regeneration of Lancashire and Cumbria.",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "Morecambe Bay and the Duddon Estuary are areas of outstanding environmental importance. NTPG will work with environmental protection agencies to ensure that the development is monitored and the environment is protected.",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Projected effects of the project",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "Adapted from NTPG (2020)",
+        "chartType": "none"
+      },
+      {
+        "type": "list",
+        "content": [
+          "Saving £250 million a year by improving transport links",
+          "Saving £370 million a year by generating emission-free energy",
+          "New industry will generate £20 billion over 20 years",
+          "£400 million a year from economic growth",
+          "The creation of 13 000 jobs",
+          "Saving £100 million a year by protecting the environment against future flooding and storm damage"
+        ],
+        "chartType": "none"
+      },
+      {
+        "type": "image_description",
+        "content": "A circular blue diagram depicting three curved arrows arranged in a recycling symbol shape, with the acronym 'NTPG' written in white text in the center.",
+        "chartType": "none"
+      },
+      {
+        "type": "heading",
+        "content": "Why don’t we use tidal power more?",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "Variations in wind patterns and weather conditions are difficult to predict and this means that wind and solar energy are not always reliable. Tidal patterns and ocean currents are more predictable and more powerful than winds so they can generate more energy.",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "Why then has tidal power not taken off in the same way that wind and solar energy have? The basic problem is one of cost. Tidal power is expensive – up to ten times the cost of onshore wind energy. The engineering is complex and maintaining machinery that can survive in seawater can be very expensive. There is also the cost of dealing with environmental issues, some of which are not fully understood.",
+        "chartType": "none"
+      },
+      {
+        "type": "paragraph",
+        "content": "Energy consultant",
+        "chartType": "none"
+      }
+    ]
+  },
+  {
+    "pageNumber": 7,
+    "sections": [
+      {
+        "type": "heading",
+        "content": "Figure 3 continued",
+        "chartType": "none",
+        "chartData": null
+      },
+      {
+        "type": "heading",
+        "content": "The Morecambe Bay and Duddon Estuary tidal gateway project",
+        "chartType": "none",
+        "chartData": null,
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "heading",
+        "content": "Putting nature in the ‘energy trilemma’",
+        "chartType": "none",
+        "chartData": null,
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "We need an energy system that delivers affordable energy, ensures supply security and reduces emissions – often called the ‘energy trilemma’. However, energy supply will not be truly sustainable if it damages the natural environment. Tidal power has great potential to generate large amounts of renewable energy, but it carries significant risks to sensitive environments. Large numbers of marine birds and wildlife are often found in areas suitable for tidal power schemes and are likely to be disturbed during the building phase and affected through the operation of such schemes. Tidal power schemes can also affect the seabed and wildlife habitats. The RSPB is encouraging energy companies to find solutions to these issues so that our seas and estuaries can produce clean energy while avoiding damage to these valuable environments.\nAdapted from ‘RSPB’s 2050 Energy Vision’",
+        "chartType": "none",
+        "chartData": null
+      },
+      {
+        "type": "image_description",
+        "content": "A diagram illustrating the 'Energy trilemma' as a triangle. The three vertices are labeled 'Environmental sustainability', 'Energy security', and 'Affordability'. The central text within the triangle is 'Energy trilemma'. To the right of the diagram is a blue-bordered text box titled 'Morecambe Bay barrage is a nature concern'. The text in the box reads: 'Morecambe Bay is an internationally important site for its wintering wildfowl and waders. Birds arrive from all over the Northern Hemisphere to spend the winter here. It might be possible to create new habitats for the birds, but this would add to the already high cost of the project.' Below this text, it is attributed to 'A conservation manager at Cumbria Wildlife Trust'.",
+        "chartType": "none",
+        "chartData": null
+      },
+      {
+        "type": "heading",
+        "content": "Morecambe Bay and Duddon Estuary project – is it a waste of money?",
+        "chartType": "none",
+        "chartData": null,
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "It has been said that this project will be both uneconomic and environmentally damaging. It will take 25 years to build and during that time the existing infrastructure will come under more pressure. The estimated £10 billion cost would be better spent on existing road and rail networks, which could be quickly improved. People argue that the barrage would help to regenerate Barrow-in-Furness and increase tourism in Cumbria. However, many locals take a different view, suggesting that the area is already overcrowded in the summer and that it will make the economic situation in Barrow-in-Furness worse as people leave the area to work in Morecambe or Lancaster.",
+        "chartType": "none",
+        "chartData": null
+      },
+      {
+        "type": "heading",
+        "content": "Morecambe Bay and Duddon Estuary project – a blessing or a curse?",
+        "chartType": "none",
+        "chartData": null,
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "It has been suggested that the Morecambe Bay and Duddon Estuary development will transform the North West of England and could be an example of tidal energy for other parts of the country. Although the scheme is expensive, it is not just about generating energy. It will also create new transport links to Cumbria and bring skills-based training and employment to places like Barrow-in-Furness, a town that struggles with high levels of poverty and ill-health, where young people move away because of a lack of job prospects. In addition, the barrage will protect against the effects of climate change by reducing tidal surges and flood risks.\nHowever, Morecambe Bay and the Duddon Estuary are areas of high biodiversity which support a wide range of species and include Sites of Special Scientific Interest (SSSI), and the area is surrounded by Areas of Outstanding Natural Beauty (AONB). The scenery is important to both locals and visitors, and the environment provides a wide range of benefits, including fishing, tourism and shipping. There may be alternative ways to generate electricity which are cheaper and put less pressure on the environment – so is the project a good use of such a large amount of money?",
+        "chartType": "none",
+        "chartData": null
+      },
+      {
+        "type": "heading",
+        "content": "END OF RESOURCES",
+        "chartType": "none",
+        "chartData": null,
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": "G/Jun25/8035/3/PM",
+        "chartType": "none",
+        "chartData": null
+      }
+    ]
+  }
+]
