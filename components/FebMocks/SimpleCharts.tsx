@@ -27,6 +27,8 @@ const COLORS = [
 
 // --- Simple Pie Chart ---
 export const SimplePieChart: React.FC<ChartProps> = ({ data, title }) => {
+    if (!data || data.length === 0) return null;
+
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let cumulativeAngle = 0;
 
@@ -98,6 +100,8 @@ export const SimplePieChart: React.FC<ChartProps> = ({ data, title }) => {
 
 // --- Simple Line Chart ---
 export const SimpleLineChart: React.FC<ChartProps> = ({ data, title }) => {
+    if (!data || data.length === 0) return null;
+
     // 1. Group by category (series)
     const seriesMap: Record<string, { x: string; y: number }[]> = {};
     const xLabels = Array.from(new Set(data.map(d => d.label))); // X-Axis Labels (e.g., Years)
@@ -211,6 +215,8 @@ export const SimpleLineChart: React.FC<ChartProps> = ({ data, title }) => {
 // --- Simple Bar Chart ---
 // For Categorical Data (e.g. Map Data represented as bars)
 export const SimpleBarChart: React.FC<ChartProps> = ({ data, title }) => {
+    if (!data || data.length === 0) return null;
+
     const maxVal = Math.max(...data.map(d => d.value));
 
     return (

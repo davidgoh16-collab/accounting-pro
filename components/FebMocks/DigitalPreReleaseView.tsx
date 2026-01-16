@@ -53,7 +53,7 @@ const DigitalPreReleaseView: React.FC<DigitalViewProps> = ({ pageIndex, onPageCh
                     </ul>
                 );
             case 'chart_data':
-                if (!section.chartData) return null;
+                if (!section.chartData || section.chartData.length === 0) return null;
                 if (section.chartType === 'pie') {
                     return <SimplePieChart key={index} data={section.chartData} title={section.content as string} />;
                 }
@@ -65,6 +65,9 @@ const DigitalPreReleaseView: React.FC<DigitalViewProps> = ({ pageIndex, onPageCh
 
             case 'map_data':
                 // Render maps as bar charts for accessibility (showing values per country)
+                // Defensive check: If no data, just show the description box
+                const hasMapData = section.chartData && section.chartData.length > 0;
+
                 return (
                     <div key={index} className="my-6">
                         <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-800 mb-4 flex items-start gap-3">
@@ -74,7 +77,13 @@ const DigitalPreReleaseView: React.FC<DigitalViewProps> = ({ pageIndex, onPageCh
                                  <p className="text-sm text-indigo-700 dark:text-indigo-400">{section.content}</p>
                              </div>
                         </div>
-                        <SimpleBarChart data={section.chartData} />
+                        {hasMapData ? (
+                            <SimpleBarChart data={section.chartData} />
+                        ) : (
+                            <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-lg text-sm text-stone-500 italic">
+                                Map illustration only - no numerical data to display.
+                            </div>
+                        )}
                     </div>
                 );
 
