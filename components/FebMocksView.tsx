@@ -1,7 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, CheckCircle, ChevronDown, BookOpen, AlertCircle, ArrowRight, Brain } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, ChevronDown, BookOpen, Brain, ArrowRight } from 'lucide-react';
 import { AuthUser } from '../types';
+import { db } from '../firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import HubLayout from './HubLayout';
 
 // --- Data Definitions ---
 
@@ -189,6 +192,8 @@ const specTopics = {
     }
 };
 
+// --- Sub-Components ---
+
 const Countdown: React.FC<{ targetDate?: string }> = ({ targetDate }) => {
     if (!targetDate) return <span className="text-xl font-bold">Check Timetable</span>;
 
@@ -217,7 +222,7 @@ const Countdown: React.FC<{ targetDate?: string }> = ({ targetDate }) => {
     });
 
     if (Object.keys(timeLeft).length === 0 || (+new Date(targetDate) - +new Date() <= 0)) {
-        return <span className="text-xl font-bold text-red-600">Exam Started/Finished!</span>;
+        return <span className="text-xl font-bold text-red-600">Exam Started!</span>;
     }
 
     return (
@@ -230,32 +235,73 @@ const Countdown: React.FC<{ targetDate?: string }> = ({ targetDate }) => {
     );
 };
 
-const Schedule = () => {
-    const [completed, setCompleted] = useState<Record<string, boolean>>(() => {
-        const saved = localStorage.getItem('geoScheduleState');
-        return saved ? JSON.parse(saved) : {};
-    });
+const FebMocksExams = () => (
+    <div className="grid md:grid-cols-3 gap-8 animate-fade-in">
+        {exams.map((exam) => (
+            <div key={exam.id} className="bg-white dark:bg-stone-900 rounded-xl shadow-xl overflow-hidden border border-stone-200 dark:border-stone-700 flex flex-col hover:shadow-2xl transition-shadow duration-300">
+                <div className={`${exam.color} p-4 text-white`}>
+                    <h2 className="text-lg font-bold leading-tight">{exam.title}</h2>
+                </div>
+                <div className="p-6 flex-grow flex flex-col">
+                    <div className="flex items-center gap-3 mb-4 text-stone-600 dark:text-stone-300">
+                        <Calendar className="w-5 h-5 text-stone-400" />
+                        <span className="font-medium">{exam.displayDate}</span>
+                    </div>
+                    <div className="flex items-center gap-3 mb-6 text-stone-600 dark:text-stone-300">
+                        <Clock className="w-5 h-5 text-stone-400" />
+                        <span className="font-medium">{exam.time} &bull; {exam.duration}</span>
+                    </div>
+
+                    <div className="mb-4">
+                        <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2 border-b border-stone-200 dark:border-stone-700 pb-1">Topics Included:</h3>
+                        <ul className="space-y-2">
+                            {exam.topics.map((topic, i) => (
+                                <li key={i} className="text-sm text-stone-600 dark:text-stone-300 flex items-start gap-2">
+                                    <span className="text-teal-500 mt-1 shrink-0">✓</span>
+                                    <span className="break-words">{topic}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {exam.notes && (
+                        <div className={`text-sm p-3 rounded-lg mt-auto break-words ${exam.alert ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-100 dark:border-red-800' : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400'}`}>
+                            <strong>Note:</strong> {exam.notes}
+                        </div>
+                    )}
+                </div>
+                <div className="bg-stone-50 dark:bg-stone-800 p-4 border-t border-stone-100 dark:border-stone-700">
+                    <div className="flex justify-center text-stone-600 dark:text-stone-300 text-sm font-semibold">
+                        {exam.date ? <Countdown targetDate={exam.date} /> : <span>Prepare Now</span>}
+                    </div>
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
+const FebMocksSchedule: React.FC<{ user: AuthUser }> = ({ user }) => {
+    const [completed, setCompleted] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        localStorage.setItem('geoScheduleState', JSON.stringify(completed));
-    }, [completed]);
+        const docRef = doc(db, 'users', user.uid, 'mocks', 'feb2026');
+        const unsubscribe = onSnapshot(docRef, (snap) => {
+            if (snap.exists() && snap.data().schedule) {
+                setCompleted(snap.data().schedule);
+            }
+        });
+        return () => unsubscribe();
+    }, [user]);
 
-    const toggleDay = (id: string) => {
-        setCompleted(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }));
+    const toggleDay = async (id: string) => {
+        const newState = { ...completed, [id]: !completed[id] };
+        setCompleted(newState);
+        // Persist to Firestore
+        await setDoc(doc(db, 'users', user.uid, 'mocks', 'feb2026'), { schedule: newState }, { merge: true });
     };
 
     return (
-        <div id="schedule" className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-8 mb-16 scroll-mt-24">
-                <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
-                    <Calendar className="w-6 h-6" />
-                </div>
-                <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100">Revision Schedule</h2>
-            </div>
-
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-8 animate-fade-in">
             <div className="grid md:grid-cols-2 gap-8">
                 {scheduleData.map((week, idx) => (
                     <div key={idx} className="bg-stone-50 dark:bg-stone-800/50 rounded-xl p-5 border border-stone-100 dark:border-stone-700 h-full">
@@ -265,7 +311,6 @@ const Schedule = () => {
                                 const isExam = day.type === 'exam';
                                 const isCompleted = completed[day.id];
 
-                                // Colors based on Paper
                                 let borderClass = "border-l-4 border-stone-300 dark:border-stone-600";
                                 if (day.type === 'p1') borderClass = "border-l-4 border-blue-500";
                                 if (day.type === 'p2') borderClass = "border-l-4 border-emerald-500";
@@ -305,30 +350,28 @@ const Schedule = () => {
     );
 };
 
-const RAGTracker = () => {
-    const [ragState, setRagState] = useState<Record<string, string>>(() => {
-        const saved = localStorage.getItem('geoRagState');
-        return saved ? JSON.parse(saved) : {};
-    });
-
+const FebMocksTopics: React.FC<{ user: AuthUser }> = ({ user }) => {
+    const [ragState, setRagState] = useState<Record<string, string>>({});
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        localStorage.setItem('geoRagState', JSON.stringify(ragState));
-    }, [ragState]);
+        const docRef = doc(db, 'users', user.uid, 'mocks', 'feb2026');
+        const unsubscribe = onSnapshot(docRef, (snap) => {
+            if (snap.exists() && snap.data().rag) {
+                setRagState(snap.data().rag);
+            }
+        });
+        return () => unsubscribe();
+    }, [user]);
 
-    const handleRate = (topic: string, subtopic: string, rating: string) => {
-        setRagState(prev => ({
-            ...prev,
-            [`${topic}-${subtopic}`]: rating
-        }));
+    const handleRate = async (topic: string, subtopic: string, rating: string) => {
+        const newState = { ...ragState, [`${topic}-${subtopic}`]: rating };
+        setRagState(newState);
+        await setDoc(doc(db, 'users', user.uid, 'mocks', 'feb2026'), { rag: newState }, { merge: true });
     };
 
     const toggleSection = (sectionName: string) => {
-        setOpenSections(prev => ({
-            ...prev,
-            [sectionName]: !prev[sectionName]
-        }));
+        setOpenSections(prev => ({ ...prev, [sectionName]: !prev[sectionName] }));
     };
 
     const getRating = (topic: string, subtopic: string) => {
@@ -349,7 +392,7 @@ const RAGTracker = () => {
     };
 
     return (
-        <div id="topics" className="space-y-8 scroll-mt-24">
+        <div className="space-y-8 animate-fade-in">
             {Object.entries(specTopics).map(([paper, sections]) => (
                 <div key={paper} className="bg-white dark:bg-stone-900 rounded-xl shadow-lg overflow-hidden border border-stone-200 dark:border-stone-700">
                     <div className="bg-stone-800 dark:bg-stone-950 p-4 text-white flex justify-between items-center">
@@ -397,188 +440,135 @@ const RAGTracker = () => {
     );
 };
 
+const FebMocksSkills = () => (
+    <div className="grid lg:grid-cols-2 gap-8 animate-fade-in">
+        {/* Skills Card */}
+        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-6">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
+                    <Brain className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Key Exam Skills</h2>
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400 text-xs uppercase tracking-wider">
+                            <th className="p-3 border-b border-stone-200 dark:border-stone-700 font-bold">Command</th>
+                            <th className="p-3 border-b border-stone-200 dark:border-stone-700 font-bold">Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+                        {skills.map((skill, idx) => (
+                            <tr key={idx} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/50 transition-colors">
+                                <td className="p-3 text-sm font-bold text-indigo-700 dark:text-indigo-400 align-top">{skill.word}</td>
+                                <td className="p-3 text-sm text-stone-600 dark:text-stone-300">
+                                    {skill.meaning}
+                                    <div className="text-stone-400 dark:text-stone-500 text-xs mt-1 italic">{skill.tip}</div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div className="space-y-8">
+            {/* Resources Card */}
+            <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg text-teal-600 dark:text-teal-400">
+                        <BookOpen className="w-5 h-5" />
+                    </div>
+                    <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Additional Resources</h2>
+                </div>
+                <ul className="space-y-3">
+                    {resources.map((res, idx) => (
+                        <li key={idx}>
+                            <a href={res.url} target="_blank" rel="noopener noreferrer" className="block group p-3 rounded-lg border border-stone-200 dark:border-stone-700 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-sm transition-all bg-stone-50 dark:bg-stone-800 hover:bg-white dark:hover:bg-stone-700">
+                                <h4 className="font-bold text-stone-800 dark:text-stone-200 text-sm group-hover:text-teal-600 dark:group-hover:text-teal-400 flex items-center justify-between">
+                                    {res.title}
+                                    <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-teal-400 dark:group-hover:text-teal-500" />
+                                </h4>
+                                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{res.desc}</p>
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Quick Tips Card */}
+            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-lg p-6 text-white">
+                <h3 className="text-lg font-bold mb-3">Revision Strategy</h3>
+                <ul className="space-y-2 text-sm text-indigo-100">
+                    <li className="flex gap-2"><span className="font-bold text-white">1.</span> Learn case study facts (numbers).</li>
+                    <li className="flex gap-2"><span className="font-bold text-white">2.</span> Practice 9-mark questions.</li>
+                    <li className="flex gap-2"><span className="font-bold text-white">3.</span> 'BUG' the question: Box, Underline, Glance.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+);
+
+// --- Main View ---
+
 interface FebMocksViewProps {
     user: AuthUser;
     onBack: () => void;
 }
 
 const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
+    const [activeTab, setActiveTab] = useState<'exams' | 'schedule' | 'topics' | 'skills'>('exams');
+
     return (
-        <div className="min-h-screen flex flex-col pt-16 bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 selection:bg-teal-200 selection:text-teal-900">
-            {/* Sub Navbar for this view */}
-            <nav className="fixed top-20 left-0 right-0 z-30 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-700 shadow-sm transition-all">
-                <div className="container mx-auto px-6 py-2 flex justify-between items-center overflow-x-auto no-scrollbar">
-                    <button onClick={onBack} className="text-sm font-bold text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 flex items-center gap-1 pr-4 border-r border-stone-200 dark:border-stone-700 mr-4 shrink-0">
-                        ← Back
-                    </button>
-                    <ul className="flex gap-4 md:gap-8 text-sm font-semibold text-stone-600 dark:text-stone-400 whitespace-nowrap">
-                        <li><a href="#exams" className="hover:text-teal-600 dark:hover:text-teal-400 px-2 py-1 rounded transition-colors">Exams</a></li>
-                        <li><a href="#schedule" className="hover:text-teal-600 dark:hover:text-teal-400 px-2 py-1 rounded transition-colors">Schedule</a></li>
-                        <li><a href="#topics" className="hover:text-teal-600 dark:hover:text-teal-400 px-2 py-1 rounded transition-colors">Topics</a></li>
-                        <li><a href="#skills" className="hover:text-teal-600 dark:hover:text-teal-400 px-2 py-1 rounded transition-colors">Skills</a></li>
-                    </ul>
-                </div>
-            </nav>
+        <HubLayout
+            title="February Mock Revision"
+            subtitle="Year 11 Geography Mock Exams 2026"
+            gradient="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600"
+            onBack={onBack}
+        >
+            <div className="w-full max-w-7xl mx-auto space-y-8">
 
-            {/* Hero Section */}
-            <header className="bg-stone-900 dark:bg-black text-white pt-24 pb-20 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('/grid.svg')]"></div>
-                <div className="container mx-auto px-6 relative z-10">
-                    <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
-                        Year 11 Geography <span className="text-teal-400">Mock Revision</span>
-                    </h1>
-                    <p className="text-xl text-stone-300 max-w-2xl mb-8">
-                        Everything you need for your February 2026 Mocks. Timetables, topics, and key skills all in one place.
-                    </p>
-
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl inline-block">
-                        <p className="text-teal-300 font-semibold mb-2 text-sm uppercase tracking-wider">Next Exam: Paper 2</p>
-                        <Countdown targetDate="2026-01-30T09:15:00" />
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="container mx-auto px-6 -mt-10 relative z-20 pb-20">
-
-                {/* Exam Cards */}
-                <section id="exams" className="grid md:grid-cols-3 gap-8 mb-16 scroll-mt-24">
-                    {exams.map((exam) => (
-                        <div key={exam.id} className="bg-white dark:bg-stone-900 rounded-xl shadow-xl overflow-hidden border border-stone-100 dark:border-stone-700 flex flex-col hover:shadow-2xl transition-shadow duration-300">
-                            <div className={`${exam.color} p-4 text-white`}>
-                                <h2 className="text-lg font-bold leading-tight">{exam.title}</h2>
-                            </div>
-                            <div className="p-6 flex-grow flex flex-col">
-                                <div className="flex items-center gap-3 mb-4 text-stone-600 dark:text-stone-300">
-                                    <Calendar className="w-5 h-5 text-stone-400" />
-                                    <span className="font-medium">{exam.displayDate}</span>
-                                </div>
-                                <div className="flex items-center gap-3 mb-6 text-stone-600 dark:text-stone-300">
-                                    <Clock className="w-5 h-5 text-stone-400" />
-                                    <span className="font-medium">{exam.time} &bull; {exam.duration}</span>
-                                </div>
-
-                                <div className="mb-4">
-                                    <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2 border-b border-stone-200 dark:border-stone-700 pb-1">Topics Included:</h3>
-                                    <ul className="space-y-2">
-                                        {exam.topics.map((topic, i) => (
-                                            <li key={i} className="text-sm text-stone-600 dark:text-stone-300 flex items-start gap-2">
-                                                <span className="text-teal-500 mt-1 shrink-0">✓</span>
-                                                <span className="break-words">{topic}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {exam.notes && (
-                                    <div className={`text-sm p-3 rounded-lg mt-auto break-words ${exam.alert ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-100 dark:border-red-800' : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400'}`}>
-                                        <strong>Note:</strong> {exam.notes}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="bg-stone-50 dark:bg-stone-800 p-4 border-t border-stone-100 dark:border-stone-700">
-                                <div className="flex justify-center text-stone-600 dark:text-stone-300 text-sm font-semibold">
-                                    {exam.date ? <Countdown targetDate={exam.date} /> : <span>Prepare Now</span>}
-                                </div>
-                            </div>
-                        </div>
+                {/* Modern Navigation Tabs */}
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-4 bg-white/50 dark:bg-stone-900/50 backdrop-blur-md p-2 rounded-2xl border border-stone-200 dark:border-stone-700 w-fit mx-auto shadow-sm sticky top-24 z-20">
+                    {[
+                        { id: 'exams', label: 'Exam Overview', icon: '📝' },
+                        { id: 'schedule', label: 'Schedule', icon: '📅' },
+                        { id: 'topics', label: 'Topic Tracker', icon: '✅' },
+                        { id: 'skills', label: 'Skills & Info', icon: '🧠' }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`
+                                flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300
+                                ${activeTab === tab.id
+                                    ? 'bg-white dark:bg-stone-800 text-teal-600 dark:text-teal-400 shadow-md scale-105'
+                                    : 'text-stone-500 dark:text-stone-400 hover:bg-white/50 dark:hover:bg-stone-800/50 hover:text-stone-700 dark:hover:text-stone-300'}
+                            `}
+                        >
+                            <span>{tab.icon}</span>
+                            <span>{tab.label}</span>
+                        </button>
                     ))}
-                </section>
-
-                {/* REVISION SCHEDULE */}
-                <Schedule />
-
-                <div className="grid lg:grid-cols-12 gap-8">
-
-                    {/* Left Column: Topic Tracker */}
-                    <section className="lg:col-span-7 space-y-8">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
-                                <CheckCircle className="w-6 h-6" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100">Topic Checklist</h2>
-                        </div>
-                        <p className="text-stone-600 dark:text-stone-400 text-sm mb-4">Click the headers below to expand topics. Rate your confidence: <span className="text-red-500 font-bold">R</span>, <span className="text-amber-500 font-bold">A</span>, <span className="text-green-500 font-bold">G</span>.</p>
-
-                        <RAGTracker />
-                    </section>
-
-                    {/* Right Column: Skills & Resources */}
-                    <aside id="skills" className="lg:col-span-5 space-y-8 sticky top-32 self-start h-fit scroll-mt-24">
-
-                        {/* Skills Card */}
-                        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
-                                    <Brain className="w-6 h-6" />
-                                </div>
-                                <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Key Exam Skills</h2>
-                            </div>
-
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-400 text-xs uppercase tracking-wider">
-                                            <th className="p-3 border-b border-stone-200 dark:border-stone-700 font-bold">Command</th>
-                                            <th className="p-3 border-b border-stone-200 dark:border-stone-700 font-bold">Meaning</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
-                                        {skills.map((skill, idx) => (
-                                            <tr key={idx} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/50 transition-colors">
-                                                <td className="p-3 text-sm font-bold text-indigo-700 dark:text-indigo-400">{skill.word}</td>
-                                                <td className="p-3 text-sm text-stone-600 dark:text-stone-300">
-                                                    {skill.meaning}
-                                                    <div className="text-stone-400 dark:text-stone-500 text-xs mt-1 italic">{skill.tip}</div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        {/* Resources Card */}
-                        <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg text-teal-600 dark:text-teal-400">
-                                    <BookOpen className="w-5 h-5" />
-                                </div>
-                                <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100">Additional Resources</h2>
-                            </div>
-                            <ul className="space-y-3">
-                                {resources.map((res, idx) => (
-                                    <li key={idx}>
-                                        <a href={res.url} target="_blank" rel="noopener noreferrer" className="block group p-3 rounded-lg border border-stone-200 dark:border-stone-700 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-sm transition-all bg-stone-50 dark:bg-stone-800 hover:bg-white dark:hover:bg-stone-700">
-                                            <h4 className="font-bold text-stone-800 dark:text-stone-200 text-sm group-hover:text-teal-600 dark:group-hover:text-teal-400 flex items-center justify-between">
-                                                {res.title}
-                                                <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-teal-400 dark:group-hover:text-teal-500" />
-                                            </h4>
-                                            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{res.desc}</p>
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Quick Tips Card */}
-                        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-lg p-6 text-white">
-                            <h3 className="text-lg font-bold mb-3">Revision Strategy</h3>
-                            <ul className="space-y-2 text-sm text-indigo-100">
-                                <li className="flex gap-2"><span className="font-bold text-white">1.</span> Learn case study facts (numbers).</li>
-                                <li className="flex gap-2"><span className="font-bold text-white">2.</span> Practice 9-mark questions.</li>
-                                <li className="flex gap-2"><span className="font-bold text-white">3.</span> 'BUG' the question: Box, Underline, Glance.</li>
-                            </ul>
-                        </div>
-                    </aside>
                 </div>
 
-            </main>
+                {/* Content Area */}
+                <div className="min-h-[50vh]">
+                    {activeTab === 'exams' && <FebMocksExams />}
+                    {activeTab === 'schedule' && <FebMocksSchedule user={user} />}
+                    {activeTab === 'topics' && <FebMocksTopics user={user} />}
+                    {activeTab === 'skills' && <FebMocksSkills />}
+                </div>
 
-            <footer className="bg-stone-900 text-stone-400 py-12 text-center mt-auto">
-                <p>© 2026 Geography Department. Good luck with your mocks!</p>
-            </footer>
-        </div>
+            </div>
+
+            <style>{`
+                .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
+                @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+            `}</style>
+        </HubLayout>
     );
 };
 
