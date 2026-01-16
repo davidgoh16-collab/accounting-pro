@@ -5,6 +5,7 @@ import { AuthUser } from '../types';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import HubLayout from './HubLayout';
+import PreReleaseView from './FebMocks/PreReleaseView';
 
 // --- Data Definitions ---
 
@@ -519,7 +520,7 @@ interface FebMocksViewProps {
 }
 
 const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
-    const [activeTab, setActiveTab] = useState<'exams' | 'schedule' | 'topics' | 'skills'>('exams');
+    const [activeTab, setActiveTab] = useState<'exams' | 'schedule' | 'topics' | 'skills' | 'prerelease'>('exams');
 
     return (
         <HubLayout
@@ -536,6 +537,7 @@ const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
                         { id: 'exams', label: 'Exam Overview', icon: '📝' },
                         { id: 'schedule', label: 'Schedule', icon: '📅' },
                         { id: 'topics', label: 'Topic Tracker', icon: '✅' },
+                        { id: 'prerelease', label: 'Paper 3 Pre-release', icon: '🗺️' },
                         { id: 'skills', label: 'Skills & Info', icon: '🧠' }
                     ].map(tab => (
                         <button
@@ -559,6 +561,7 @@ const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
                     {activeTab === 'exams' && <FebMocksExams />}
                     {activeTab === 'schedule' && <FebMocksSchedule user={user} />}
                     {activeTab === 'topics' && <FebMocksTopics user={user} />}
+                    {activeTab === 'prerelease' && <PreReleaseView />}
                     {activeTab === 'skills' && <FebMocksSkills />}
                 </div>
 

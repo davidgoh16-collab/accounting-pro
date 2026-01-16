@@ -96,7 +96,11 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         
         const currentQ = questions[currentQuestionIndex].questionData;
         setSelectedAnswer(answer);
-        const correct = answer.trim() === currentQ.correctAnswer.trim();
+
+        // Fuzzy comparison logic
+        const normalize = (str: string) => str.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
+        const correct = normalize(answer) === normalize(currentQ.correctAnswer);
+
         setIsCorrect(correct);
         if (correct) {
             setScore(prev => prev + 1);

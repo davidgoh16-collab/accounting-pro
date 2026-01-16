@@ -84,7 +84,7 @@ const cleanJson = (text: string): string => {
         start = firstSquare;
         end = clean.lastIndexOf(']');
     }
-    
+
     if (start !== -1 && end !== -1 && end > start) {
         clean = clean.substring(start, end + 1);
     }
@@ -358,7 +358,24 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
             // If they pick the "actual" right answer (which might be option[1]), they lose points.
             // But if correct answer string doesn't match ANY option, the user can NEVER get it right.
             console.warn(`Fixed mismatched quiz answer for "${q.question}". Expected: ${correctAnswer}, Options: ${options.join(', ')}`);
-            return { ...q, correctAnswer: options[0] };
+
+            // NEW STRATEGY: Do not just pick option[0]. Pick the option that is most similar (Levenshtein-ish) or just fail gracefully?
+            // If we force it to option[0], users get angry.
+            // Let's try to find the option with the most shared words.
+            const correctWords = correctAnswer.toLowerCase().split(' ');
+            let bestMatch = options[0];
+            let maxOverlap = 0;
+
+            options.forEach(opt => {
+                const optWords = opt.toLowerCase().split(' ');
+                const overlap = optWords.filter(w => correctWords.includes(w)).length;
+                if (overlap > maxOverlap) {
+                    maxOverlap = overlap;
+                    bestMatch = opt;
+                }
+            });
+
+            return { ...q, correctAnswer: bestMatch };
         });
     } catch (e) {
         console.error("Failed to parse batch quiz questions", e);
@@ -401,8 +418,23 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
     // Validate answer
     if (q.options && q.correctAnswer && !q.options.includes(q.correctAnswer)) {
          const fuzzyMatch = q.options.find((opt: string) => opt.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase());
-         if (fuzzyMatch) q.correctAnswer = fuzzyMatch;
-         else q.correctAnswer = q.options[0]; // Fallback
+         if (fuzzyMatch) {
+             q.correctAnswer = fuzzyMatch;
+         } else {
+             // Word overlap fallback
+             const correctWords = q.correctAnswer.toLowerCase().split(' ');
+             let bestMatch = q.options[0];
+             let maxOverlap = 0;
+             q.options.forEach((opt: string) => {
+                 const optWords = opt.toLowerCase().split(' ');
+                 const overlap = optWords.filter((w: string) => correctWords.includes(w)).length;
+                 if (overlap > maxOverlap) {
+                     maxOverlap = overlap;
+                     bestMatch = opt;
+                 }
+             });
+             q.correctAnswer = bestMatch;
+         }
     }
 
     return q;
@@ -664,4 +696,82 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
         console.error("Failed to parse video quiz JSON:", response.text);
         throw new Error("Invalid AI response format");
     }
+});
+
+export const chatWithPreRelease = async (history: ChatMessage[], message: string, imageBase64: string | null, onChunk: (chunk: string) => void): Promise<void> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+
+    // Construct history with the new model input format
+    // gemini-1.5-pro supports multimodal inputs
+    const contents: any[] = history.map(msg => ({
+        role: msg.role === 'model' ? 'model' : 'user',
+        parts: [{ text: msg.text }]
+    }));
+
+    const userParts: any[] = [{ text: message }];
+
+    if (imageBase64) {
+        // Remove data URL prefix if present for the API call
+        const base64Data = imageBase64.split(',')[1] || imageBase64;
+        userParts.push({
+            inlineData: {
+                mimeType: "image/jpeg",
+                data: base64Data
+            }
+        });
+    }
+
+    contents.push({ role: 'user', parts: userParts });
+
+    const systemInstruction = `You are an expert Geography tutor assisting a student with the "June 2025 Paper 3 Pre-release Material".
+    The student is looking at a specific page of the resource booklet (provided as an image).
+    Answer their questions specifically about the data, maps, graphs, or photos shown in the image.
+    Be precise, quote figures if visible, and explain geographical concepts related to the resource.`;
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-1.5-pro', // Use Pro for vision capabilities
+        contents: contents,
+        config: { systemInstruction }
+    });
+
+    for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
+};
+
+export const generatePreReleaseQuestion = async (imageBase64: string): Promise<GeneratedQuestionData> => handleApiCall(async () => {
+    const ai = getAiClient();
+    const base64Data = imageBase64.split(',')[1] || imageBase64;
+
+    const prompt = `Look at this Geography Pre-release resource. Generate a GCSE-level exam question based on it.
+
+    Format as JSON object: { "questionNumber": "03.X", "marks": number, "prompt": "string", "markScheme": { "content": "string" } }
+
+    Ensure the question requires using the resource (e.g., "Using Figure X...", "Describe the pattern...", "Calculate...").`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-1.5-pro',
+        contents: [
+            { role: 'user', parts: [
+                { text: prompt },
+                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+            ]}
+        ],
+        config: { responseMimeType: 'application/json' }
+    });
+
+    const data = JSON.parse(cleanJson(response.text || '{}'));
+
+    // Map to GeneratedQuestionData interface
+    return {
+        examYear: 2025,
+        questionNumber: data.questionNumber || "03.1",
+        unit: "Paper 3",
+        title: "Pre-release Question",
+        prompt: data.prompt,
+        marks: data.marks || 4,
+        figureDescription: "Pre-release Resource",
+        ao: { ao1: 0, ao2: 0, ao3: 0, ao4: 0 },
+        caseStudy: { title: "", content: "" },
+        markScheme: { title: "Mark Scheme", content: data.markScheme?.content || "" }
+    };
 });
