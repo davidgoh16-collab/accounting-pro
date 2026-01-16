@@ -25,6 +25,8 @@ export type Page =
     | 'revision_planner' 
     | 'podcast_studio' 
     | 'video_learning'
+    | 'mocks_hub'
+    | 'feb_mocks'
     | 'admin';
 
 export interface AuthUser {

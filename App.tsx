@@ -29,6 +29,8 @@ import RevisionPlannerView from './components/RevisionPlannerView';
 import PodcastView from './components/PodcastView';
 import LearningHubView from './components/LearningHubView'; 
 import VideoLearningView from './components/VideoLearningView'; // Imported
+import MocksHubView from './components/MocksHubView';
+import FebMocksView from './components/FebMocksView';
 import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
@@ -326,6 +328,14 @@ const App: React.FC = () => {
                                     accentColor="text-orange-600 hover:text-orange-700"
                                     disabled={!featureFlags.ragAssessment}
                                 />
+                                <HubCard
+                                    icon={<span className="text-4xl">🎯</span>}
+                                    title="Mocks"
+                                    description="Access targeted revision materials for specific mock exam series (e.g. Feb 2026)."
+                                    onClick={() => handleNavigate('mocks_hub')}
+                                    shadowColor="shadow-rose-500/20"
+                                    accentColor="text-rose-600 hover:text-rose-700"
+                                />
                             </div>
                         </section>
 
@@ -369,6 +379,8 @@ const App: React.FC = () => {
 
             {page === 'learning_hub' && <LearningHubView user={user} onBack={() => handleNavigate('dashboard')} />}
             {page === 'video_learning' && <VideoLearningView user={user} onBack={() => handleNavigate('dashboard')} />} 
+            {page === 'mocks_hub' && <MocksHubView user={user} onNavigate={handleNavigate} />}
+            {page === 'feb_mocks' && <FebMocksView user={user} onBack={() => handleNavigate('mocks_hub')} />}
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
