@@ -15,7 +15,7 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, onNavigate }) => {
             title="Mocks Central"
             subtitle="Prepare for your upcoming examinations."
             gradient="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-600"
-            backAction={() => onNavigate('dashboard')}
+            onBack={() => onNavigate('dashboard')}
         >
             <div className="w-full max-w-7xl mx-auto space-y-12">
                 <section className="animate-fade-in">
