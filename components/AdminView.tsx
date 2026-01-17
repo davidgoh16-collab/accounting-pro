@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
-import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember } from '../firebase';
+import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassName, addClassMembers, updateUserRole } from '../firebase';
 import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
@@ -156,6 +156,21 @@ const ClassManager: React.FC<{
     const [isCreating, setIsCreating] = useState(false);
     const [studentSearch, setStudentSearch] = useState('');
 
+    // Edit Class Name State
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editingName, setEditingName] = useState('');
+
+    // Bulk Add State
+    const [selectedStudentsToAdd, setSelectedStudentsToAdd] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (selectedClass) {
+            setEditingName(selectedClass.name);
+            setIsEditingName(false);
+            setSelectedStudentsToAdd([]);
+        }
+    }, [selectedClass]);
+
     const handleCreateClass = async () => {
         if (!newClassName.trim()) return;
         setIsCreating(true);
@@ -171,17 +186,16 @@ const ClassManager: React.FC<{
         }
     };
 
-    const handleAddStudent = async (studentId: string) => {
-        if (!selectedClass) return;
+    const handleUpdateClassName = async () => {
+        if (!selectedClass || !editingName.trim()) return;
         try {
-            await addClassMember(selectedClass.id, studentId);
+            await updateClassName(selectedClass.id, editingName);
             onRefreshClasses();
-            // Optimistically update local state if needed, or just rely on refresh
-            // But we can update selectedClass to reflect change immediately in UI
-            setSelectedClass(prev => prev ? ({...prev, studentIds: [...prev.studentIds, studentId]}) : null);
+            setSelectedClass(prev => prev ? ({...prev, name: editingName}) : null);
+            setIsEditingName(false);
         } catch (e) {
             console.error(e);
-            alert("Failed to add student");
+            alert("Failed to update class name");
         }
     };
 
@@ -198,11 +212,30 @@ const ClassManager: React.FC<{
         }
     };
 
+    const handleBulkAdd = async () => {
+        if (!selectedClass || selectedStudentsToAdd.length === 0) return;
+        try {
+            await addClassMembers(selectedClass.id, selectedStudentsToAdd);
+            onRefreshClasses();
+            setSelectedClass(prev => prev ? ({...prev, studentIds: [...prev.studentIds, ...selectedStudentsToAdd]}) : null);
+            setSelectedStudentsToAdd([]);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to add students");
+        }
+    };
+
+    const toggleStudentSelection = (uid: string) => {
+        setSelectedStudentsToAdd(prev =>
+            prev.includes(uid) ? prev.filter(id => id !== uid) : [...prev, uid]
+        );
+    };
+
     const filteredStudentsToAdd = allUsers.filter(u =>
         !(selectedClass?.studentIds || []).includes(u.uid) &&
         ((u.displayName?.toLowerCase() || '').includes(studentSearch.toLowerCase()) ||
          (u.email?.toLowerCase() || '').includes(studentSearch.toLowerCase()))
-    ).slice(0, 10); // Limit results
+    );
 
     return (
         <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-6 h-[85vh] flex gap-6">
@@ -243,9 +276,29 @@ const ClassManager: React.FC<{
             <div className="flex-1 flex flex-col">
                 {selectedClass ? (
                     <>
-                        <div className="mb-6">
-                            <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{selectedClass.name}</h3>
-                            <p className="text-stone-500 text-sm">{(selectedClass.studentIds || []).length} Students Enrolled</p>
+                        <div className="mb-6 flex justify-between items-start">
+                            <div>
+                                {isEditingName ? (
+                                    <div className="flex gap-2 items-center">
+                                        <input
+                                            type="text"
+                                            value={editingName}
+                                            onChange={(e) => setEditingName(e.target.value)}
+                                            className="text-2xl font-bold text-stone-800 dark:text-stone-100 bg-transparent border-b border-stone-400 focus:border-indigo-500 outline-none w-full"
+                                        />
+                                        <button onClick={handleUpdateClassName} className="text-green-600 hover:text-green-700 text-sm font-bold">Save</button>
+                                        <button onClick={() => setIsEditingName(false)} className="text-stone-400 hover:text-stone-600 text-sm">Cancel</button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2 items-center">
+                                        <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{selectedClass.name}</h3>
+                                        <button onClick={() => setIsEditingName(true)} className="text-stone-400 hover:text-indigo-500 transition">
+                                            ✏️
+                                        </button>
+                                    </div>
+                                )}
+                                <p className="text-stone-500 text-sm">{(selectedClass.studentIds || []).length} Students Enrolled</p>
+                            </div>
                         </div>
 
                         <div className="flex-1 flex flex-col gap-6 overflow-hidden">
@@ -275,8 +328,18 @@ const ClassManager: React.FC<{
                             </div>
 
                             {/* Add Student */}
-                            <div className="bg-white dark:bg-stone-800 rounded-2xl p-4 border border-stone-200 dark:border-stone-700">
-                                <h4 className="font-bold text-stone-700 dark:text-stone-300 mb-3 text-sm uppercase">Add Student</h4>
+                            <div className="bg-white dark:bg-stone-800 rounded-2xl p-4 border border-stone-200 dark:border-stone-700 flex flex-col h-[40%]">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h4 className="font-bold text-stone-700 dark:text-stone-300 text-sm uppercase">Add Students</h4>
+                                    {selectedStudentsToAdd.length > 0 && (
+                                        <button
+                                            onClick={handleBulkAdd}
+                                            className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm transition-all"
+                                        >
+                                            Add {selectedStudentsToAdd.length} Selected
+                                        </button>
+                                    )}
+                                </div>
                                 <input
                                     type="text"
                                     placeholder="Search student name or email..."
@@ -284,24 +347,29 @@ const ClassManager: React.FC<{
                                     onChange={e => setStudentSearch(e.target.value)}
                                     className="w-full px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 text-sm mb-3"
                                 />
-                                {studentSearch && (
-                                    <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-1">
-                                        {filteredStudentsToAdd.map(u => (
+                                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
+                                    {filteredStudentsToAdd.map(u => {
+                                        const isSelected = selectedStudentsToAdd.includes(u.uid);
+                                        return (
                                             <button
                                                 key={u.uid}
-                                                onClick={() => handleAddStudent(u.uid)}
-                                                className="w-full text-left flex justify-between items-center p-2 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg"
+                                                onClick={() => toggleStudentSelection(u.uid)}
+                                                className={`w-full text-left flex justify-between items-center p-2 rounded-lg transition-all border ${isSelected ? 'bg-indigo-50 border-indigo-300 dark:bg-indigo-900/30 dark:border-indigo-700' : 'hover:bg-stone-100 dark:hover:bg-stone-700 border-transparent'}`}
                                             >
-                                                <div className="text-sm">
-                                                    <span className="font-bold text-stone-800 dark:text-stone-200">{u.displayName}</span>
-                                                    <span className="text-stone-400 text-xs ml-2">{u.email}</span>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-stone-400'}`}>
+                                                        {isSelected && <span className="text-white text-[10px]">✓</span>}
+                                                    </div>
+                                                    <div className="text-sm">
+                                                        <span className="font-bold text-stone-800 dark:text-stone-200">{u.displayName}</span>
+                                                        <span className="text-stone-400 text-xs ml-2">{u.email}</span>
+                                                    </div>
                                                 </div>
-                                                <span className="text-green-600 font-bold text-xs">+ Add</span>
                                             </button>
-                                        ))}
-                                        {filteredStudentsToAdd.length === 0 && <p className="text-xs text-stone-400 p-2">No matching students found.</p>}
-                                    </div>
-                                )}
+                                        );
+                                    })}
+                                    {filteredStudentsToAdd.length === 0 && <p className="text-xs text-stone-400 p-2">No matching students found.</p>}
+                                </div>
                             </div>
                         </div>
                     </>
@@ -470,6 +538,7 @@ const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) => void }> = ({ user, onImpersonate }) => {
     const [activeTab, setActiveTab] = useState<Tab>('overview');
     const [viewSession, setViewSession] = useState<CompletedSession | null>(null);
+    const [roleLoading, setRoleLoading] = useState(false);
     
     const TabButton = ({ id, label, icon }: { id: Tab, label: string, icon: string }) => (
         <button 
@@ -480,6 +549,24 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
             {label}
         </button>
     );
+
+    const handleRoleUpdate = async () => {
+        const newRole = user.role === 'admin' ? 'student' : 'admin';
+        if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+
+        setRoleLoading(true);
+        try {
+            await updateUserRole(user.uid, newRole);
+            // In a real app we'd trigger a refresh or update the local user object,
+            // but for now we'll just alert. Ideally AdminView should pass a refresh handler.
+            alert(`User role updated to ${newRole}. Refresh to see changes.`);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to update role");
+        } finally {
+            setRoleLoading(false);
+        }
+    };
 
     return (
         <div className="animate-fade-in h-full flex flex-col">
@@ -495,15 +582,25 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                             <div className="flex gap-2 mt-1">
                                 <p className="text-xs text-stone-400 dark:text-stone-500 uppercase tracking-wider font-semibold">UID: {user.uid}</p>
                                 {user.level && <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{user.level}</span>}
+                                {user.role === 'admin' && <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Admin</span>}
                             </div>
                         </div>
                     </div>
-                    <button 
-                        onClick={() => onImpersonate(user)}
-                        className="px-6 py-3 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition shadow-md flex items-center gap-2"
-                    >
-                        <span>👓</span> View as Student
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleRoleUpdate}
+                            disabled={roleLoading}
+                            className={`px-4 py-3 rounded-xl font-bold transition shadow-sm border ${user.role === 'admin' ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'}`}
+                        >
+                            {user.role === 'admin' ? 'Revoke Admin' : 'Make Admin'}
+                        </button>
+                        <button
+                            onClick={() => onImpersonate(user)}
+                            className="px-6 py-3 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition shadow-md flex items-center gap-2"
+                        >
+                            <span>👓</span> View as Student
+                        </button>
+                    </div>
                 </div>
             </div>
 

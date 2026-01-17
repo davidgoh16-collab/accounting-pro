@@ -35,6 +35,7 @@ export interface AuthUser {
     email: string | null;
     photoURL: string | null;
     level?: UserLevel;
+    role?: 'student' | 'admin';
 }
 
 export interface CommandWord {

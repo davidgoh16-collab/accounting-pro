@@ -49,9 +49,15 @@ export const getAllUsers = async (): Promise<AuthUser[]> => {
             email: data.email || null,
             photoURL: data.photoURL || null,
             level: data.level,
+            role: data.role,
         }
     });
     return userList;
+};
+
+export const updateUserRole = async (uid: string, role: string) => {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { role });
 };
 
 export const getClasses = async (): Promise<ClassGroup[]> => {
@@ -76,10 +82,22 @@ export const createClass = async (name: string): Promise<string> => {
     return docRef.id;
 };
 
+export const updateClassName = async (classId: string, name: string) => {
+    const classRef = doc(db, 'classes', classId);
+    await updateDoc(classRef, { name });
+};
+
 export const addClassMember = async (classId: string, studentId: string) => {
     const classRef = doc(db, 'classes', classId);
     await updateDoc(classRef, {
         studentIds: arrayUnion(studentId)
+    });
+};
+
+export const addClassMembers = async (classId: string, studentIds: string[]) => {
+    const classRef = doc(db, 'classes', classId);
+    await updateDoc(classRef, {
+        studentIds: arrayUnion(...studentIds)
     });
 };
 
