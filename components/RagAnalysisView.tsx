@@ -69,7 +69,7 @@ const ManualRagGrid: React.FC<{
 }> = ({ topics, ratings, onRate }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-            {topics.map(topic => (
+            {(topics || []).map(topic => (
                 <div key={topic} className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
                     <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-4 text-lg">{topic}</h3>
                     <div className="grid grid-cols-3 gap-2">
