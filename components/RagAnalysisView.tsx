@@ -296,8 +296,8 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
         if (user) fetchData();
     }, [user, allTopics]); // Added allTopics to dependency array as it's a derived value
 
-    const handleManualRate = async (topic: string, rating: 'Red' | 'Amber' | 'Green') => {
-        const newRatings = { ...manualRatings, [topic]: rating };
+    const handleManualRate = async (itemId: string, rating: 'Red' | 'Amber' | 'Green') => {
+        const newRatings = { ...manualRatings, [itemId]: rating };
         setManualRatings(newRatings);
         try {
             await setDoc(doc(db, 'users', user.uid, 'manual_progress', 'rag_sheet'), newRatings, { merge: true });
@@ -343,7 +343,12 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                         <p className="text-stone-500 font-semibold">Crunching the numbers...</p>
                     </div>
                 ) : selectedTopic ? (
-                    <TopicSpecificationView topic={selectedTopic} onBack={() => setSelectedTopic(null)} />
+                    <TopicSpecificationView
+                        topic={selectedTopic}
+                        onBack={() => setSelectedTopic(null)}
+                        ratings={manualRatings}
+                        onRate={handleManualRate}
+                    />
                 ) : viewMode === 'manual' ? (
                     <ManualRagGrid
                         topics={allTopics}

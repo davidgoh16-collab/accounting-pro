@@ -5,9 +5,11 @@ import { COURSE_LESSONS } from '../constants';
 interface TopicSpecificationViewProps {
     topic: string;
     onBack: () => void;
+    ratings: Record<string, 'Red' | 'Amber' | 'Green'>;
+    onRate: (itemId: string, rating: 'Red' | 'Amber' | 'Green') => void;
 }
 
-const TopicSpecificationView: React.FC<TopicSpecificationViewProps> = ({ topic, onBack }) => {
+const TopicSpecificationView: React.FC<TopicSpecificationViewProps> = ({ topic, onBack, ratings, onRate }) => {
     // Filter lessons that belong to the selected topic (chapter)
     const lessons = COURSE_LESSONS.filter(lesson => lesson.chapter === topic);
 
@@ -28,20 +30,42 @@ const TopicSpecificationView: React.FC<TopicSpecificationViewProps> = ({ topic, 
 
                 {lessons.length > 0 ? (
                     <div className="space-y-3">
-                        {lessons.map((lesson) => (
-                            <div
-                                key={lesson.id}
-                                className="flex items-start gap-4 p-4 rounded-xl bg-stone-50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-700 transition-all hover:bg-white dark:hover:bg-stone-800 hover:shadow-md"
-                            >
-                                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm">
-                                    {lesson.id}
+                        {lessons.map((lesson) => {
+                            const currentRating = ratings[lesson.id];
+                            return (
+                                <div
+                                    key={lesson.id}
+                                    className="flex items-start gap-4 p-4 rounded-xl bg-stone-50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-700 transition-all hover:bg-white dark:hover:bg-stone-800 hover:shadow-md justify-between flex-wrap"
+                                >
+                                    <div className="flex gap-4 flex-1 min-w-[200px]">
+                                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm">
+                                            {lesson.id}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-stone-800 dark:text-stone-200 text-lg">{lesson.title}</h3>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-1">
+                                        {(['Red', 'Amber', 'Green'] as const).map(rating => {
+                                            const isSelected = currentRating === rating;
+                                            const baseColor = rating === 'Red' ? 'bg-red-500' : rating === 'Amber' ? 'bg-amber-500' : 'bg-emerald-500';
+                                            const opacity = isSelected ? 'opacity-100 ring-2 ring-offset-2 ring-stone-400 dark:ring-offset-stone-900' : 'opacity-20 hover:opacity-50';
+
+                                            return (
+                                                <button
+                                                    key={rating}
+                                                    onClick={() => onRate(lesson.id, rating)}
+                                                    className={`h-8 w-16 rounded-md ${baseColor} ${opacity} transition-all font-bold text-white text-[10px] uppercase tracking-wider`}
+                                                >
+                                                    {rating}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-stone-800 dark:text-stone-200 text-lg">{lesson.title}</h3>
-                                    {/* In a real app, we might have descriptions or sub-points here */}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-12 bg-stone-50 dark:bg-stone-900/50 rounded-2xl border border-dashed border-stone-300 dark:border-stone-700">
