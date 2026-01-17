@@ -199,7 +199,7 @@ const ClassManager: React.FC<{
     };
 
     const filteredStudentsToAdd = allUsers.filter(u =>
-        !selectedClass?.studentIds.includes(u.uid) &&
+        !(selectedClass?.studentIds || []).includes(u.uid) &&
         ((u.displayName?.toLowerCase() || '').includes(studentSearch.toLowerCase()) ||
          (u.email?.toLowerCase() || '').includes(studentSearch.toLowerCase()))
     ).slice(0, 10); // Limit results
@@ -233,7 +233,7 @@ const ClassManager: React.FC<{
                             className={`w-full text-left p-3 rounded-xl transition-all border ${selectedClass?.id === cls.id ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-700' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'}`}
                         >
                             <p className="font-bold text-stone-800 dark:text-stone-200">{cls.name}</p>
-                            <p className="text-xs text-stone-500">{cls.studentIds.length} Students</p>
+                            <p className="text-xs text-stone-500">{(cls.studentIds || []).length} Students</p>
                         </button>
                     ))}
                 </div>
@@ -245,16 +245,16 @@ const ClassManager: React.FC<{
                     <>
                         <div className="mb-6">
                             <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{selectedClass.name}</h3>
-                            <p className="text-stone-500 text-sm">{selectedClass.studentIds.length} Students Enrolled</p>
+                            <p className="text-stone-500 text-sm">{(selectedClass.studentIds || []).length} Students Enrolled</p>
                         </div>
 
                         <div className="flex-1 flex flex-col gap-6 overflow-hidden">
                             {/* Enrolled Students */}
                             <div className="flex-1 bg-stone-50 dark:bg-stone-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar">
                                 <h4 className="font-bold text-stone-700 dark:text-stone-300 mb-3 text-sm uppercase">Enrolled Students</h4>
-                                {selectedClass.studentIds.length === 0 && <p className="text-stone-400 text-sm italic">No students yet.</p>}
+                                {(selectedClass.studentIds || []).length === 0 && <p className="text-stone-400 text-sm italic">No students yet.</p>}
                                 <div className="space-y-2">
-                                    {selectedClass.studentIds.map(sid => {
+                                    {(selectedClass.studentIds || []).map(sid => {
                                         const student = allUsers.find(u => u.uid === sid);
                                         return (
                                             <div key={sid} className="flex justify-between items-center p-2 bg-white dark:bg-stone-700 rounded-lg shadow-sm">

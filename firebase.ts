@@ -57,10 +57,14 @@ export const getAllUsers = async (): Promise<AuthUser[]> => {
 export const getClasses = async (): Promise<ClassGroup[]> => {
     const classesCol = collection(db, 'classes');
     const snapshot = await getDocs(classesCol);
-    return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    } as ClassGroup));
+    return snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            name: data.name || 'Unnamed Class',
+            studentIds: data.studentIds || []
+        } as ClassGroup;
+    });
 };
 
 export const createClass = async (name: string): Promise<string> => {
