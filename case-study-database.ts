@@ -109,3 +109,27 @@ export const CASE_STUDY_LOCATIONS: CaseStudyLocation[] = [
   { name: 'Lesotho Highland Water Project', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -29.6, lng: 28.2, details: 'Transferring water from Lesotho to South Africa (Vaal dam). Economic benefits vs displacement.', citation: 'Water Transfer', levels: ['GCSE'] },
   { name: 'Makueni, Kenya', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -1.8, lng: 37.6, details: 'Sand dams. Local sustainable food strategy. Harvesting rainwater in dry season.', citation: 'Food Security Strategy', levels: ['GCSE'] }
 ];
+
+export const TOPIC_COLORS: { [key: string]: string } = {
+    // Physical
+    'Water and Carbon Cycles': '#0ea5e9',
+    'Coastal Systems and Landscapes': '#14b8a6',
+    'Physical Landscapes in the UK': '#14b8a6',
+    'The Challenge of Natural Hazards': '#ef4444',
+    'Hazards': '#ef4444',
+    'The Living World': '#84cc16',
+    'Ecosystems Under Stress': '#84cc16',
+    'Population and the Environment': '#10b981',
+
+    // Human
+    'Global Systems and Global Governance': '#a855f7',
+    'Changing Places': '#ec4899',
+    'Contemporary Urban Environments': '#f59e0b',
+    'Urban Issues and Challenges': '#f59e0b',
+    'The Changing Economic World': '#a855f7',
+    'The Challenge of Resource Management': '#3b82f6',
+    'Resource Security': '#3b82f6',
+    'Geographical Applications': '#6366f1' // Added color for Paper 3
+};
+
+export const GEOGRAPHY_TYPES = ['All', 'Physical Geography', 'Human Geography'];
