@@ -349,3 +349,9 @@ export interface VideoQuizContent {
         sampleAnswer: string;
     }[];
 }
+
+export interface ClassGroup {
+    id: string;
+    name: string;
+    studentIds: string[];
+}

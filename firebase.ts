@@ -7,8 +7,8 @@ import {
     OAuthProvider,
     User
 } from "firebase/auth";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { AuthUser } from "./types";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { AuthUser, ClassGroup } from "./types";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB-1EHzIdag5GriE076dSxVUCiN1gwC1F8",
@@ -48,7 +48,40 @@ export const getAllUsers = async (): Promise<AuthUser[]> => {
             displayName: data.displayName || null,
             email: data.email || null,
             photoURL: data.photoURL || null,
+            level: data.level,
         }
     });
     return userList;
+};
+
+export const getClasses = async (): Promise<ClassGroup[]> => {
+    const classesCol = collection(db, 'classes');
+    const snapshot = await getDocs(classesCol);
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    } as ClassGroup));
+};
+
+export const createClass = async (name: string): Promise<string> => {
+    const classesCol = collection(db, 'classes');
+    const docRef = await addDoc(classesCol, {
+        name,
+        studentIds: []
+    });
+    return docRef.id;
+};
+
+export const addClassMember = async (classId: string, studentId: string) => {
+    const classRef = doc(db, 'classes', classId);
+    await updateDoc(classRef, {
+        studentIds: arrayUnion(studentId)
+    });
+};
+
+export const removeClassMember = async (classId: string, studentId: string) => {
+    const classRef = doc(db, 'classes', classId);
+    await updateDoc(classRef, {
+        studentIds: arrayRemove(studentId)
+    });
 };

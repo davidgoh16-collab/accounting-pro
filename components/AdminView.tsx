@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress } from '../types';
-import { getAllUsers, db } from '../firebase';
+import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
+import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember } from '../firebase';
 import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
 import SessionDetailView from './SessionDetailView';
+import RevisionPlannerContent from './RevisionPlannerContent';
 import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
@@ -13,7 +14,7 @@ interface AdminViewProps {
     onBack: () => void;
 }
 
-type Tab = 'overview' | 'sessions' | 'games' | 'chats' | 'learning';
+type Tab = 'overview' | 'sessions' | 'games' | 'chats' | 'learning' | 'planner';
 
 interface TopicProgressStats {
     total: number;
@@ -140,6 +141,175 @@ const FeatureSettingsPanel: React.FC = () => {
                         ))}
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+const ClassManager: React.FC<{
+    classes: ClassGroup[],
+    allUsers: AuthUser[],
+    onRefreshClasses: () => void
+}> = ({ classes, allUsers, onRefreshClasses }) => {
+    const [selectedClass, setSelectedClass] = useState<ClassGroup | null>(null);
+    const [newClassName, setNewClassName] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
+    const [studentSearch, setStudentSearch] = useState('');
+
+    const handleCreateClass = async () => {
+        if (!newClassName.trim()) return;
+        setIsCreating(true);
+        try {
+            await createClass(newClassName);
+            setNewClassName('');
+            onRefreshClasses();
+        } catch (e) {
+            console.error(e);
+            alert("Failed to create class");
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleAddStudent = async (studentId: string) => {
+        if (!selectedClass) return;
+        try {
+            await addClassMember(selectedClass.id, studentId);
+            onRefreshClasses();
+            // Optimistically update local state if needed, or just rely on refresh
+            // But we can update selectedClass to reflect change immediately in UI
+            setSelectedClass(prev => prev ? ({...prev, studentIds: [...prev.studentIds, studentId]}) : null);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to add student");
+        }
+    };
+
+    const handleRemoveStudent = async (studentId: string) => {
+        if (!selectedClass) return;
+        if (!confirm("Remove student from class?")) return;
+        try {
+            await removeClassMember(selectedClass.id, studentId);
+            onRefreshClasses();
+            setSelectedClass(prev => prev ? ({...prev, studentIds: prev.studentIds.filter(id => id !== studentId)}) : null);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to remove student");
+        }
+    };
+
+    const filteredStudentsToAdd = allUsers.filter(u =>
+        !selectedClass?.studentIds.includes(u.uid) &&
+        ((u.displayName?.toLowerCase() || '').includes(studentSearch.toLowerCase()) ||
+         (u.email?.toLowerCase() || '').includes(studentSearch.toLowerCase()))
+    ).slice(0, 10); // Limit results
+
+    return (
+        <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-6 h-[85vh] flex gap-6">
+            {/* List of Classes */}
+            <div className="w-1/3 flex flex-col border-r border-stone-200 dark:border-stone-700 pr-6">
+                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">Classes</h3>
+                <div className="flex gap-2 mb-4">
+                    <input
+                        type="text"
+                        value={newClassName}
+                        onChange={e => setNewClassName(e.target.value)}
+                        placeholder="New Class Name"
+                        className="flex-1 px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm"
+                    />
+                    <button
+                        onClick={handleCreateClass}
+                        disabled={isCreating || !newClassName.trim()}
+                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg font-bold text-sm disabled:opacity-50"
+                    >
+                        +
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+                    {classes.map(cls => (
+                        <button
+                            key={cls.id}
+                            onClick={() => setSelectedClass(cls)}
+                            className={`w-full text-left p-3 rounded-xl transition-all border ${selectedClass?.id === cls.id ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-700' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'}`}
+                        >
+                            <p className="font-bold text-stone-800 dark:text-stone-200">{cls.name}</p>
+                            <p className="text-xs text-stone-500">{cls.studentIds.length} Students</p>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Class Details */}
+            <div className="flex-1 flex flex-col">
+                {selectedClass ? (
+                    <>
+                        <div className="mb-6">
+                            <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{selectedClass.name}</h3>
+                            <p className="text-stone-500 text-sm">{selectedClass.studentIds.length} Students Enrolled</p>
+                        </div>
+
+                        <div className="flex-1 flex flex-col gap-6 overflow-hidden">
+                            {/* Enrolled Students */}
+                            <div className="flex-1 bg-stone-50 dark:bg-stone-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar">
+                                <h4 className="font-bold text-stone-700 dark:text-stone-300 mb-3 text-sm uppercase">Enrolled Students</h4>
+                                {selectedClass.studentIds.length === 0 && <p className="text-stone-400 text-sm italic">No students yet.</p>}
+                                <div className="space-y-2">
+                                    {selectedClass.studentIds.map(sid => {
+                                        const student = allUsers.find(u => u.uid === sid);
+                                        return (
+                                            <div key={sid} className="flex justify-between items-center p-2 bg-white dark:bg-stone-700 rounded-lg shadow-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                                                        {student?.displayName?.[0] || '?'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-sm text-stone-800 dark:text-stone-200">{student?.displayName || 'Unknown User'}</p>
+                                                        <p className="text-[10px] text-stone-500">{student?.email}</p>
+                                                    </div>
+                                                </div>
+                                                <button onClick={() => handleRemoveStudent(sid)} className="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1 rounded bg-red-50 dark:bg-red-900/20">Remove</button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Add Student */}
+                            <div className="bg-white dark:bg-stone-800 rounded-2xl p-4 border border-stone-200 dark:border-stone-700">
+                                <h4 className="font-bold text-stone-700 dark:text-stone-300 mb-3 text-sm uppercase">Add Student</h4>
+                                <input
+                                    type="text"
+                                    placeholder="Search student name or email..."
+                                    value={studentSearch}
+                                    onChange={e => setStudentSearch(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 text-sm mb-3"
+                                />
+                                {studentSearch && (
+                                    <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-1">
+                                        {filteredStudentsToAdd.map(u => (
+                                            <button
+                                                key={u.uid}
+                                                onClick={() => handleAddStudent(u.uid)}
+                                                className="w-full text-left flex justify-between items-center p-2 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg"
+                                            >
+                                                <div className="text-sm">
+                                                    <span className="font-bold text-stone-800 dark:text-stone-200">{u.displayName}</span>
+                                                    <span className="text-stone-400 text-xs ml-2">{u.email}</span>
+                                                </div>
+                                                <span className="text-green-600 font-bold text-xs">+ Add</span>
+                                            </button>
+                                        ))}
+                                        {filteredStudentsToAdd.length === 0 && <p className="text-xs text-stone-400 p-2">No matching students found.</p>}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-stone-400">
+                        Select a class to manage
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -341,6 +511,7 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                 <div className="flex border-b border-stone-200 dark:border-stone-700 overflow-x-auto">
                     <TabButton id="overview" label="Overview" icon="📊" />
                     <TabButton id="learning" label="Academy Progress" icon="🎓" />
+                    <TabButton id="planner" label="Revision Planner" icon="📅" />
                     <TabButton id="sessions" label="Practice Sessions" icon="📝" />
                     <TabButton id="games" label="Game Stats" icon="🎮" />
                     <TabButton id="chats" label="Communication Logs" icon="💬" />
@@ -369,6 +540,7 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                     </div>
                 )}
                 {activeTab === 'learning' && <LearningProgressViewer user={user} />}
+                {activeTab === 'planner' && <RevisionPlannerContent user={user} />}
                 {activeTab === 'sessions' && (
                     viewSession ? 
                     <SessionDetailView session={viewSession} onBack={() => setViewSession(null)} /> :
@@ -475,12 +647,23 @@ const ChatLogViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 };
 
 const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
-    const [viewMode, setViewMode] = useState<'students' | 'settings'>('students');
+    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes'>('students');
     const [users, setUsers] = useState<AuthUser[]>([]);
+    const [classes, setClasses] = useState<ClassGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState<AuthUser | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [levelFilter, setLevelFilter] = useState<'All' | 'GCSE' | 'A-Level'>('All');
+    const [classFilter, setClassFilter] = useState<string>('All');
+
+    const fetchClasses = async () => {
+        try {
+            const cls = await getClasses();
+            setClasses(cls);
+        } catch (e) {
+            console.error("Failed to fetch classes", e);
+        }
+    };
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -498,13 +681,15 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
             }
         };
         fetchUsers();
+        fetchClasses();
     }, []);
 
     const filteredUsers = users.filter(u => {
         const matchesSearch = (u.displayName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (u.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
         const matchesLevel = levelFilter === 'All' || u.level === levelFilter;
-        return matchesSearch && matchesLevel;
+        const matchesClass = classFilter === 'All' || classes.find(c => c.id === classFilter)?.studentIds.includes(u.uid);
+        return matchesSearch && matchesLevel && matchesClass;
     });
 
     return (
@@ -529,6 +714,12 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                         >
                             Students
                         </button>
+                         <button
+                            onClick={() => setViewMode('classes')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'classes' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                        >
+                            Classes
+                        </button>
                         <button
                             onClick={() => setViewMode('settings')}
                             className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'settings' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
@@ -540,6 +731,8 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                 
                 {viewMode === 'settings' ? (
                     <FeatureSettingsPanel />
+                ) : viewMode === 'classes' ? (
+                    <ClassManager classes={classes} allUsers={users} onRefreshClasses={fetchClasses} />
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[85vh]">
                         {/* Sidebar User List */}
@@ -567,6 +760,14 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                                         </button>
                                     ))}
                                 </div>
+                                <select
+                                    value={classFilter}
+                                    onChange={(e) => setClassFilter(e.target.value)}
+                                    className="w-full mt-2 p-1.5 rounded-md border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-bold text-stone-600 dark:text-stone-300 focus:ring-1 focus:ring-indigo-500 outline-none"
+                                >
+                                    <option value="All">All Classes</option>
+                                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
                             </div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
                                 {isLoading ? (
