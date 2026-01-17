@@ -771,6 +771,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [levelFilter, setLevelFilter] = useState<'All' | 'GCSE' | 'A-Level'>('All');
     const [classFilter, setClassFilter] = useState<string>('All');
+    const [showAdmins, setShowAdmins] = useState(false);
 
     const fetchClasses = async () => {
         try {
@@ -803,9 +804,15 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
     const filteredUsers = users.filter(u => {
         const matchesSearch = (u.displayName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (u.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+
+        if (showAdmins) {
+            return matchesSearch && u.role === 'admin';
+        }
+
         const matchesLevel = levelFilter === 'All' || u.level === levelFilter;
         const matchesClass = classFilter === 'All' || classes.find(c => c.id === classFilter)?.studentIds.includes(u.uid);
-        return matchesSearch && matchesLevel && matchesClass;
+        // Exclude admins from the student list
+        return matchesSearch && matchesLevel && matchesClass && u.role !== 'admin';
     });
 
     return (
@@ -861,35 +868,57 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full px-4 py-2 bg-stone-100 dark:bg-stone-800 border-transparent focus:bg-white dark:focus:bg-stone-900 border focus:border-indigo-500 rounded-lg text-sm transition-all text-stone-800 dark:text-stone-200"
                                 />
-                                <div className="flex gap-2 mt-3">
-                                    {(['All', 'GCSE', 'A-Level'] as const).map(level => (
-                                        <button
-                                            key={level}
-                                            onClick={() => setLevelFilter(level)}
-                                            className={`flex-1 py-1.5 text-xs font-bold rounded-md border transition-colors ${
-                                                levelFilter === level
-                                                ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-700'
-                                                : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'
-                                            }`}
-                                        >
-                                            {level}
-                                        </button>
-                                    ))}
+
+                                <div className="flex gap-2 mt-3 p-1 bg-stone-100 dark:bg-stone-900 rounded-lg">
+                                    <button
+                                        onClick={() => setShowAdmins(false)}
+                                        className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${!showAdmins ? 'bg-white dark:bg-stone-700 shadow text-indigo-600 dark:text-indigo-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                                    >
+                                        Students
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAdmins(true)}
+                                        className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${showAdmins ? 'bg-white dark:bg-stone-700 shadow text-indigo-600 dark:text-indigo-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                                    >
+                                        Admins
+                                    </button>
                                 </div>
-                                <select
-                                    value={classFilter}
-                                    onChange={(e) => setClassFilter(e.target.value)}
-                                    className="w-full mt-2 p-1.5 rounded-md border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-bold text-stone-600 dark:text-stone-300 focus:ring-1 focus:ring-indigo-500 outline-none"
-                                >
-                                    <option value="All">All Classes</option>
-                                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                </select>
+
+                                {!showAdmins && (
+                                    <>
+                                        <div className="flex gap-2 mt-3">
+                                            {(['All', 'GCSE', 'A-Level'] as const).map(level => (
+                                                <button
+                                                    key={level}
+                                                    onClick={() => setLevelFilter(level)}
+                                                    className={`flex-1 py-1.5 text-xs font-bold rounded-md border transition-colors ${
+                                                        levelFilter === level
+                                                        ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-700'
+                                                        : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'
+                                                    }`}
+                                                >
+                                                    {level}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <select
+                                            value={classFilter}
+                                            onChange={(e) => setClassFilter(e.target.value)}
+                                            className="w-full mt-2 p-1.5 rounded-md border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-bold text-stone-600 dark:text-stone-300 focus:ring-1 focus:ring-indigo-500 outline-none"
+                                        >
+                                            <option value="All">All Classes</option>
+                                            {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
+                                    </>
+                                )}
                             </div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
                                 {isLoading ? (
                                     <div className="p-4 text-center text-stone-500">Loading users...</div>
                                 ) : filteredUsers.length === 0 ? (
-                                    <div className="p-4 text-center text-stone-500 text-sm">No students found matching filters.</div>
+                                    <div className="p-4 text-center text-stone-500 text-sm">
+                                        {showAdmins ? 'No admin accounts found.' : 'No students found matching filters.'}
+                                    </div>
                                 ) : (
                                     filteredUsers.map(user => (
                                         <button
@@ -916,7 +945,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                                 )}
                             </div>
                             <div className="p-3 bg-stone-50 dark:bg-stone-800 text-center text-xs text-stone-400 border-t border-stone-200 dark:border-stone-700">
-                                {filteredUsers.length} Students Found
+                                {filteredUsers.length} {showAdmins ? 'Admins' : 'Students'} Found
                             </div>
                         </div>
 
