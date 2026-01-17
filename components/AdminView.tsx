@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
-import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassName, addClassMembers, updateUserRole } from '../firebase';
+import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassName, addClassMembers, updateUserRole, deleteClass } from '../firebase';
 import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
@@ -199,6 +199,19 @@ const ClassManager: React.FC<{
         }
     };
 
+    const handleDeleteClass = async () => {
+        if (!selectedClass) return;
+        if (!confirm(`Are you sure you want to delete "${selectedClass.name}"? This cannot be undone.`)) return;
+        try {
+            await deleteClass(selectedClass.id);
+            onRefreshClasses();
+            setSelectedClass(null);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to delete class");
+        }
+    };
+
     const handleRemoveStudent = async (studentId: string) => {
         if (!selectedClass) return;
         if (!confirm("Remove student from class?")) return;
@@ -299,6 +312,12 @@ const ClassManager: React.FC<{
                                 )}
                                 <p className="text-stone-500 text-sm">{(selectedClass.studentIds || []).length} Students Enrolled</p>
                             </div>
+                            <button
+                                onClick={handleDeleteClass}
+                                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition"
+                            >
+                                Delete Class
+                            </button>
                         </div>
 
                         <div className="flex-1 flex flex-col gap-6 overflow-hidden">

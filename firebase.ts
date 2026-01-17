@@ -7,7 +7,7 @@ import {
     OAuthProvider,
     User
 } from "firebase/auth";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove, query, where, writeBatch, deleteDoc } from "firebase/firestore";
 import { AuthUser, ClassGroup } from "./types";
 
 const firebaseConfig = {
@@ -87,7 +87,27 @@ export const updateClassName = async (classId: string, name: string) => {
     await updateDoc(classRef, { name });
 };
 
+export const deleteClass = async (classId: string) => {
+    const classRef = doc(db, 'classes', classId);
+    await deleteDoc(classRef);
+};
+
+export const removeStudentFromAllClasses = async (studentId: string) => {
+    const classesCol = collection(db, 'classes');
+    const q = query(classesCol, where('studentIds', 'array-contains', studentId));
+    const snapshot = await getDocs(q);
+
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(doc => {
+        batch.update(doc.ref, {
+            studentIds: arrayRemove(studentId)
+        });
+    });
+    await batch.commit();
+};
+
 export const addClassMember = async (classId: string, studentId: string) => {
+    await removeStudentFromAllClasses(studentId);
     const classRef = doc(db, 'classes', classId);
     await updateDoc(classRef, {
         studentIds: arrayUnion(studentId)
@@ -95,6 +115,10 @@ export const addClassMember = async (classId: string, studentId: string) => {
 };
 
 export const addClassMembers = async (classId: string, studentIds: string[]) => {
+    // Process removals sequentially or in parallel, depending on preference.
+    // For safety and simplicity, we await all removals first.
+    await Promise.all(studentIds.map(id => removeStudentFromAllClasses(id)));
+
     const classRef = doc(db, 'classes', classId);
     await updateDoc(classRef, {
         studentIds: arrayUnion(...studentIds)
