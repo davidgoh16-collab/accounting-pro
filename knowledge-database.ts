@@ -15,6 +15,11 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Carbon Pump', topic: 'Water and Carbon Cycles', details: 'Mechanisms (biological and physical) that move carbon from the atmosphere to the deep ocean.', citation: 'Process: Carbon Cycle', type: 'term', levels: ['A-Level'] },
     { name: 'Peat', topic: 'Water and Carbon Cycles', details: 'Partially decayed plant matter found in bogs. A significant carbon store.', citation: 'Store: Carbon', type: 'term', levels: ['A-Level'] },
     { name: 'Enhanced Greenhouse Effect', topic: 'Water and Carbon Cycles', details: 'The strengthening of the natural greenhouse effect through human activities.', citation: 'Concept: Climate', type: 'term', levels: ['A-Level'] },
+    { name: 'Photosynthesis', topic: 'Water and Carbon Cycles', details: 'Process where plants use sunlight to convert CO2 and water into glucose and oxygen. Key carbon flux.', citation: 'Process: Carbon Cycle', type: 'term', levels: ['A-Level'] },
+    { name: 'Respiration', topic: 'Water and Carbon Cycles', details: 'Process where organisms convert glucose and oxygen into energy, releasing CO2 and water.', citation: 'Process: Carbon Cycle', type: 'term', levels: ['A-Level'] },
+    { name: 'Decomposition', topic: 'Water and Carbon Cycles', details: 'Breakdown of dead organic matter by bacteria/fungi, releasing carbon to atmosphere/soil.', citation: 'Process: Carbon Cycle', type: 'term', levels: ['A-Level'] },
+    { name: 'Combustion', topic: 'Water and Carbon Cycles', details: 'Burning of organic material (biomass/fossil fuels) releasing CO2 rapidly.', citation: 'Process: Carbon Cycle', type: 'term', levels: ['A-Level'] },
+    { name: 'River Discharge', topic: 'Water and Carbon Cycles', details: 'The volume of water flowing through a river channel (cumecs).', citation: 'Measure: Hydrology', type: 'term', levels: ['A-Level'] },
 
     // --- A-LEVEL: COASTAL SYSTEMS ---
     { name: 'Sediment Cell', topic: 'Coastal Systems and Landscapes', details: 'A length of coastline and its associated nearshore area within which the movement of coarse sediment is largely self-contained.', citation: 'Concept: Systems', type: 'term', levels: ['A-Level'] },
@@ -27,6 +32,9 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Tombolo', topic: 'Coastal Systems and Landscapes', details: 'A spit connecting an island to the mainland.', citation: 'Landform: Deposition', type: 'term', levels: ['A-Level'] },
     { name: 'Dalmatian Coast', topic: 'Coastal Systems and Landscapes', details: 'A submergent landscape where valleys and ridges run parallel to the coast.', citation: 'Landform: Submergent', type: 'term', levels: ['A-Level'] },
     { name: 'Managed Retreat', topic: 'Coastal Systems and Landscapes', details: 'Allowing the shoreline to move naturally (often inland) rather than attempting to hold the line.', citation: 'Strategy: Management', type: 'term', levels: ['A-Level'] },
+    { name: 'Hold the Line', topic: 'Coastal Systems and Landscapes', details: 'Maintaing the current coastline position using hard/soft engineering.', citation: 'Strategy: Management', type: 'term', levels: ['A-Level'] },
+    { name: 'Advance the Line', topic: 'Coastal Systems and Landscapes', details: 'Building new defences seaward of the existing coastline.', citation: 'Strategy: Management', type: 'term', levels: ['A-Level'] },
+    { name: 'Cost-Benefit Analysis', topic: 'Coastal Systems and Landscapes', details: 'Comparing the economic cost of defences vs the value of land/property protected.', citation: 'Concept: Management', type: 'term', levels: ['A-Level'] },
 
     // --- A-LEVEL: HAZARDS ---
     { name: 'Liquefaction', topic: 'Hazards', details: 'Process where saturated soil loses strength and stiffness in response to earthquake shaking, behaving like a liquid.', citation: 'Process: Seismic', type: 'term', levels: ['A-Level'] },
@@ -38,6 +46,9 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Multi-Hazard Zone', topic: 'Hazards', details: 'An area where two or more hazards occur, and where they may interact (e.g., The Philippines).', citation: 'Concept: Risk', type: 'term', levels: ['A-Level'] },
     { name: 'Retrofitting', topic: 'Hazards', details: 'Adding new technology or features to older systems (e.g., earthquake-proofing buildings).', citation: 'Strategy: Mitigation', type: 'term', levels: ['A-Level'] },
     { name: 'Slab Pull', topic: 'Hazards', details: 'The force exerted by a cold, dense oceanic plate plunging into the mantle due to its own weight.', citation: 'Process: Tectonics', type: 'term', levels: ['A-Level'] },
+    { name: 'Ridge Push', topic: 'Hazards', details: 'Gravitational force that causes a plate to move away from the crest of an ocean ridge.', citation: 'Process: Tectonics', type: 'term', levels: ['A-Level'] },
+    { name: 'Tephra', topic: 'Hazards', details: 'Rock fragments and particles ejected by a volcanic eruption.', citation: 'Hazard: Volcanic', type: 'term', levels: ['A-Level'] },
+    { name: 'Lahar', topic: 'Hazards', details: 'A destructive mudflow on the slopes of a volcano.', citation: 'Hazard: Volcanic', type: 'term', levels: ['A-Level'] },
 
     // --- A-LEVEL: GLOBAL SYSTEMS & GOVERNANCE ---
     { name: 'Global Shift', topic: 'Global Systems and Global Governance', details: 'The movement of manufacturing and economic activity from HICs to NEEs and LICs.', citation: 'Concept: Globalisation', type: 'term', levels: ['A-Level'] },
@@ -49,6 +60,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Vertical Integration', topic: 'Global Systems and Global Governance', details: 'When a company controls multiple stages of production (e.g., supply chain and distribution).', citation: 'Concept: TNCs', type: 'term', levels: ['A-Level'] },
     { name: 'Horizontal Integration', topic: 'Global Systems and Global Governance', details: 'When a company increases production of goods or services at the same part of the supply chain (e.g., buying a competitor).', citation: 'Concept: TNCs', type: 'term', levels: ['A-Level'] },
     { name: 'Diaspora', topic: 'Global Systems and Global Governance', details: 'A scattered population whose origin lies in a separate geographic locale.', citation: 'Concept: Migration', type: 'term', levels: ['A-Level'] },
+    { name: 'Interdependence', topic: 'Global Systems and Global Governance', details: 'Mutual reliance between two or more groups/nations (economic, social, political).', citation: 'Concept: Globalisation', type: 'term', levels: ['A-Level'] },
+    { name: 'Time-Space Compression', topic: 'Global Systems and Global Governance', details: 'The "shrinking" of the world due to improvements in transport and communication.', citation: 'Concept: Globalisation', type: 'term', levels: ['A-Level'] },
 
     // --- A-LEVEL: CHANGING PLACES ---
     { name: 'Endogenous Factors', topic: 'Changing Places', details: 'Internal factors that help shape the character of a place (e.g., location, topography, land use, infrastructure).', citation: 'Concept: Place', type: 'term', levels: ['A-Level'] },
@@ -59,6 +72,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Topophilia', topic: 'Changing Places', details: 'A strong sense of place, which often mixes with the sense of cultural identity.', citation: 'Concept: Perception', type: 'term', levels: ['A-Level'] },
     { name: 'Insider/Outsider', topic: 'Changing Places', details: 'The perspective of someone who knows a place well vs. someone who does not (or feels excluded).', citation: 'Concept: Perception', type: 'term', levels: ['A-Level'] },
     { name: 'Glocalisation', topic: 'Changing Places', details: 'The adaptation of global products/services to local markets (e.g., McDonald\'s menus).', citation: 'Concept: Place', type: 'term', levels: ['A-Level'] },
+    { name: 'Near Place', topic: 'Changing Places', details: 'Geographically close OR emotionally connected place.', citation: 'Concept: Place', type: 'term', levels: ['A-Level'] },
+    { name: 'Far Place', topic: 'Changing Places', details: 'Geographically distant OR emotionally disconnected place.', citation: 'Concept: Place', type: 'term', levels: ['A-Level'] },
 
     // --- A-LEVEL: CONTEMPORARY URBAN ENVIRONMENTS ---
     { name: 'Urban Heat Island', topic: 'Contemporary Urban Environments', details: 'An urban area or metropolitan area that is significantly warmer than its surrounding rural areas.', citation: 'Phenomenon: Climate', type: 'term', levels: ['A-Level'] },
@@ -67,6 +82,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'World City', topic: 'Contemporary Urban Environments', details: 'A city considered to be an important node in the global economic system.', citation: 'Concept: Globalisation', type: 'term', levels: ['A-Level'] },
     { name: 'Sustainable Drainage Systems (SuDS)', topic: 'Contemporary Urban Environments', details: 'Water management practices to reduce surface water runoff and prevent flooding in urban areas.', citation: 'Strategy: Management', type: 'term', levels: ['A-Level'] },
     { name: 'Urban Resurgence', topic: 'Contemporary Urban Environments', details: 'Regeneration, both economic and structural, of an urban area which has suffered a period of decline.', citation: 'Process: Urban', type: 'term', levels: ['A-Level'] },
+    { name: 'Decentralisation', topic: 'Contemporary Urban Environments', details: 'Movement of people and industry from the centre to suburbs or edge of city.', citation: 'Process: Urban', type: 'term', levels: ['A-Level'] },
+    { name: 'Megacity', topic: 'Contemporary Urban Environments', details: 'City with a population over 10 million.', citation: 'Form: Urban', type: 'term', levels: ['A-Level'] },
 
     // --- A-LEVEL: POPULATION & ENVIRONMENT ---
     { name: 'Epidemiological Transition', topic: 'Population and the Environment', details: 'The changing pattern of disease seen as countries experience social and economic development.', citation: 'Model: Health', type: 'term', levels: ['A-Level'] },
@@ -74,6 +91,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Demographic Dividend', topic: 'Population and the Environment', details: 'Economic growth potential that can result from shifts in a population’s age structure (more workers, fewer dependents).', citation: 'Concept: Economics', type: 'term', levels: ['A-Level'] },
     { name: 'Food Security', topic: 'Population and the Environment', details: 'When all people at all times have access to sufficient, safe, nutritious food.', citation: 'Concept: Resources', type: 'term', levels: ['A-Level'] },
     { name: 'Replacement Level', topic: 'Population and the Environment', details: 'The fertility rate needed to maintain a population size (approx 2.1).', citation: 'Concept: Demography', type: 'term', levels: ['A-Level'] },
+    { name: 'Overpopulation', topic: 'Population and the Environment', details: 'When population exceeds the carrying capacity of the environment.', citation: 'Concept: Demography', type: 'term', levels: ['A-Level'] },
+    { name: 'Net Migration', topic: 'Population and the Environment', details: 'Difference between number of immigrants and emigrants.', citation: 'Measure: Demography', type: 'term', levels: ['A-Level'] },
 
     // --- GCSE: NATURAL HAZARDS ---
     { name: 'Natural Hazard', topic: 'The Challenge of Natural Hazards', details: 'A natural event (e.g., earthquake, flood) that threatens people or property.', citation: 'Definition', type: 'term', levels: ['GCSE'] },
@@ -84,6 +103,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Immediate Responses', topic: 'The Challenge of Natural Hazards', details: 'Reaction of people as the disaster happens (e.g., search and rescue).', citation: 'Concept: Management', type: 'term', levels: ['GCSE'] },
     { name: 'Long-term Responses', topic: 'The Challenge of Natural Hazards', details: 'Later reactions that occur in the weeks/months/years after (e.g., rebuilding).', citation: 'Concept: Management', type: 'term', levels: ['GCSE'] },
     { name: 'Coriolis Effect', topic: 'The Challenge of Natural Hazards', details: 'The effect of Earth\'s rotation on the direction of winds and currents.', citation: 'Concept: Weather', type: 'term', levels: ['GCSE'] },
+    { name: 'Epicentre', topic: 'The Challenge of Natural Hazards', details: 'Point on Earth\'s surface directly above the focus of an earthquake.', citation: 'Structure: Seismic', type: 'term', levels: ['GCSE'] },
+    { name: 'Tropical Storm', topic: 'The Challenge of Natural Hazards', details: 'Huge storm that develops in the tropics (Hurricane/Typhoon/Cyclone).', citation: 'Hazard: Atmospheric', type: 'term', levels: ['GCSE'] },
 
     // --- GCSE: LIVING WORLD ---
     { name: 'Ecosystem', topic: 'The Living World', details: 'A community of plants and animals that interact with each other and their physical environment.', citation: 'Concept: Ecology', type: 'term', levels: ['GCSE'] },
@@ -94,6 +115,9 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Biodiversity', topic: 'The Living World', details: 'The variety of life in the world or in a particular habitat.', citation: 'Concept: Ecology', type: 'term', levels: ['GCSE'] },
     { name: 'Buttress Roots', topic: 'The Living World', details: 'Large roots above the ground to support tall trees in shallow rainforest soil.', citation: 'Adaptation', type: 'term', levels: ['GCSE'] },
     { name: 'Drip Tip', topic: 'The Living World', details: 'Pointy ends on leaves to allow water to run off quickly, preventing mould.', citation: 'Adaptation', type: 'term', levels: ['GCSE'] },
+    { name: 'Interdependence', topic: 'The Living World', details: 'Reliance of every form of life on other living things and natural resources.', citation: 'Concept: Ecology', type: 'term', levels: ['GCSE'] },
+    { name: 'Biotic', topic: 'The Living World', details: 'Living components of an ecosystem (plants, animals).', citation: 'Concept: Ecology', type: 'term', levels: ['GCSE'] },
+    { name: 'Abiotic', topic: 'The Living World', details: 'Non-living components of an ecosystem (climate, soil, water).', citation: 'Concept: Ecology', type: 'term', levels: ['GCSE'] },
 
     // --- GCSE: PHYSICAL LANDSCAPES ---
     { name: 'Hydraulic Action', topic: 'Physical Landscapes in the UK', details: 'The force of water colliding with rocks breaks rock particles away.', citation: 'Process: Erosion', type: 'term', levels: ['GCSE'] },
@@ -103,6 +127,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Longshore Drift', topic: 'Physical Landscapes in the UK', details: 'Movement of sediment along the coast by waves approaching at an angle.', citation: 'Process: Coastal', type: 'term', levels: ['GCSE'] },
     { name: 'Spit', topic: 'Physical Landscapes in the UK', details: 'Extended stretch of beach material projecting out to sea.', citation: 'Landform: Deposition', type: 'term', levels: ['GCSE'] },
     { name: 'V-shaped Valley', topic: 'Physical Landscapes in the UK', details: 'Steep-sided valley formed by vertical erosion in the upper course of a river.', citation: 'Landform: River', type: 'term', levels: ['GCSE'] },
+    { name: 'Discordant Coastline', topic: 'Physical Landscapes in the UK', details: 'Coastline where geology alternates between hard and soft rock at right angles to the sea (Headlands/Bays).', citation: 'Structure: Geology', type: 'term', levels: ['GCSE'] },
+    { name: 'Concordant Coastline', topic: 'Physical Landscapes in the UK', details: 'Coastline where the same type of rock runs parallel to the sea (Coves).', citation: 'Structure: Geology', type: 'term', levels: ['GCSE'] },
     
     // --- GCSE: URBAN ISSUES ---
     { name: 'Urbanisation', topic: 'Urban Issues and Challenges', details: 'Increasing percentage of a country\'s population living in towns and cities.', citation: 'Concept: Population', type: 'term', levels: ['GCSE'] },
@@ -110,6 +136,8 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Rural-urban migration', topic: 'Urban Issues and Challenges', details: 'Movement of people from the countryside to the city.', citation: 'Concept: Migration', type: 'term', levels: ['GCSE'] },
     { name: 'Squatter Settlement', topic: 'Urban Issues and Challenges', details: 'Area of poor quality housing, lacking amenities, often illegal.', citation: 'Concept: Urban', type: 'term', levels: ['GCSE'] },
     { name: 'Brownfield Site', topic: 'Urban Issues and Challenges', details: 'Land that has been used, abandoned and now awaits some new use.', citation: 'Concept: Planning', type: 'term', levels: ['GCSE'] },
+    { name: 'Greenfield Site', topic: 'Urban Issues and Challenges', details: 'Land that has not been built on before (usually countryside).', citation: 'Concept: Planning', type: 'term', levels: ['GCSE'] },
+    { name: 'Urban Sprawl', topic: 'Urban Issues and Challenges', details: 'The unplanned growth of urban areas into the surrounding countryside.', citation: 'Process: Urban', type: 'term', levels: ['GCSE'] },
     
     // --- GCSE: ECONOMIC WORLD ---
     { name: 'GNI', topic: 'The Changing Economic World', details: 'Gross National Income: Total value of goods/services plus money earned from abroad.', citation: 'Measure: Development', type: 'term', levels: ['GCSE'] },
@@ -117,10 +145,14 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'NEE', topic: 'The Changing Economic World', details: 'Newly Emerging Economy: Country experiencing high rates of economic development.', citation: 'Concept: Development', type: 'term', levels: ['GCSE'] },
     { name: 'Demographic Transition Model', topic: 'The Changing Economic World', details: 'Model showing how population changes over time as a country develops.', citation: 'Model: Population', type: 'term', levels: ['GCSE'] },
     { name: 'TNC', topic: 'The Changing Economic World', details: 'Transnational Corporation: Company operating in more than one country.', citation: 'Concept: Globalisation', type: 'term', levels: ['GCSE'] },
+    { name: 'Fairtrade', topic: 'The Changing Economic World', details: 'Movement ensuring producers in developing countries get a fair price for their goods.', citation: 'Strategy: Trade', type: 'term', levels: ['GCSE'] },
+    { name: 'Microfinance', topic: 'The Changing Economic World', details: 'Small loans given to people in low-income countries to help them start small businesses.', citation: 'Strategy: Aid', type: 'term', levels: ['GCSE'] },
 
     // --- GCSE: RESOURCE MANAGEMENT ---
     { name: 'Resource Management', topic: 'The Challenge of Resource Management', details: 'Control and monitoring of resources so they do not become depleted.', citation: 'Concept: Sustainability', type: 'term', levels: ['GCSE'] },
     { name: 'Carbon Footprint', topic: 'The Challenge of Resource Management', details: 'Measurement of greenhouse gases we individually produce.', citation: 'Concept: Environment', type: 'term', levels: ['GCSE'] },
     { name: 'Food Miles', topic: 'The Challenge of Resource Management', details: 'Distance covered by food from growing to plate.', citation: 'Concept: Sustainability', type: 'term', levels: ['GCSE'] },
-    { name: 'Fracking', topic: 'The Challenge of Resource Management', details: 'Hydraulic fracturing to release gas inside rock.', citation: 'Process: Energy', type: 'term', levels: ['GCSE'] }
+    { name: 'Fracking', topic: 'The Challenge of Resource Management', details: 'Hydraulic fracturing to release gas inside rock.', citation: 'Process: Energy', type: 'term', levels: ['GCSE'] },
+    { name: 'Water Stress', topic: 'The Challenge of Resource Management', details: 'When demand for water exceeds the available amount during a certain period.', citation: 'Concept: Water', type: 'term', levels: ['GCSE'] },
+    { name: 'Agribusiness', topic: 'The Challenge of Resource Management', details: 'Agriculture conducted on commercial principles, using advanced technology.', citation: 'Concept: Food', type: 'term', levels: ['GCSE'] }
 ];

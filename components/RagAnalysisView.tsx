@@ -4,7 +4,7 @@ import { AuthUser, CompletedSession, GameSessionResult } from '../types';
 import { AQA_UNITS, GCSE_UNITS } from '../constants';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { db } from '../firebase';
-import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import HubLayout from './HubLayout';
 
 interface TopicMetrics {
@@ -60,6 +60,39 @@ const calculateMastery = (metrics: TopicMetrics): { score: number, status: 'Red'
     else if (finalScore >= 50) status = 'Amber';
 
     return { score: finalScore, status };
+};
+
+const ManualRagGrid: React.FC<{
+    topics: string[];
+    ratings: Record<string, 'Red' | 'Amber' | 'Green'>;
+    onRate: (topic: string, rating: 'Red' | 'Amber' | 'Green') => void
+}> = ({ topics, ratings, onRate }) => {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+            {topics.map(topic => (
+                <div key={topic} className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
+                    <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-4 text-lg">{topic}</h3>
+                    <div className="grid grid-cols-3 gap-2">
+                        {(['Red', 'Amber', 'Green'] as const).map(rating => {
+                            const isSelected = ratings[topic] === rating;
+                            const baseColor = rating === 'Red' ? 'bg-red-500' : rating === 'Amber' ? 'bg-amber-500' : 'bg-emerald-500';
+                            const opacity = isSelected ? 'opacity-100 ring-2 ring-offset-2 ring-stone-400 dark:ring-offset-stone-900' : 'opacity-30 hover:opacity-60';
+
+                            return (
+                                <button
+                                    key={rating}
+                                    onClick={() => onRate(topic, rating)}
+                                    className={`h-10 rounded-lg ${baseColor} ${opacity} transition-all font-bold text-white text-xs uppercase tracking-wider`}
+                                >
+                                    {rating}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 };
 
 const MetricBar: React.FC<{ label: string; value: number; count: number; colorClass: string }> = ({ label, value, count, colorClass }) => (
@@ -128,8 +161,26 @@ const RagCard: React.FC<{ result: RagResult }> = ({ result }) => {
 };
 
 const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
+    const [viewMode, setViewMode] = useState<'automated' | 'manual'>('automated');
     const [ragResults, setRagResults] = useState<RagResult[]>([]);
+    const [manualRatings, setManualRatings] = useState<Record<string, 'Red' | 'Amber' | 'Green'>>({});
     const [isLoading, setIsLoading] = useState(true);
+
+    const relevantUnits = useMemo(() => {
+        if (!user.level) return [];
+        return user.level === 'GCSE' ? GCSE_UNITS : AQA_UNITS;
+    }, [user.level]);
+
+    const allTopics = useMemo(() => {
+        const caseStudyTopics = CASE_STUDY_LOCATIONS
+            .filter(cs => cs.levels.includes(user.level || 'A-Level'))
+            .map(cs => cs.topic);
+
+        return Array.from(new Set([
+            ...relevantUnits.filter(u => u !== 'All Units'),
+            ...caseStudyTopics
+        ])).sort();
+    }, [user.level, relevantUnits]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -150,16 +201,14 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                 const fcSnap = await getDoc(fcRef);
                 const fcStatuses = fcSnap.exists() ? (fcSnap.data() as Record<string, 'known' | 'unknown'>) : {};
 
-                // 4. Initialize Data Structure for All Topics
-                // Filter topics based on user level
-                const relevantUnits = user.level === 'GCSE' ? GCSE_UNITS : AQA_UNITS;
-                const relevantCaseStudies = CASE_STUDY_LOCATIONS.filter(cs => cs.levels.includes(user.level || 'A-Level'));
+                // 4. Fetch Manual Ratings
+                const manualRef = doc(db, 'users', user.uid, 'manual_progress', 'rag_sheet');
+                const manualSnap = await getDoc(manualRef);
+                if (manualSnap.exists()) {
+                    setManualRatings(manualSnap.data() as Record<string, 'Red' | 'Amber' | 'Green'>);
+                }
 
-                const allTopics = new Set([
-                    ...relevantUnits.filter(u => u !== 'All Units'), 
-                    ...relevantCaseStudies.map(cs => cs.topic)
-                ]);
-                
+                // 5. Initialize Data Structure for All Topics
                 const dataMap: Record<string, TopicMetrics> = {};
                 allTopics.forEach(topic => {
                     dataMap[topic] = {
@@ -169,7 +218,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                     };
                 });
 
-                // 5. Process Exams (Filter by level implicitly via sessions or explicitly here)
+                // 6. Process Exams (Filter by level implicitly via sessions or explicitly here)
                 sessions.forEach(s => {
                     // Ensure session matches user level or general
                     if (s.level === user.level && dataMap[s.question.unit]) {
@@ -180,7 +229,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                     }
                 });
 
-                // 6. Process Games
+                // 7. Process Games
                 gameResults.forEach(g => {
                     const topic = g.question.topic;
                     if (dataMap[topic]) {
@@ -195,7 +244,8 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                     }
                 });
 
-                // 7. Process Flashcards
+                // 8. Process Flashcards
+                const relevantCaseStudies = CASE_STUDY_LOCATIONS.filter(cs => cs.levels.includes(user.level || 'A-Level'));
                 relevantCaseStudies.forEach(cs => {
                     if (dataMap[cs.topic]) {
                         dataMap[cs.topic].flashcardTotal++;
@@ -210,7 +260,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                     }
                 });
 
-                // 8. Final RAG Calculation
+                // 9. Final RAG Calculation
                 const results: RagResult[] = Object.entries(dataMap).map(([topic, metrics]) => {
                     const { score, status } = calculateMastery(metrics);
                     return { topic, metrics, masteryScore: score, status };
@@ -235,16 +285,43 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
         };
 
         if (user) fetchData();
-    }, [user]);
+    }, [user, allTopics]); // Added allTopics to dependency array as it's a derived value
+
+    const handleManualRate = async (topic: string, rating: 'Red' | 'Amber' | 'Green') => {
+        const newRatings = { ...manualRatings, [topic]: rating };
+        setManualRatings(newRatings);
+        try {
+            await setDoc(doc(db, 'users', user.uid, 'manual_progress', 'rag_sheet'), newRatings, { merge: true });
+        } catch (e) {
+            console.error("Error saving manual rating", e);
+        }
+    };
 
     return (
         <HubLayout
             title="Knowledge Tracker"
-            subtitle={`A real-time RAG (Red-Amber-Green) analysis of your ${user.level} geography mastery.`}
+            subtitle={`A RAG (Red-Amber-Green) analysis of your ${user.level} geography mastery.`}
             gradient="bg-gradient-to-r from-orange-500 via-red-500 to-rose-600"
             onBack={onBack}
         >
             <main className="w-full max-w-7xl mx-auto p-2">
+                <div className="flex justify-center mb-8">
+                    <div className="bg-stone-100 dark:bg-stone-800 p-1 rounded-xl flex gap-2">
+                        <button
+                            onClick={() => setViewMode('automated')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'automated' ? 'bg-white dark:bg-stone-700 shadow text-rose-600 dark:text-rose-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                        >
+                            Automated Analysis
+                        </button>
+                        <button
+                            onClick={() => setViewMode('manual')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'manual' ? 'bg-white dark:bg-stone-700 shadow text-rose-600 dark:text-rose-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                        >
+                            Manual Self-Assessment
+                        </button>
+                    </div>
+                </div>
+
                 {isLoading ? (
                     <div className="text-center py-20">
                         <div className="flex items-center justify-center space-x-2 mb-4">
@@ -254,8 +331,10 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                         </div>
                         <p className="text-stone-500 font-semibold">Crunching the numbers...</p>
                     </div>
+                ) : viewMode === 'manual' ? (
+                    <ManualRagGrid topics={allTopics} ratings={manualRatings} onRate={handleManualRate} />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
                         {ragResults.map(result => (
                             <RagCard key={result.topic} result={result} />
                         ))}
