@@ -6,6 +6,7 @@ import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { db } from '../firebase';
 import { collection, query, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import HubLayout from './HubLayout';
+import TopicSpecificationView from './TopicSpecificationView';
 
 interface TopicMetrics {
     examScore: number; // 0-100
@@ -65,13 +66,20 @@ const calculateMastery = (metrics: TopicMetrics): { score: number, status: 'Red'
 const ManualRagGrid: React.FC<{
     topics: string[];
     ratings: Record<string, 'Red' | 'Amber' | 'Green'>;
-    onRate: (topic: string, rating: 'Red' | 'Amber' | 'Green') => void
-}> = ({ topics, ratings, onRate }) => {
+    onRate: (topic: string, rating: 'Red' | 'Amber' | 'Green') => void;
+    onSelectTopic: (topic: string) => void;
+}> = ({ topics, ratings, onRate, onSelectTopic }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
             {(topics || []).map(topic => (
                 <div key={topic} className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
-                    <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-4 text-lg">{topic}</h3>
+                    <button
+                        onClick={() => onSelectTopic(topic)}
+                        className="text-left group"
+                    >
+                        <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{topic}</h3>
+                        <p className="text-xs text-stone-400 mb-4 font-semibold group-hover:text-indigo-500 transition-colors">View Specification &rarr;</p>
+                    </button>
                     <div className="grid grid-cols-3 gap-2">
                         {(['Red', 'Amber', 'Green'] as const).map(rating => {
                             const isSelected = ratings[topic] === rating;
@@ -165,6 +173,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
     const [ragResults, setRagResults] = useState<RagResult[]>([]);
     const [manualRatings, setManualRatings] = useState<Record<string, 'Red' | 'Amber' | 'Green'>>({});
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
     const relevantUnits = useMemo(() => {
         if (!user.level) return [];
@@ -302,25 +311,27 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
             title="Knowledge Tracker"
             subtitle={`A RAG (Red-Amber-Green) analysis of your ${user.level} geography mastery.`}
             gradient="bg-gradient-to-r from-orange-500 via-red-500 to-rose-600"
-            onBack={onBack}
+            onBack={selectedTopic ? undefined : onBack}
         >
             <main className="w-full max-w-7xl mx-auto p-2">
-                <div className="flex justify-center mb-8">
-                    <div className="bg-stone-100 dark:bg-stone-800 p-1 rounded-xl flex gap-2">
-                        <button
-                            onClick={() => setViewMode('automated')}
-                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'automated' ? 'bg-white dark:bg-stone-700 shadow text-rose-600 dark:text-rose-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
-                        >
-                            Automated Analysis
-                        </button>
-                        <button
-                            onClick={() => setViewMode('manual')}
-                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'manual' ? 'bg-white dark:bg-stone-700 shadow text-rose-600 dark:text-rose-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
-                        >
-                            Manual Self-Assessment
-                        </button>
+                {!selectedTopic && (
+                    <div className="flex justify-center mb-8">
+                        <div className="bg-stone-100 dark:bg-stone-800 p-1 rounded-xl flex gap-2">
+                            <button
+                                onClick={() => setViewMode('automated')}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'automated' ? 'bg-white dark:bg-stone-700 shadow text-rose-600 dark:text-rose-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                            >
+                                Automated Analysis
+                            </button>
+                            <button
+                                onClick={() => setViewMode('manual')}
+                                className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'manual' ? 'bg-white dark:bg-stone-700 shadow text-rose-600 dark:text-rose-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
+                            >
+                                Manual Self-Assessment
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {isLoading ? (
                     <div className="text-center py-20">
@@ -331,8 +342,15 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                         </div>
                         <p className="text-stone-500 font-semibold">Crunching the numbers...</p>
                     </div>
+                ) : selectedTopic ? (
+                    <TopicSpecificationView topic={selectedTopic} onBack={() => setSelectedTopic(null)} />
                 ) : viewMode === 'manual' ? (
-                    <ManualRagGrid topics={allTopics} ratings={manualRatings} onRate={handleManualRate} />
+                    <ManualRagGrid
+                        topics={allTopics}
+                        ratings={manualRatings}
+                        onRate={handleManualRate}
+                        onSelectTopic={setSelectedTopic}
+                    />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
                         {ragResults.map(result => (
