@@ -180,6 +180,43 @@ export const VIDEO_LIBRARY: VideoResource[] = [
     { id: 'gcse_v91', title: 'Cold Environments (Part 8)', videoId: '0iBzxrA396k', level: 'GCSE', topic: 'Cold Environments' },
     { id: 'gcse_v92', title: 'Cold Environments (Part 9)', videoId: 'VuWIgc7SfrU', level: 'GCSE', topic: 'Cold Environments' },
     { id: 'gcse_v93', title: 'Cold Environments (Part 10)', videoId: 'sN4UN98f_jg', level: 'GCSE', topic: 'Cold Environments' },
+
+    // Urbanisation
+    { id: 'gcse_v94', title: 'Urbanisation (Part 1)', videoId: '7lwllykzeKo', level: 'GCSE', topic: 'Urbanisation' },
+    { id: 'gcse_v95', title: 'Urbanisation (Part 2)', videoId: 'REcu0XG0iqc', level: 'GCSE', topic: 'Urbanisation' },
+    { id: 'gcse_v96', title: 'Urbanisation (Part 3)', videoId: '_aIrhbzNbNQ', level: 'GCSE', topic: 'Urbanisation' },
+
+    // Lagos (Nigeria) City Study
+    { id: 'gcse_v97', title: 'Lagos Case Study (Part 1)', videoId: '8_0NaR9eRNE', level: 'GCSE', topic: 'Lagos Case Study' },
+    { id: 'gcse_v98', title: 'Lagos Case Study (Part 2)', videoId: 'FZm2fMs6xAk', level: 'GCSE', topic: 'Lagos Case Study' },
+    { id: 'gcse_v99', title: 'Lagos Case Study (Part 3)', videoId: 'YCIgCbDY0WM', level: 'GCSE', topic: 'Lagos Case Study' },
+    { id: 'gcse_v100', title: 'Lagos Case Study (Part 4)', videoId: 'ydf86QTk5fk', level: 'GCSE', topic: 'Lagos Case Study' },
+    { id: 'gcse_v101', title: 'Lagos Case Study (Part 5)', videoId: 'dLxaw1fqlfE', level: 'GCSE', topic: 'Lagos Case Study' },
+    { id: 'gcse_v102', title: 'Lagos Case Study (Part 6)', videoId: '2shl49kIeNQ', level: 'GCSE', topic: 'Lagos Case Study' },
+
+    // Rio de Janeiro (Brazil) City Study
+    { id: 'gcse_v103', title: 'Rio Case Study (Part 1)', videoId: 'lk0efjOZPHo', level: 'GCSE', topic: 'Rio Case Study' },
+    { id: 'gcse_v104', title: 'Rio Case Study (Part 2)', videoId: 'YWj0JLt9gG0', level: 'GCSE', topic: 'Rio Case Study' },
+    { id: 'gcse_v105', title: 'Rio Case Study (Part 3)', videoId: 'XqoOMrQcVrI', level: 'GCSE', topic: 'Rio Case Study' },
+    { id: 'gcse_v106', title: 'Rio Case Study (Part 4)', videoId: 'sQAW56dASZI', level: 'GCSE', topic: 'Rio Case Study' },
+    { id: 'gcse_v107', title: 'Rio Case Study (Part 5)', videoId: '8LyC2_r-4EA', level: 'GCSE', topic: 'Rio Case Study' },
+    { id: 'gcse_v108', title: 'Rio Case Study (Part 6)', videoId: 'YMQhHP6LCuc', level: 'GCSE', topic: 'Rio Case Study' },
+
+    // London Case Study
+    { id: 'gcse_v109', title: 'London Case Study (Part 1)', videoId: 'x8oCoT38mn0', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v110', title: 'London Case Study (Part 2)', videoId: 'WrpuYWwtUq8', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v111', title: 'London Case Study (Part 3)', videoId: 'iDlnpjKNovA', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v112', title: 'London Case Study (Part 4)', videoId: '2craMeAtstw', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v113', title: 'London Case Study (Part 5)', videoId: 'z_z-53HYOE0', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v114', title: 'London Case Study (Part 6)', videoId: '2s7vs--ZK2k', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v115', title: 'London Case Study (Part 7)', videoId: 'oykc4cbExek', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v116', title: 'London Case Study (Part 8)', videoId: 'qkk4BbIRWmQ', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v117', title: 'London Case Study (Part 9)', videoId: 'TVbQ0g_2S5o', level: 'GCSE', topic: 'London Case Study' },
+    { id: 'gcse_v118', title: 'London Case Study (Part 10)', videoId: '_XSHPXJ_PMU', level: 'GCSE', topic: 'London Case Study' },
+
+    // Sustainable Urban Environments
+    { id: 'gcse_v119', title: 'Sustainable Urban Environments (Part 1)', videoId: 'b9APfOuR1V4', level: 'GCSE', topic: 'Sustainable Urban Environments' },
+    { id: 'gcse_v120', title: 'Sustainable Urban Environments (Part 2)', videoId: 'salk-6AykLA', level: 'GCSE', topic: 'Sustainable Urban Environments' },
 ];
 
 export const COMMAND_WORDS: CommandWord[] = [
