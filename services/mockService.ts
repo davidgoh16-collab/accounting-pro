@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, doc, getDocs, setDoc, getDoc, query, where } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, getDoc, deleteDoc, query, where } from 'firebase/firestore';
 import { MockConfig, MockExam, UserLevel } from '../types';
 
 export const getMocks = async (): Promise<MockConfig[]> => {
@@ -17,6 +17,15 @@ export const saveMock = async (mock: MockConfig): Promise<void> => {
         await setDoc(doc(db, 'mocks', mock.id), mock);
     } catch (e) {
         console.error("Failed to save mock", e);
+        throw e;
+    }
+};
+
+export const deleteMock = async (mockId: string): Promise<void> => {
+    try {
+        await deleteDoc(doc(db, 'mocks', mockId));
+    } catch (e) {
+        console.error("Failed to delete mock", e);
         throw e;
     }
 };

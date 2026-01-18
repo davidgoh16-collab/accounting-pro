@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MockConfig, MockExam, UserLevel } from '../types';
-import { getMocks, saveMock, migrateFeb2026 } from '../services/mockService';
+import { getMocks, saveMock, deleteMock, migrateFeb2026 } from '../services/mockService';
 import { parseTimetableFile } from '../services/geminiService';
 import { COURSE_LESSONS } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -82,6 +82,24 @@ const MockManager: React.FC = () => {
         } catch (e) {
             console.error(e);
             alert("Failed to save mock.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedMock) return;
+        if (!confirm(`Are you sure you want to delete "${selectedMock.title}"? This cannot be undone.`)) return;
+
+        setLoading(true);
+        try {
+            await deleteMock(selectedMock.id);
+            await loadMocks();
+            setIsEditing(false);
+            setSelectedMock(null);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to delete mock.");
         } finally {
             setLoading(false);
         }
@@ -355,11 +373,16 @@ const MockManager: React.FC = () => {
                         </div>
 
                         {/* Save Actions */}
-                        <div className="flex justify-end gap-4 pt-4 border-t border-stone-200 dark:border-stone-700">
-                            <button onClick={() => { setIsEditing(false); setSelectedMock(null); }} className="px-6 py-2 text-stone-500 font-bold hover:bg-stone-100 rounded-lg">Cancel</button>
-                            <button onClick={handleSave} disabled={loading} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50">
-                                {loading ? 'Saving...' : 'Save Mock Series'}
+                        <div className="flex justify-between items-center pt-4 border-t border-stone-200 dark:border-stone-700">
+                            <button onClick={handleDelete} disabled={loading} className="px-4 py-2 text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition text-sm">
+                                Delete Series
                             </button>
+                            <div className="flex gap-4">
+                                <button onClick={() => { setIsEditing(false); setSelectedMock(null); }} className="px-6 py-2 text-stone-500 font-bold hover:bg-stone-100 rounded-lg">Cancel</button>
+                                <button onClick={handleSave} disabled={loading} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50">
+                                    {loading ? 'Saving...' : 'Save Mock Series'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ) : (
