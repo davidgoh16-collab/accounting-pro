@@ -468,7 +468,7 @@ const App: React.FC = () => {
             {page === 'mocks_hub' && <MocksHubView user={user} onNavigate={handleNavigate} />}
             {page === 'feb_mocks' && <FebMocksView user={user} onBack={() => handleNavigate('mocks_hub')} />}
 
-            {page === 'mock_detail' && selectedMockId && (
+            {page === 'mock_detail' && selectedMockId && activeMocks.find(m => m.id === selectedMockId) && (
                 <MockDetailView
                     user={user}
                     onBack={() => handleNavigate('mocks_hub')}

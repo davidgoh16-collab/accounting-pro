@@ -56,24 +56,29 @@ const MockManager: React.FC = () => {
     };
 
     const populateForm = (mock: MockConfig) => {
-        setTitle(mock.title);
-        setLevel(mock.level);
-        setIsActive(mock.isActive);
+        setTitle(mock.title || '');
+        setLevel(mock.level || 'A-Level');
+        setIsActive(mock.isActive || false);
         setExams(mock.exams || []);
         setTopics(mock.topics || []);
     };
 
     const handleSave = async () => {
         if (!selectedMock) return;
+        if (!title.trim()) {
+            alert("Title is required.");
+            return;
+        }
+
         setLoading(true);
         try {
             const updatedMock: MockConfig = {
                 ...selectedMock,
-                title,
-                level,
-                isActive,
-                exams,
-                topics
+                title: title || 'Untitled Mock',
+                level: level || 'A-Level',
+                isActive: !!isActive,
+                exams: exams || [],
+                topics: topics || []
             };
             await saveMock(updatedMock);
             await loadMocks();
