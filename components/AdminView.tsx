@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
-import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassName, addClassMembers, updateUserRole, deleteClass } from '../firebase';
+import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassDetails, addClassMembers, updateUserRole, deleteClass } from '../firebase';
 import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
@@ -154,12 +154,14 @@ const ClassManager: React.FC<{
 }> = ({ classes, allUsers, onRefreshClasses }) => {
     const [selectedClass, setSelectedClass] = useState<ClassGroup | null>(null);
     const [newClassName, setNewClassName] = useState('');
+    const [newYearGroup, setNewYearGroup] = useState('11');
     const [isCreating, setIsCreating] = useState(false);
     const [studentSearch, setStudentSearch] = useState('');
 
-    // Edit Class Name State
+    // Edit Class Details State
     const [isEditingName, setIsEditingName] = useState(false);
     const [editingName, setEditingName] = useState('');
+    const [editingYear, setEditingYear] = useState('11');
 
     // Bulk Add State
     const [selectedStudentsToAdd, setSelectedStudentsToAdd] = useState<string[]>([]);
@@ -167,6 +169,7 @@ const ClassManager: React.FC<{
     useEffect(() => {
         if (selectedClass) {
             setEditingName(selectedClass.name);
+            setEditingYear(selectedClass.yearGroup || '11');
             setIsEditingName(false);
             setSelectedStudentsToAdd([]);
         }
@@ -176,7 +179,7 @@ const ClassManager: React.FC<{
         if (!newClassName.trim()) return;
         setIsCreating(true);
         try {
-            await createClass(newClassName);
+            await createClass(newClassName, newYearGroup);
             setNewClassName('');
             onRefreshClasses();
         } catch (e) {
@@ -187,16 +190,16 @@ const ClassManager: React.FC<{
         }
     };
 
-    const handleUpdateClassName = async () => {
+    const handleUpdateClassDetails = async () => {
         if (!selectedClass || !editingName.trim()) return;
         try {
-            await updateClassName(selectedClass.id, editingName);
+            await updateClassDetails(selectedClass.id, editingName, editingYear);
             onRefreshClasses();
-            setSelectedClass(prev => prev ? ({...prev, name: editingName}) : null);
+            setSelectedClass(prev => prev ? ({...prev, name: editingName, yearGroup: editingYear}) : null);
             setIsEditingName(false);
         } catch (e) {
             console.error(e);
-            alert("Failed to update class name");
+            alert("Failed to update class details");
         }
     };
 
@@ -264,6 +267,16 @@ const ClassManager: React.FC<{
                         placeholder="New Class Name"
                         className="flex-1 px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm"
                     />
+                    <select
+                        value={newYearGroup}
+                        onChange={e => setNewYearGroup(e.target.value)}
+                        className="px-2 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm font-bold"
+                    >
+                        <option value="10">Y10</option>
+                        <option value="11">Y11</option>
+                        <option value="12">Y12</option>
+                        <option value="13">Y13</option>
+                    </select>
                     <button
                         onClick={handleCreateClass}
                         disabled={isCreating || !newClassName.trim()}
@@ -279,7 +292,10 @@ const ClassManager: React.FC<{
                             onClick={() => setSelectedClass(cls)}
                             className={`w-full text-left p-3 rounded-xl transition-all border ${selectedClass?.id === cls.id ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-700' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'}`}
                         >
-                            <p className="font-bold text-stone-800 dark:text-stone-200">{cls.name}</p>
+                            <div className="flex justify-between items-center">
+                                <p className="font-bold text-stone-800 dark:text-stone-200">{cls.name}</p>
+                                <span className="text-[10px] font-bold bg-stone-100 dark:bg-stone-700 px-1.5 py-0.5 rounded text-stone-500">Y{cls.yearGroup}</span>
+                            </div>
                             <p className="text-xs text-stone-500">{(cls.studentIds || []).length} Students</p>
                         </button>
                     ))}
@@ -293,25 +309,40 @@ const ClassManager: React.FC<{
                         <div className="mb-6 flex justify-between items-start">
                             <div>
                                 {isEditingName ? (
-                                    <div className="flex gap-2 items-center">
-                                        <input
-                                            type="text"
-                                            value={editingName}
-                                            onChange={(e) => setEditingName(e.target.value)}
-                                            className="text-2xl font-bold text-stone-800 dark:text-stone-100 bg-transparent border-b border-stone-400 focus:border-indigo-500 outline-none w-full"
-                                        />
-                                        <button onClick={handleUpdateClassName} className="text-green-600 hover:text-green-700 text-sm font-bold">Save</button>
-                                        <button onClick={() => setIsEditingName(false)} className="text-stone-400 hover:text-stone-600 text-sm">Cancel</button>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex gap-2 items-center">
+                                            <input
+                                                type="text"
+                                                value={editingName}
+                                                onChange={(e) => setEditingName(e.target.value)}
+                                                className="text-2xl font-bold text-stone-800 dark:text-stone-100 bg-transparent border-b border-stone-400 focus:border-indigo-500 outline-none"
+                                            />
+                                            <select
+                                                value={editingYear}
+                                                onChange={e => setEditingYear(e.target.value)}
+                                                className="text-lg font-bold bg-transparent border-b border-stone-400 outline-none"
+                                            >
+                                                <option value="10">Year 10</option>
+                                                <option value="11">Year 11</option>
+                                                <option value="12">Year 12</option>
+                                                <option value="13">Year 13</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button onClick={handleUpdateClassDetails} className="text-green-600 hover:text-green-700 text-sm font-bold">Save</button>
+                                            <button onClick={() => setIsEditingName(false)} className="text-stone-400 hover:text-stone-600 text-sm">Cancel</button>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="flex gap-2 items-center">
                                         <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100">{selectedClass.name}</h3>
+                                        <span className="text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-bold">Year {selectedClass.yearGroup}</span>
                                         <button onClick={() => setIsEditingName(true)} className="text-stone-400 hover:text-indigo-500 transition">
                                             ✏️
                                         </button>
                                     </div>
                                 )}
-                                <p className="text-stone-500 text-sm">{(selectedClass.studentIds || []).length} Students Enrolled</p>
+                                <p className="text-stone-500 text-sm mt-1">{(selectedClass.studentIds || []).length} Students Enrolled</p>
                             </div>
                             <button
                                 onClick={handleDeleteClass}

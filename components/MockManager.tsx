@@ -52,6 +52,7 @@ const MockManager: React.FC = () => {
     const [title, setTitle] = useState('');
     const [level, setLevel] = useState<UserLevel>('A-Level');
     const [isActive, setIsActive] = useState(false);
+    const [yearGroups, setYearGroups] = useState<string[]>([]);
     const [exams, setExams] = useState<MockExam[]>([]);
     const [topics, setTopics] = useState<string[]>([]); // Global topic pool for this series (optional usage)
 
@@ -86,6 +87,7 @@ const MockManager: React.FC = () => {
             title: 'New Exam Series',
             level: 'A-Level',
             isActive: false,
+            yearGroups: ['11'], // Default
             exams: [],
             topics: [],
             createdAt: new Date().toISOString()
@@ -105,6 +107,7 @@ const MockManager: React.FC = () => {
         setTitle(mock.title || '');
         setLevel(mock.level || 'A-Level');
         setIsActive(mock.isActive || false);
+        setYearGroups(mock.yearGroups || []);
         setExams(mock.exams || []);
         setTopics(mock.topics || []);
     };
@@ -123,6 +126,7 @@ const MockManager: React.FC = () => {
                 title: title || 'Untitled Exam Series',
                 level: level || 'A-Level',
                 isActive: !!isActive,
+                yearGroups: yearGroups,
                 exams: exams || [],
                 topics: topics || []
             };
@@ -360,6 +364,27 @@ const MockManager: React.FC = () => {
                                         className="w-5 h-5 rounded border-stone-300 text-indigo-600"
                                     />
                                     <span className="font-bold text-stone-700 dark:text-stone-300">Is Active?</span>
+                                </div>
+                            </div>
+
+                            {/* Year Groups Selector */}
+                            <div className="mb-6">
+                                <label className="block text-xs font-bold text-stone-500 uppercase mb-2">Target Year Groups</label>
+                                <div className="flex gap-4">
+                                    {['10', '11', '12', '13'].map(yg => (
+                                        <label key={yg} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={yearGroups.includes(yg)}
+                                                onChange={e => {
+                                                    if (e.target.checked) setYearGroups([...yearGroups, yg]);
+                                                    else setYearGroups(yearGroups.filter(y => y !== yg));
+                                                }}
+                                                className="w-4 h-4 text-indigo-600 rounded border-stone-300"
+                                            />
+                                            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Year {yg}</span>
+                                        </label>
+                                    ))}
                                 </div>
                             </div>
                         </div>

@@ -6,10 +6,11 @@ import HubCard from './HubCard';
 
 interface MocksHubViewProps {
     user: AuthUser;
+    yearGroup?: string;
     onNavigate: (page: any, param?: any) => void;
 }
 
-const MocksHubView: React.FC<MocksHubViewProps> = ({ user, onNavigate }) => {
+const MocksHubView: React.FC<MocksHubViewProps> = ({ user, yearGroup, onNavigate }) => {
     const [mocks, setMocks] = useState<MockConfig[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -17,9 +18,20 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, onNavigate }) => {
         const fetchMocks = async () => {
             try {
                 const data = await getMocks();
-                // Filter by active and matching level (or show all if no level set?)
-                // User level filtering is good UX.
-                const filtered = data.filter(m => m.isActive && (!user.level || m.level === user.level));
+                // Filter by active, matching level AND matching year group
+                const filtered = data.filter(m => {
+                    const isActive = m.isActive;
+                    const levelMatch = !user.level || m.level === user.level;
+
+                    // Year Group Logic:
+                    // If mock has NO yearGroups specified, assume it's global -> show it.
+                    // If mock HAS yearGroups, user MUST have a yearGroup matching one of them.
+                    // If user has NO yearGroup, maybe show nothing or assume something? Defaulting to show if no restrictions.
+                    const mockYears = m.yearGroups || [];
+                    const yearMatch = mockYears.length === 0 || (yearGroup && mockYears.includes(yearGroup));
+
+                    return isActive && levelMatch && yearMatch;
+                });
                 setMocks(filtered);
             } catch (e) {
                 console.error("Failed to load mocks", e);
@@ -28,7 +40,7 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, onNavigate }) => {
             }
         };
         fetchMocks();
-    }, [user.level]);
+    }, [user.level, yearGroup]);
 
     return (
         <HubLayout
@@ -66,17 +78,6 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, onNavigate }) => {
                                 </div>
                             )}
 
-                            {/* Legacy/Future Placeholder if needed */}
-                             <HubCard
-                                icon={<span className="text-4xl">☀️</span>}
-                                title="Summer 2026"
-                                description="Official Examination revision materials. Coming soon."
-                                onClick={() => {}}
-                                shadowColor="shadow-stone-500/20"
-                                accentColor="text-stone-400"
-                                disabled={true}
-                                actionText="Coming Soon"
-                            />
                         </div>
                     )}
                 </section>

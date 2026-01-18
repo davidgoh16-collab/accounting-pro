@@ -357,6 +357,7 @@ export interface ClassGroup {
     id: string;
     name: string;
     studentIds: string[];
+    yearGroup?: string; // '10', '11', '12', '13'
 }
 
 export interface TopicTrackerItem {
@@ -392,6 +393,7 @@ export interface MockConfig {
     title: string;
     isActive: boolean;
     level: UserLevel;
+    yearGroups?: string[]; // Target year groups e.g. ['11']
     exams: MockExam[];
     topics: string[]; // List of all topics covered in this mock series
     createdAt: string;

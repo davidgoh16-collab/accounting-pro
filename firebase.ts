@@ -68,18 +68,25 @@ export const getClasses = async (): Promise<ClassGroup[]> => {
         return {
             id: doc.id,
             name: data.name || 'Unnamed Class',
+            yearGroup: data.yearGroup || '11',
             studentIds: data.studentIds || []
         } as ClassGroup;
     });
 };
 
-export const createClass = async (name: string): Promise<string> => {
+export const createClass = async (name: string, yearGroup: string = '11'): Promise<string> => {
     const classesCol = collection(db, 'classes');
     const docRef = await addDoc(classesCol, {
         name,
+        yearGroup,
         studentIds: []
     });
     return docRef.id;
+};
+
+export const updateClassDetails = async (classId: string, name: string, yearGroup: string) => {
+    const classRef = doc(db, 'classes', classId);
+    await updateDoc(classRef, { name, yearGroup });
 };
 
 export const updateClassName = async (classId: string, name: string) => {

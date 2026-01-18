@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig } from './types';
 import { onAuthChange, signOutUser, db } from './firebase';
 import { User } from 'firebase/auth';
-import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot, where } from 'firebase/firestore';
 import { getMocks } from './services/mockService';
 
 import LoginView from './components/LoginView';
@@ -36,15 +36,20 @@ import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
 
-const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel }> = ({ mocks, userLevel }) => {
+const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
-        const relevantMocks = mocks.filter(m => m.isActive && (!userLevel || m.level === userLevel));
+        const relevantMocks = mocks.filter(m => {
+            const levelMatch = !userLevel || m.level === userLevel;
+            const yearMatch = !m.yearGroups || m.yearGroups.length === 0 || (userYearGroup && m.yearGroups.includes(userYearGroup));
+            return m.isActive && levelMatch && yearMatch;
+        });
+
         const allExams = relevantMocks.flatMap(m => m.exams);
         const now = new Date();
         const futureExams = allExams.filter(e => new Date(e.date) > now);
         futureExams.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         return futureExams[0];
-    }, [mocks, userLevel]);
+    }, [mocks, userLevel, userYearGroup]);
 
     const calculateTimeLeft = () => {
         if (!nextExam) return {};
@@ -144,6 +149,7 @@ const RecentActivity: React.FC<{ onViewSession: (session: CompletedSession) => v
 
 const App: React.FC = () => {
     const [user, setUser] = useState<AuthUser | null>(null);
+    const [userYearGroup, setUserYearGroup] = useState<string>('11'); // Default fallback
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState<Page>('dashboard');
     const [selectedGameTopic, setSelectedGameTopic] = useState<string>('All Topics');
@@ -228,6 +234,21 @@ const App: React.FC = () => {
                     role = data.role;
                     userLevel = data.level; 
                     if (!userLevel) setShowLevelSelector(true);
+                }
+
+                // Fetch Class for Year Group
+                try {
+                    const classesCol = collection(db, 'classes');
+                    const q = query(classesCol, where('studentIds', 'array-contains', firebaseUser.uid));
+                    const classSnaps = await getDocs(q);
+                    if (!classSnaps.empty) {
+                        const classData = classSnaps.docs[0].data();
+                        if (classData.yearGroup) {
+                            setUserYearGroup(classData.yearGroup);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch user class", e);
                 }
 
                 const authUser: AuthUser = {
@@ -335,7 +356,7 @@ const App: React.FC = () => {
                     subtitle={theme.subtitle} 
                     gradient={theme.hubGradient}
                 >
-                    <CountdownWidget mocks={activeMocks} userLevel={user.level} />
+                    <CountdownWidget mocks={activeMocks} userLevel={user.level} userYearGroup={userYearGroup} />
 
                     <div className="w-full max-w-7xl mx-auto space-y-12">
                         
@@ -465,7 +486,7 @@ const App: React.FC = () => {
 
             {page === 'learning_hub' && <LearningHubView user={user} onBack={() => handleNavigate('dashboard')} />}
             {page === 'video_learning' && <VideoLearningView user={user} onBack={() => handleNavigate('dashboard')} />} 
-            {page === 'mocks_hub' && <MocksHubView user={user} onNavigate={handleNavigate} />}
+            {page === 'mocks_hub' && <MocksHubView user={user} yearGroup={userYearGroup} onNavigate={handleNavigate} />}
             {page === 'feb_mocks' && <FebMocksView user={user} onBack={() => handleNavigate('mocks_hub')} />}
 
             {page === 'mock_detail' && selectedMockId && activeMocks.find(m => m.id === selectedMockId) && (
