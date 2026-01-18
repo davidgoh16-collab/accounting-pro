@@ -776,11 +776,14 @@ export const generatePreReleaseQuestion = async (imageBase64: string): Promise<G
     };
 });
 
-export const parseTimetableImage = async (imageBase64: string): Promise<any[]> => handleApiCall(async () => {
+export const parseTimetableFile = async (data: string, mimeType: string = 'image/jpeg'): Promise<any[]> => handleApiCall(async () => {
     const ai = getAiClient();
-    const base64Data = imageBase64.split(',')[1] || imageBase64;
+    // remove data uri prefix if present for binary types, but not for text/csv if we encoded it raw?
+    // In MockManager we used btoa(text) for CSV, and DataURL for others.
+    // If DataURL, split comma. If raw base64, keep it.
+    const base64Data = data.includes(',') ? data.split(',')[1] : data;
 
-    const prompt = `Analyze this exam timetable image. Extract the dates, times, and durations for Geography exams (Paper 1, Paper 2, Paper 3) for both GCSE and A-Level if present.
+    let prompt = `Analyze this exam timetable. Extract the dates, times, and durations for Geography exams (Paper 1, Paper 2, Paper 3) for both GCSE and A-Level if present.
 
     Return a JSON ARRAY of objects with this structure:
     {
@@ -793,13 +796,29 @@ export const parseTimetableImage = async (imageBase64: string): Promise<any[]> =
 
     Ignore non-geography exams.`;
 
+    // Handle CSV as text prompt if possible, or blob.
+    // If it is CSV, we can just decode base64 and pass as text part?
+    // Gemini supports text/csv via inlineData too? Or just as text.
+    // Let's prefer passing text if it is text-based.
+
+    const parts: any[] = [{ text: prompt }];
+
+    if (mimeType === 'text/csv') {
+        const csvText = atob(base64Data);
+        parts.push({ text: `\n\nCSV Data:\n${csvText}` });
+    } else {
+        parts.push({
+            inlineData: {
+                mimeType: mimeType,
+                data: base64Data
+            }
+        });
+    }
+
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: [
-            { role: 'user', parts: [
-                { text: prompt },
-                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
-            ]}
+            { role: 'user', parts: parts }
         ],
         config: { responseMimeType: 'application/json' }
     });

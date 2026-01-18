@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MockConfig, MockExam, UserLevel } from '../types';
 import { getMocks, saveMock, migrateFeb2026 } from '../services/mockService';
-import { parseTimetableImage } from '../services/geminiService';
+import { parseTimetableFile } from '../services/geminiService';
 import { COURSE_LESSONS } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -93,34 +93,53 @@ const MockManager: React.FC = () => {
 
         setLoading(true);
         try {
-            // Convert to base64
             const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const base64 = reader.result as string;
-                // Call AI Service
-                const extractedExams = await parseTimetableImage(base64);
 
-                // Map to MockExam objects
-                const newExams: MockExam[] = extractedExams.map((ex: any, idx: number) => ({
-                    id: uuidv4(),
-                    title: `${ex.paper} (${ex.level})`,
-                    paper: ex.paper,
-                    date: ex.date,
-                    time: ex.time,
-                    duration: ex.duration,
-                    topics: [] // Topics need to be assigned manually or via topic logic
-                }));
+            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                // Read CSV as text
+                reader.readAsText(file);
+                reader.onload = async () => {
+                    const text = reader.result as string;
+                    // Pass as text/csv mime type, but just raw text in data for simpler handling if service supports it,
+                    // or encode to base64 to match uniform interface.
+                    // Let's encode to base64 for uniformity in service.
+                    const base64 = btoa(text);
+                    const extractedExams = await parseTimetableFile(base64, 'text/csv');
+                    processExtractedExams(extractedExams);
+                };
+            } else {
+                // Image or PDF -> Base64
+                reader.readAsDataURL(file);
+                reader.onload = async () => {
+                    const result = reader.result as string;
+                    // extract raw base64 and mime
+                    // Data URL format: "data:[<mediatype>][;base64],<data>"
+                    const [prefix, data] = result.split(',');
+                    const mimeType = prefix.match(/:(.*?);/)?.[1] || file.type;
 
-                // Filter by level if needed, or just add all
-                setExams(prev => [...prev, ...newExams]);
-            };
+                    const extractedExams = await parseTimetableFile(result, mimeType);
+                    processExtractedExams(extractedExams);
+                };
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to parse timetable.");
-        } finally {
             setLoading(false);
         }
+    };
+
+    const processExtractedExams = (extractedExams: any[]) => {
+        const newExams: MockExam[] = extractedExams.map((ex: any) => ({
+            id: uuidv4(),
+            title: `${ex.paper} (${ex.level})`,
+            paper: ex.paper,
+            date: ex.date,
+            time: ex.time,
+            duration: ex.duration,
+            topics: []
+        }));
+        setExams(prev => [...prev, ...newExams]);
+        setLoading(false);
     };
 
     const handleAddExam = () => {
@@ -255,8 +274,8 @@ const MockManager: React.FC = () => {
                                 <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">Exams</h3>
                                 <div className="flex gap-2">
                                     <label className="cursor-pointer px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-2">
-                                        <span>📷</span> Upload Timetable
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleTimetableUpload} />
+                                        <span>📷</span> Upload Timetable (Img/PDF/CSV)
+                                        <input type="file" accept="image/*,.pdf,.csv" className="hidden" onChange={handleTimetableUpload} />
                                     </label>
                                     <button onClick={handleAddExam} className="px-3 py-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-700 dark:text-stone-200 text-xs font-bold rounded-lg transition">
                                         + Manual Add
