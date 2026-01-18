@@ -225,9 +225,10 @@ const App: React.FC = () => {
                 const q = query(classesCol, where('studentIds', 'array-contains', user.uid));
                 const classSnaps = await getDocs(q);
                 if (!classSnaps.empty) {
-                    const classData = classSnaps.docs[0].data();
-                    if (classData.yearGroup) {
-                        setUserYearGroup(classData.yearGroup);
+                    // Try to find a class with a year group defined
+                    const classWithYear = classSnaps.docs.find(doc => doc.data().yearGroup);
+                    if (classWithYear) {
+                        setUserYearGroup(classWithYear.data().yearGroup);
                         return;
                     }
                 }
