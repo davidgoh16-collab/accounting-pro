@@ -149,7 +149,7 @@ const RecentActivity: React.FC<{ onViewSession: (session: CompletedSession) => v
 
 const App: React.FC = () => {
     const [user, setUser] = useState<AuthUser | null>(null);
-    const [userYearGroup, setUserYearGroup] = useState<string>('11'); // Default fallback
+    const [userYearGroup, setUserYearGroup] = useState<string | null>(null); // Start null to prevent leaking defaults
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState<Page>('dashboard');
     const [selectedGameTopic, setSelectedGameTopic] = useState<string>('All Topics');

@@ -6,7 +6,7 @@ import HubCard from './HubCard';
 
 interface MocksHubViewProps {
     user: AuthUser;
-    yearGroup?: string;
+    yearGroup?: string | null;
     onNavigate: (page: any, param?: any) => void;
 }
 
@@ -18,17 +18,18 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, yearGroup, onNavigate
         const fetchMocks = async () => {
             try {
                 const data = await getMocks();
-                // Filter by active, matching level AND matching year group
                 const filtered = data.filter(m => {
                     const isActive = m.isActive;
                     const levelMatch = !user.level || m.level === user.level;
 
                     // Year Group Logic:
-                    // If mock has NO yearGroups specified, assume it's global -> show it.
-                    // If mock HAS yearGroups, user MUST have a yearGroup matching one of them.
-                    // If user has NO yearGroup, maybe show nothing or assume something? Defaulting to show if no restrictions.
-                    const mockYears = m.yearGroups || [];
-                    const yearMatch = mockYears.length === 0 || (yearGroup && mockYears.includes(yearGroup));
+                    // If mock has restricted year groups, user MUST match one of them.
+                    // If user's year group is null (unknown), they fail the restriction check.
+                    const hasRestrictedYears = m.yearGroups && m.yearGroups.length > 0;
+                    let yearMatch = true;
+                    if (hasRestrictedYears) {
+                        yearMatch = !!yearGroup && m.yearGroups!.includes(yearGroup);
+                    }
 
                     return isActive && levelMatch && yearMatch;
                 });
