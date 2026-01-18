@@ -148,54 +148,146 @@ const MockSchedule: React.FC<{ user: AuthUser, mockId: string, exams: MockExam[]
         await setDoc(doc(db, 'users', user.uid, 'mocks', mockId), { schedule: newState }, { merge: true });
     };
 
+    // --- Schedule Generation Logic ---
+    const scheduleWeeks = React.useMemo(() => {
+        const tasks: { date: Date; task: string; examId: string; id: string; isExam: boolean; examTitle: string }[] = [];
+
+        // 1. Generate tasks for each exam working backwards
+        exams.forEach(exam => {
+            if (!exam.date) return;
+            const examDate = new Date(exam.date);
+
+            // Add the exam itself
+            tasks.push({
+                date: examDate,
+                task: `EXAM: ${exam.title} (${exam.time})`,
+                examId: exam.id,
+                id: `${exam.id}_exam`,
+                isExam: true,
+                examTitle: exam.title
+            });
+
+            // Expand topics
+            const allSubTopics = exam.topics.flatMap(topic =>
+                getSubTopics(topic).map(sub => ({ parent: topic, title: sub }))
+            );
+
+            // Work backwards from exam date - 1 day
+            // Assign 1 topic per day, skipping weekends for heavy revision?
+            // Or just fill every day. Let's fill every day to ensure fit.
+            let currentDate = new Date(examDate);
+            currentDate.setDate(currentDate.getDate() - 1);
+
+            // Reverse topics so the last one is closest to exam
+            [...allSubTopics].reverse().forEach((topic, idx) => {
+                // Determine ID (stable based on topic index in reversed list)
+                const id = `${exam.id}_task_${allSubTopics.length - 1 - idx}`;
+
+                tasks.push({
+                    date: new Date(currentDate),
+                    task: `${topic.parent}: ${topic.title}`,
+                    examId: exam.id,
+                    id: id,
+                    isExam: false,
+                    examTitle: exam.title
+                });
+
+                // Move back one day
+                currentDate.setDate(currentDate.getDate() - 1);
+            });
+        });
+
+        // 2. Sort all tasks by date
+        tasks.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+        // 3. Group by Week (Monday start)
+        const weeks: { title: string; days: typeof tasks }[] = [];
+        let currentWeek: typeof tasks = [];
+        let currentWeekStart: Date | null = null;
+
+        tasks.forEach(task => {
+            // Find Monday of the task's week
+            const d = new Date(task.date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+            const monday = new Date(d.setDate(diff));
+            monday.setHours(0,0,0,0);
+
+            if (!currentWeekStart || monday.getTime() !== currentWeekStart.getTime()) {
+                if (currentWeek.length > 0) {
+                    weeks.push({
+                        title: `Week Commencing ${currentWeekStart!.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
+                        days: currentWeek
+                    });
+                }
+                currentWeek = [];
+                currentWeekStart = monday;
+            }
+            currentWeek.push(task);
+        });
+
+        if (currentWeek.length > 0 && currentWeekStart) {
+            weeks.push({
+                title: `Week Commencing ${currentWeekStart.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
+                days: currentWeek
+            });
+        }
+
+        return weeks;
+    }, [exams]);
+
     return (
         <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-8 animate-fade-in">
-             <h3 className="font-bold text-stone-700 dark:text-stone-300 mb-6 uppercase tracking-wide text-sm">Revision Checklist</h3>
-             <div className="grid md:grid-cols-2 gap-8">
-                {exams.map((exam) => {
-                    // Expand topics for checklist
-                    const allSubTopics = exam.topics.flatMap(topic =>
-                        getSubTopics(topic).map(sub => ({ parent: topic, title: sub }))
-                    );
+             <h3 className="font-bold text-stone-700 dark:text-stone-300 mb-6 uppercase tracking-wide text-sm">Revision Schedule</h3>
+             <div className="space-y-8">
+                {scheduleWeeks.length === 0 && <p className="text-stone-500 italic">No schedule available. Ensure exams have dates and topics assigned.</p>}
 
-                    return (
-                        <div key={exam.id} className="bg-stone-50 dark:bg-stone-800/50 rounded-xl p-5 border border-stone-100 dark:border-stone-700">
-                            <h4 className="font-bold text-stone-800 dark:text-stone-200 mb-4 border-b border-stone-200 dark:border-stone-700 pb-2">{exam.title}</h4>
-                            <div className="space-y-3">
-                                {allSubTopics.map((item, idx) => {
-                                    // Create a unique ID for the schedule item based on exam and index
-                                    // Use index to ensure uniqueness even if topics repeat
-                                    const id = `${exam.id}_item_${idx}`;
-                                    const isCompleted = completed[id];
+                {scheduleWeeks.map((week, wIdx) => (
+                    <div key={wIdx} className="bg-stone-50 dark:bg-stone-800/50 rounded-xl p-5 border border-stone-100 dark:border-stone-700">
+                        <h4 className="font-bold text-stone-700 dark:text-stone-300 mb-3 text-sm uppercase bg-white dark:bg-stone-900 p-2 rounded inline-block shadow-sm">
+                            {week.title}
+                        </h4>
+                        <div className="space-y-2">
+                            {week.days.map((day) => {
+                                const isCompleted = completed[day.id];
+                                const isExam = day.isExam;
 
-                                    return (
-                                        <div
-                                            key={id}
-                                            onClick={() => toggleItem(id)}
-                                            className={`
-                                                flex items-center justify-between p-3 bg-white dark:bg-stone-900 rounded shadow-sm cursor-pointer transition-all w-full
-                                                border-l-4 ${isCompleted ? 'border-green-500 opacity-50 grayscale' : 'border-stone-300 hover:shadow-md'}
-                                            `}
-                                        >
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] text-stone-400 uppercase tracking-wider">{item.parent}</span>
-                                                <span className="text-sm font-medium break-words text-stone-800 dark:text-stone-200">
-                                                    {item.title}
-                                                </span>
-                                            </div>
+                                let borderClass = "border-l-4 border-stone-300 dark:border-stone-600";
+                                if (day.examTitle.toLowerCase().includes('paper 1')) borderClass = "border-l-4 border-blue-500";
+                                if (day.examTitle.toLowerCase().includes('paper 2')) borderClass = "border-l-4 border-emerald-500";
+                                if (day.examTitle.toLowerCase().includes('paper 3')) borderClass = "border-l-4 border-amber-500";
+                                if (isExam) borderClass = "border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20";
+
+                                return (
+                                    <div
+                                        key={day.id}
+                                        onClick={() => !isExam && toggleItem(day.id)}
+                                        className={`
+                                            flex items-center justify-between p-3 bg-white dark:bg-stone-900 rounded shadow-sm cursor-pointer transition-all w-full
+                                            ${borderClass}
+                                            ${isCompleted ? 'opacity-50 grayscale' : 'hover:shadow-md'}
+                                        `}
+                                    >
+                                        <div className="flex flex-col min-w-0 pr-2">
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${isExam ? 'text-yellow-700 dark:text-yellow-400' : 'text-stone-400'}`}>
+                                                {day.date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
+                                            </span>
+                                            <span className={`text-sm font-medium break-words ${isExam ? 'text-stone-900 dark:text-stone-100 font-bold' : 'text-stone-800 dark:text-stone-200'} ${isCompleted ? 'line-through' : ''}`}>
+                                                {day.task}
+                                            </span>
+                                        </div>
+                                        {!isExam && (
                                             <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-500 border-green-500' : 'border-stone-300 dark:border-stone-600'}`}>
                                                 {isCompleted && <span className="text-white text-xs">✓</span>}
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                                {allSubTopics.length === 0 && (
-                                    <p className="text-stone-500 italic text-sm">No topics assigned to this exam yet.</p>
-                                )}
-                            </div>
+                                        )}
+                                        {isExam && <span className="text-2xl shrink-0">🎓</span>}
+                                    </div>
+                                );
+                            })}
                         </div>
-                    );
-                })}
+                    </div>
+                ))}
              </div>
         </div>
     );
