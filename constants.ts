@@ -138,6 +138,48 @@ export const VIDEO_LIBRARY: VideoResource[] = [
     { id: 'gcse_v57', title: 'River Landscapes (Part 9)', videoId: '5ThPRongOzU', level: 'GCSE', topic: 'River Landscapes' },
     { id: 'gcse_v58', title: 'River Landscapes (Part 10)', videoId: 'GjyqlBloRGs', level: 'GCSE', topic: 'River Landscapes' },
     { id: 'gcse_v59', title: 'River Landscapes (Part 11)', videoId: 'suPuE-Q8Ipk', level: 'GCSE', topic: 'River Landscapes' },
+
+    // Ecosystems
+    { id: 'gcse_v60', title: 'Ecosystems (Part 1)', videoId: 't4Pbt0a7E_I', level: 'GCSE', topic: 'Ecosystems' },
+    { id: 'gcse_v61', title: 'Ecosystems (Part 2)', videoId: 'PpzGpnFwQcU', level: 'GCSE', topic: 'Ecosystems' },
+    { id: 'gcse_v62', title: 'Ecosystems (Part 3)', videoId: 'PlBTnEnhR44', level: 'GCSE', topic: 'Ecosystems' },
+    { id: 'gcse_v63', title: 'Ecosystems (Part 4)', videoId: 'f2vt9mh7dfc', level: 'GCSE', topic: 'Ecosystems' },
+
+    // Tropical Rainforests
+    { id: 'gcse_v64', title: 'Tropical Rainforests (Part 1)', videoId: 'EiBJ6fFDoAU', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v65', title: 'Tropical Rainforests (Part 2)', videoId: 'AoI_ueDjC-s', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v66', title: 'Tropical Rainforests (Part 3)', videoId: '7rwUbm2ShkA', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v67', title: 'Tropical Rainforests (Part 4)', videoId: 'jUaZv6D6aE0', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v68', title: 'Tropical Rainforests (Part 5)', videoId: 'KniEgtNYpEM', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v69', title: 'Tropical Rainforests (Part 6)', videoId: 'LgM1vq1cj7g', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v70', title: 'Tropical Rainforests (Part 7)', videoId: '7-G8Z0GigqQ', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v71', title: 'Tropical Rainforests (Part 8)', videoId: 'IIkFA9ds7kg', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v72', title: 'Tropical Rainforests (Part 9)', videoId: 'UTUz6c4pGD4', level: 'GCSE', topic: 'Tropical Rainforests' },
+    { id: 'gcse_v73', title: 'Tropical Rainforests (Part 10)', videoId: '95p3f52_lVE', level: 'GCSE', topic: 'Tropical Rainforests' },
+
+    // Hot Deserts
+    { id: 'gcse_v74', title: 'Hot Deserts (Part 1)', videoId: 'umj-z3Q5154', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v75', title: 'Hot Deserts (Part 2)', videoId: 'uGRvnUVkwec', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v76', title: 'Hot Deserts (Part 3)', videoId: 'lyxATVYWOVQ', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v77', title: 'Hot Deserts (Part 4)', videoId: 'yfnr0BmJmMk', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v78', title: 'Hot Deserts (Part 5)', videoId: 'opiMGsWd8iA', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v79', title: 'Hot Deserts (Part 6)', videoId: '5EIGP7AuKps', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v80', title: 'Hot Deserts (Part 7)', videoId: 'ZTihfkXrdaY', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v81', title: 'Hot Deserts (Part 8)', videoId: 'l6gnjNw0Aak', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v82', title: 'Hot Deserts (Part 9)', videoId: '86OKOiKZBwc', level: 'GCSE', topic: 'Hot Deserts' },
+    { id: 'gcse_v83', title: 'Hot Deserts (Part 10)', videoId: '4bVB_zF-TGY', level: 'GCSE', topic: 'Hot Deserts' },
+
+    // Cold Environments
+    { id: 'gcse_v84', title: 'Cold Environments (Part 1)', videoId: 'eAMzMNBV4Bw', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v85', title: 'Cold Environments (Part 2)', videoId: 'yhCdLs78GEA', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v86', title: 'Cold Environments (Part 3)', videoId: 's6nTDjGSL4o', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v87', title: 'Cold Environments (Part 4)', videoId: 'SeX-IL8oZJo', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v88', title: 'Cold Environments (Part 5)', videoId: 'vLCe_BVpEiY', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v89', title: 'Cold Environments (Part 6)', videoId: 'cykVSlX729Q', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v90', title: 'Cold Environments (Part 7)', videoId: 'W8YdLL0iWp0', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v91', title: 'Cold Environments (Part 8)', videoId: '0iBzxrA396k', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v92', title: 'Cold Environments (Part 9)', videoId: 'VuWIgc7SfrU', level: 'GCSE', topic: 'Cold Environments' },
+    { id: 'gcse_v93', title: 'Cold Environments (Part 10)', videoId: 'sN4UN98f_jg', level: 'GCSE', topic: 'Cold Environments' },
 ];
 
 export const COMMAND_WORDS: CommandWord[] = [
