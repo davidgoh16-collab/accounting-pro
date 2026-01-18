@@ -952,3 +952,78 @@ export const GCSE_SPEC_TOPICS: Record<string, string[]> = {
         "Issue Evaluation (Decision Making)"
     ]
 };
+
+export const ALEVEL_SPEC_TOPICS: Record<string, string[]> = {
+    "Water and Carbon Cycles": [
+        "Systems framework and their application",
+        "The water cycle",
+        "The carbon cycle",
+        "Water, carbon, climate and life on Earth"
+    ],
+    "Coastal Systems and Landscapes": [
+        "Introduction to coastal systems and landscapes",
+        "Systems and processes in coastal environments",
+        "Coastal landscape development",
+        "Coastal management",
+        "Quantitative and qualitative skills in coastal landscapes"
+    ],
+    "Hazards": [
+        "The concept of a hazard in a geographical context",
+        "Plate tectonics",
+        "Volcanic hazards",
+        "Seismic hazards",
+        "Storm (typhoons, hurricanes) hazards",
+        "Fires in nature: The nature of wildfires"
+    ],
+    "Global Systems and Global Governance": [
+        "Globalisation",
+        "Global systems",
+        "International trade and access to markets",
+        "Global governance",
+        "The 'global commons'",
+        "Globalisation critique"
+    ],
+    "Changing Places": [
+        "The nature and importance of places",
+        "Changing places: relationships and connections",
+        "Changing places: meaning and representation",
+        "Representations of place: quantitative and qualitative sources"
+    ],
+    "Contemporary Urban Environments": [
+        "Patterns of urbanisation since 1945",
+        "Urban forms",
+        "Social and economic issues associated with urbanisation",
+        "Urban climate",
+        "Urban drainage",
+        "Urban waste and its disposal",
+        "Other contemporary urban environmental issues",
+        "Sustainable urban development"
+    ],
+    "Population and the Environment": [
+        "Natural increase and vital rates",
+        "Demographic Transition Model",
+        "Migration concepts and patterns",
+        "Population structures and pyramids",
+        "Food security and population",
+        "Health, disease and population",
+        "Global population futures"
+    ],
+    "Resource Security": [
+        "Resource development and security",
+        "Water security: supply and demand",
+        "Water conflicts and management",
+        "Energy security: supply and demand",
+        "Energy mix and transitions",
+        "Energy geopolitics and sustainability",
+        "Mineral security"
+    ],
+    "Ecosystems Under Stress": [
+        "Ecosystem concepts and energy flow",
+        "Biomes and succession",
+        "Tropical rainforests: characteristics and threats",
+        "Savannas: characteristics and threats",
+        "Coral reefs: characteristics and threats",
+        "Local ecosystem case study",
+        "Global ecosystem management"
+    ]
+};

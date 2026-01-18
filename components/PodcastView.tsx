@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthUser } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
 import { generatePodcastScript, generatePodcastAudio } from '../services/geminiService';
 import HubLayout from './HubLayout';
+import { ChevronDown, ChevronUp, Play, Download, Mic } from 'lucide-react';
 
 interface PodcastViewProps {
     user: AuthUser;
@@ -82,12 +83,15 @@ function bufferToWave(abuffer: AudioBuffer, len: number) {
 
 const PodcastView: React.FC<PodcastViewProps> = ({ user, onBack }) => {
     const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+    const [expandedUnit, setExpandedUnit] = useState<string | null>(null);
     const [script, setScript] = useState<string | null>(null);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [status, setStatus] = useState<'idle' | 'generating-script' | 'generating-audio' | 'ready' | 'error'>('idle');
     const [statusMessage, setStatusMessage] = useState('');
     
-    const topics = user.level === 'GCSE' ? GCSE_UNITS.filter(u => u !== 'All Units') : ALEVEL_UNITS.filter(u => u !== 'All Units');
+    // Determine units and subtopics based on user level
+    const units = user.level === 'GCSE' ? GCSE_UNITS.filter(u => u !== 'All Units') : ALEVEL_UNITS.filter(u => u !== 'All Units');
+    const specMap = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
 
     const handleGenerate = async () => {
         if (!selectedTopic) return;
@@ -141,30 +145,71 @@ const PodcastView: React.FC<PodcastViewProps> = ({ user, onBack }) => {
         >
             <div className="max-w-4xl w-full mx-auto p-4">
                 {status === 'idle' && (
-                    <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-stone-200 dark:border-stone-700 text-center">
-                        <div className="text-6xl mb-6 animate-bounce">🎙️</div>
-                        <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">Select a Topic</h2>
-                        <p className="text-stone-600 dark:text-stone-400 mb-8">Hosts Alex and Sam are ready to record a deep-dive episode for you.</p>
+                    <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-stone-200 dark:border-stone-700">
+                        <div className="text-center mb-8">
+                            <div className="text-6xl mb-6 animate-bounce inline-block">🎙️</div>
+                            <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">Select a Topic</h2>
+                            <p className="text-stone-600 dark:text-stone-400">Hosts Alex and Sam are ready to record a deep-dive episode for you.</p>
+                        </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                            {topics.map(topic => (
-                                <button 
-                                    key={topic}
-                                    onClick={() => setSelectedTopic(topic)}
-                                    className={`p-4 rounded-xl border transition-all ${selectedTopic === topic ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-500 ring-2 ring-pink-200 dark:ring-pink-800' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:border-pink-300'}`}
-                                >
-                                    <span className="font-semibold text-stone-800 dark:text-stone-200">{topic}</span>
-                                </button>
-                            ))}
+                        <div className="space-y-3 mb-8">
+                            {units.map(unit => {
+                                const subTopics = specMap[unit] || [];
+                                const isExpanded = expandedUnit === unit;
+                                const isSelected = selectedTopic === unit || subTopics.includes(selectedTopic || '');
+
+                                return (
+                                    <div key={unit} className={`rounded-xl border transition-all overflow-hidden ${isExpanded || isSelected ? 'border-pink-300 dark:border-pink-700 bg-white dark:bg-stone-800' : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-pink-200'}`}>
+                                        <button
+                                            onClick={() => setExpandedUnit(isExpanded ? null : unit)}
+                                            className={`w-full p-4 flex justify-between items-center text-left font-bold transition-colors ${isExpanded ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300' : 'text-stone-700 dark:text-stone-200'}`}
+                                        >
+                                            <span className="flex items-center gap-3">
+                                                {isSelected && <span className="w-2 h-2 rounded-full bg-pink-500"></span>}
+                                                {unit}
+                                            </span>
+                                            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                        </button>
+
+                                        {isExpanded && (
+                                            <div className="p-3 bg-stone-50 dark:bg-stone-900/50 grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-pink-100 dark:border-stone-700">
+                                                <button
+                                                    onClick={() => setSelectedTopic(unit)}
+                                                    className={`p-3 rounded-lg text-left text-sm transition-all flex items-center gap-2 ${selectedTopic === unit ? 'bg-pink-500 text-white shadow-md font-bold' : 'bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-400'}`}
+                                                >
+                                                    <Mic size={16} />
+                                                    Full Chapter Overview
+                                                </button>
+
+                                                {subTopics.map(sub => (
+                                                    <button
+                                                        key={sub}
+                                                        onClick={() => setSelectedTopic(sub)}
+                                                        className={`p-3 rounded-lg text-left text-sm transition-all ${selectedTopic === sub ? 'bg-pink-500 text-white shadow-md font-bold' : 'bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-400'}`}
+                                                    >
+                                                        {sub}
+                                                    </button>
+                                                ))}
+                                                {subTopics.length === 0 && (
+                                                    <p className="col-span-2 text-center text-xs text-stone-400 italic py-2">No sub-topics available. Select Full Chapter.</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
 
-                        <button 
-                            onClick={handleGenerate} 
-                            disabled={!selectedTopic}
-                            className="mt-8 px-8 py-3 bg-pink-600 text-white font-bold rounded-full text-lg shadow-lg hover:bg-pink-700 disabled:bg-stone-300 disabled:cursor-not-allowed transition-transform active:scale-95"
-                        >
-                            Generate Episode
-                        </button>
+                        <div className="flex justify-center">
+                            <button
+                                onClick={handleGenerate}
+                                disabled={!selectedTopic}
+                                className="px-10 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold rounded-full text-lg shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center gap-3"
+                            >
+                                {selectedTopic ? `Generate Episode: ${selectedTopic.length > 30 ? selectedTopic.substring(0, 30) + '...' : selectedTopic}` : 'Select a Topic'}
+                                {selectedTopic && <Play size={20} fill="currentColor" />}
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -186,7 +231,7 @@ const PodcastView: React.FC<PodcastViewProps> = ({ user, onBack }) => {
                         <div className="bg-stone-900 text-white rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-br from-pink-600/20 to-purple-600/20 pointer-events-none"></div>
                             
-                            <div className="w-32 h-32 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center text-5xl shadow-lg mb-6 relative z-10">
+                            <div className="w-32 h-32 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center text-5xl shadow-lg mb-6 relative z-10 animate-pulse-slow">
                                 🎧
                             </div>
                             
@@ -197,12 +242,18 @@ const PodcastView: React.FC<PodcastViewProps> = ({ user, onBack }) => {
 
                             <a 
                                 href={audioUrl} 
-                                download={`GeoPro-Podcast-${selectedTopic?.replace(/\s+/g, '-')}.wav`}
+                                download={`GeoPro-Podcast-${selectedTopic?.replace(/[^a-zA-Z0-9]/g, '-')}.wav`}
                                 className="px-6 py-3 bg-white text-stone-900 font-bold rounded-full hover:bg-stone-200 transition flex items-center gap-2 relative z-10"
                             >
-                                <span>⬇️</span> Download Episode
+                                <Download size={18} /> Download Episode
                             </a>
                         </div>
+                        <button
+                            onClick={() => { setStatus('idle'); setSelectedTopic(null); setExpandedUnit(null); }}
+                            className="w-full mt-4 py-2 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition text-sm font-semibold"
+                        >
+                            Create Another Episode
+                        </button>
                     </div>
                 )}
 
@@ -215,6 +266,11 @@ const PodcastView: React.FC<PodcastViewProps> = ({ user, onBack }) => {
             </div>
             <style>{`
                 .custom-audio-player { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+                @keyframes pulse-slow {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.9; transform: scale(1.02); }
+                }
+                .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
             `}</style>
         </HubLayout>
     );
