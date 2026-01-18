@@ -163,7 +163,10 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                             {filteredVideos.map(video => (
                                 <button
                                     key={video.id}
-                                    onClick={() => setSelectedVideo(video)}
+                                    onClick={() => {
+                                        setSelectedVideo(video);
+                                        setIsSidebarCollapsed(true);
+                                    }}
                                     className={`w-full text-left p-3 rounded-xl transition-all border flex gap-3 ${selectedVideo?.id === video.id ? 'bg-red-50 dark:bg-red-900/20 border-red-500 ring-1 ring-red-500 shadow-md' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
                                 >
                                     <div className="relative w-24 h-16 flex-shrink-0 bg-black rounded-lg overflow-hidden">
