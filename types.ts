@@ -336,6 +336,7 @@ export interface VideoResource {
     title: string;
     videoId: string;
     level: UserLevel;
+    topic?: string;
 }
 
 export interface VideoQuizContent {

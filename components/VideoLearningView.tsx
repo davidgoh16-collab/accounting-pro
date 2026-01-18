@@ -18,13 +18,21 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
     const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({}); // Index -> Answer
     const [openEndedRevealed, setOpenEndedRevealed] = useState<Record<number, boolean>>({});
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedTopic, setSelectedTopic] = useState('All');
+
+    const availableTopics = useMemo(() => {
+        const videosForLevel = VIDEO_LIBRARY.filter(v => (v.level === user.level || !v.level));
+        const topics = new Set(videosForLevel.map(v => v.topic).filter(Boolean));
+        return ['All', ...Array.from(topics)];
+    }, [user.level]);
 
     const filteredVideos = useMemo(() => {
         return VIDEO_LIBRARY.filter(v => 
             v.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (v.level === user.level || !v.level) // Filter by level or show if no level specified
+            (v.level === user.level || !v.level) && // Filter by level or show if no level specified
+            (selectedTopic === 'All' || v.topic === selectedTopic)
         );
-    }, [searchTerm, user.level]);
+    }, [searchTerm, user.level, selectedTopic]);
 
     useEffect(() => {
         let isMounted = true;
@@ -71,7 +79,26 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
             <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 h-[85vh]">
                 {/* Left Sidebar: Video List */}
                 <div className="lg:col-span-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50">
+                    <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 space-y-3">
+                        {/* Topic Filters */}
+                        {availableTopics.length > 1 && (
+                             <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                                {availableTopics.map(topic => (
+                                    <button
+                                        key={topic}
+                                        onClick={() => setSelectedTopic(topic as string)}
+                                        className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                                            selectedTopic === topic
+                                                ? 'bg-red-500 text-white'
+                                                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
+                                        }`}
+                                    >
+                                        {topic}
+                                    </button>
+                                ))}
+                             </div>
+                        )}
+
                         <input 
                             type="text" 
                             placeholder="Search videos..." 
