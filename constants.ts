@@ -1027,3 +1027,25 @@ export const ALEVEL_SPEC_TOPICS: Record<string, string[]> = {
         "Global ecosystem management"
     ]
 };
+
+export const GCSE_PAPER_MAPPING: Record<string, string> = {
+    "The Challenge of Natural Hazards": "Paper 1",
+    "The Living World": "Paper 1",
+    "Physical Landscapes in the UK": "Paper 1",
+    "Urban Issues and Challenges": "Paper 2",
+    "The Changing Economic World": "Paper 2",
+    "The Challenge of Resource Management": "Paper 2",
+    "Geographical Applications": "Paper 3"
+};
+
+export const ALEVEL_PAPER_MAPPING: Record<string, string> = {
+    "Water and Carbon Cycles": "Paper 1",
+    "Coastal Systems and Landscapes": "Paper 1",
+    "Hazards": "Paper 1",
+    "Ecosystems Under Stress": "Paper 1",
+    "Global Systems and Global Governance": "Paper 2",
+    "Changing Places": "Paper 2",
+    "Contemporary Urban Environments": "Paper 2",
+    "Population and the Environment": "Paper 2",
+    "Resource Security": "Paper 2"
+};

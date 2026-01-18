@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, GameSessionResult } from '../types';
-import { AQA_UNITS, GCSE_UNITS } from '../constants';
+import { AQA_UNITS, GCSE_UNITS, GCSE_PAPER_MAPPING, ALEVEL_PAPER_MAPPING } from '../constants';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { db } from '../firebase';
 import { collection, query, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
@@ -68,34 +68,59 @@ const ManualRagGrid: React.FC<{
     ratings: Record<string, 'Red' | 'Amber' | 'Green'>;
     onRate: (topic: string, rating: 'Red' | 'Amber' | 'Green') => void;
     onSelectTopic: (topic: string) => void;
-}> = ({ topics, ratings, onRate, onSelectTopic }) => {
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-            {(topics || []).map(topic => (
-                <div key={topic} className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
-                    <button
-                        onClick={() => onSelectTopic(topic)}
-                        className="text-left group"
-                    >
-                        <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{topic}</h3>
-                        <p className="text-xs text-stone-400 mb-4 font-semibold group-hover:text-indigo-500 transition-colors">View Specification &rarr;</p>
-                    </button>
-                    <div className="grid grid-cols-3 gap-2">
-                        {(['Red', 'Amber', 'Green'] as const).map(rating => {
-                            const isSelected = ratings[topic] === rating;
-                            const baseColor = rating === 'Red' ? 'bg-red-500' : rating === 'Amber' ? 'bg-amber-500' : 'bg-emerald-500';
-                            const opacity = isSelected ? 'opacity-100 ring-2 ring-offset-2 ring-stone-400 dark:ring-offset-stone-900' : 'opacity-30 hover:opacity-60';
+    paperMapping: Record<string, string>;
+}> = ({ topics, ratings, onRate, onSelectTopic, paperMapping }) => {
 
-                            return (
+    // Group topics by paper
+    const groupedTopics = useMemo(() => {
+        const groups: Record<string, string[]> = {};
+        topics.forEach(topic => {
+            const paper = paperMapping[topic] || 'Other';
+            if (!groups[paper]) groups[paper] = [];
+            groups[paper].push(topic);
+        });
+
+        // Sort keys to ensure Paper 1, Paper 2, Paper 3, Other order
+        const sortedKeys = Object.keys(groups).sort();
+        return { groups, sortedKeys };
+    }, [topics, paperMapping]);
+
+    return (
+        <div className="space-y-12 animate-fade-in">
+            {groupedTopics.sortedKeys.map(paper => (
+                <div key={paper}>
+                    <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-300 mb-6 border-b border-stone-200 dark:border-stone-700 pb-2">
+                        {paper}
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {groupedTopics.groups[paper].map(topic => (
+                            <div key={topic} className="bg-white dark:bg-stone-800 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 flex flex-col justify-between">
                                 <button
-                                    key={rating}
-                                    onClick={() => onRate(topic, rating)}
-                                    className={`h-10 rounded-lg ${baseColor} ${opacity} transition-all font-bold text-white text-xs uppercase tracking-wider`}
+                                    onClick={() => onSelectTopic(topic)}
+                                    className="text-left group"
                                 >
-                                    {rating}
+                                    <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-1 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{topic}</h3>
+                                    <p className="text-xs text-stone-400 mb-4 font-semibold group-hover:text-indigo-500 transition-colors">View Specification &rarr;</p>
                                 </button>
-                            );
-                        })}
+                                <div className="grid grid-cols-3 gap-2">
+                                    {(['Red', 'Amber', 'Green'] as const).map(rating => {
+                                        const isSelected = ratings[topic] === rating;
+                                        const baseColor = rating === 'Red' ? 'bg-red-500' : rating === 'Amber' ? 'bg-amber-500' : 'bg-emerald-500';
+                                        const opacity = isSelected ? 'opacity-100 ring-2 ring-offset-2 ring-stone-400 dark:ring-offset-stone-900' : 'opacity-30 hover:opacity-60';
+
+                                        return (
+                                            <button
+                                                key={rating}
+                                                onClick={() => onRate(topic, rating)}
+                                                className={`h-10 rounded-lg ${baseColor} ${opacity} transition-all font-bold text-white text-xs uppercase tracking-wider`}
+                                            >
+                                                {rating}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             ))}
@@ -178,6 +203,10 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
     const relevantUnits = useMemo(() => {
         if (!user.level) return [];
         return user.level === 'GCSE' ? GCSE_UNITS : AQA_UNITS;
+    }, [user.level]);
+
+    const paperMapping = useMemo(() => {
+        return user.level === 'GCSE' ? GCSE_PAPER_MAPPING : ALEVEL_PAPER_MAPPING;
     }, [user.level]);
 
     const allTopics = useMemo(() => {
@@ -355,6 +384,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                         ratings={manualRatings}
                         onRate={handleManualRate}
                         onSelectTopic={setSelectedTopic}
+                        paperMapping={paperMapping}
                     />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
