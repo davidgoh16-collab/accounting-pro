@@ -19,20 +19,30 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
     const [openEndedRevealed, setOpenEndedRevealed] = useState<Record<number, boolean>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTopic, setSelectedTopic] = useState('All');
+    const [selectedPaper, setSelectedPaper] = useState('All');
 
     const availableTopics = useMemo(() => {
-        const videosForLevel = VIDEO_LIBRARY.filter(v => (v.level === user.level || !v.level));
+        const videosForLevel = VIDEO_LIBRARY.filter(v =>
+            (v.level === user.level || !v.level) &&
+            (selectedPaper === 'All' || v.paper === selectedPaper)
+        );
         const topics = new Set(videosForLevel.map(v => v.topic).filter(Boolean));
         return ['All', ...Array.from(topics)];
-    }, [user.level]);
+    }, [user.level, selectedPaper]);
+
+    // Reset topic when paper changes
+    useEffect(() => {
+        setSelectedTopic('All');
+    }, [selectedPaper]);
 
     const filteredVideos = useMemo(() => {
         return VIDEO_LIBRARY.filter(v => 
             v.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
             (v.level === user.level || !v.level) && // Filter by level or show if no level specified
+            (selectedPaper === 'All' || v.paper === selectedPaper) &&
             (selectedTopic === 'All' || v.topic === selectedTopic)
         );
-    }, [searchTerm, user.level, selectedTopic]);
+    }, [searchTerm, user.level, selectedTopic, selectedPaper]);
 
     useEffect(() => {
         let isMounted = true;
@@ -80,6 +90,25 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                 {/* Left Sidebar: Video List */}
                 <div className="lg:col-span-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col overflow-hidden">
                     <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 space-y-3">
+                        {/* Paper Filters (Only for GCSE) */}
+                        {user.level === 'GCSE' && (
+                            <div className="flex gap-2 pb-2">
+                                {['All', 'Paper 1', 'Paper 2'].map(paper => (
+                                    <button
+                                        key={paper}
+                                        onClick={() => setSelectedPaper(paper)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            selectedPaper === paper
+                                                ? 'bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900'
+                                                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
+                                        }`}
+                                    >
+                                        {paper}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
                         {/* Topic Filters */}
                         {availableTopics.length > 1 && (
                              <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
