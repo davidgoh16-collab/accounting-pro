@@ -265,6 +265,36 @@ export const VIDEO_LIBRARY: VideoResource[] = [
     { id: 'gcse_v155', title: 'Energy (Part 6)', videoId: 'RIuLD2OS2eE', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
     { id: 'gcse_v156', title: 'Energy (Part 7)', videoId: 'jfrro-9gTF8', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
     { id: 'gcse_v157', title: 'Energy (Part 8)', videoId: 'OY3ltFcipcY', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
+
+    // --- Changing Economic World (Paper 2) ---
+    // Development Gap
+    { id: 'gcse_v158', title: 'Development Gap (Part 1)', videoId: 'LbQ4G0JD-D8', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v159', title: 'Development Gap (Part 2)', videoId: 'mWFAs8eazMw', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v160', title: 'Development Gap (Part 3)', videoId: 'HYwbkswVlgQ', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v161', title: 'Development Gap (Part 4)', videoId: 'OPKzI-7_li4', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v162', title: 'Development Gap (Part 5)', videoId: '6YYIXoywGm8', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v163', title: 'Development Gap (Part 6)', videoId: 'WiUyZhWsDy8', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v164', title: 'Development Gap (Part 7)', videoId: '3Cf55i1cwMw', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v165', title: 'Development Gap (Part 8)', videoId: 'DM-Hiy1uRsM', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v166', title: 'Development Gap (Part 9)', videoId: 's-JKU30B2jY', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v167', title: 'Development Gap (Part 10)', videoId: 'HFE2L0FSfqs', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v168', title: 'Development Gap (Part 11)', videoId: '5Xvgsyxb5Pc', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v169', title: 'Development Gap (Part 12)', videoId: '_7sgtFYBBog', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v170', title: 'Development Gap (Part 13)', videoId: 'DgVGYMbLERA', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v171', title: 'Development Gap (Part 14)', videoId: 'xAI1tSHWZyI', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v172', title: 'Development Gap (Part 15)', videoId: 'MWLFYg5ZSwo', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+    { id: 'gcse_v173', title: 'Development Gap (Part 16)', videoId: '5ehZZmAeA1g', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
+
+    // UK Economic Futures
+    { id: 'gcse_v174', title: 'UK Economic Futures (Part 1)', videoId: '9obg_rnGTJw', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v175', title: 'UK Economic Futures (Part 2)', videoId: 'sZ3HkC7-R1s', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v176', title: 'UK Economic Futures (Part 3)', videoId: 'qEyUDHPzNHY', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v177', title: 'UK Economic Futures (Part 4)', videoId: 'nLfFLCN9xNA', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v178', title: 'UK Economic Futures (Part 5)', videoId: 't5OvzXGpONc', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v179', title: 'UK Economic Futures (Part 6)', videoId: '5M1CLvWatbs', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v180', title: 'UK Economic Futures (Part 7)', videoId: '_zgjuy0advs', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v181', title: 'UK Economic Futures (Part 8)', videoId: '3WUX1Zv9D6M', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+    { id: 'gcse_v182', title: 'UK Economic Futures (Part 9)', videoId: 'AOOgc6gyMMM', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
 ];
 
 export const COMMAND_WORDS: CommandWord[] = [
