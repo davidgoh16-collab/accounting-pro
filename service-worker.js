@@ -25,7 +25,12 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
-        return fetch(event.request);
+        return fetch(event.request).catch((error) => {
+            console.warn('Fetch failed:', error);
+            // Optionally return an offline fallback page here if navigation
+            // if (event.request.mode === 'navigate') { return caches.match('/offline.html'); }
+            throw error;
+        });
       })
   );
 });
