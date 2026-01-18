@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
-import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassDetails, addClassMembers, updateUserRole, deleteClass } from '../firebase';
+import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassDetails, addClassMembers, updateUserRole, deleteClass, deleteUserAccount } from '../firebase';
 import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
@@ -587,10 +587,11 @@ const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
     );
 };
 
-const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) => void }> = ({ user, onImpersonate }) => {
+const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) => void, onDeleteUser: (uid: string) => void }> = ({ user, onImpersonate, onDeleteUser }) => {
     const [activeTab, setActiveTab] = useState<Tab>('overview');
     const [viewSession, setViewSession] = useState<CompletedSession | null>(null);
     const [roleLoading, setRoleLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     
     const TabButton = ({ id, label, icon }: { id: Tab, label: string, icon: string }) => (
         <button 
@@ -609,14 +610,26 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
         setRoleLoading(true);
         try {
             await updateUserRole(user.uid, newRole);
-            // In a real app we'd trigger a refresh or update the local user object,
-            // but for now we'll just alert. Ideally AdminView should pass a refresh handler.
             alert(`User role updated to ${newRole}. Refresh to see changes.`);
         } catch (e) {
             console.error(e);
             alert("Failed to update role");
         } finally {
             setRoleLoading(false);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!confirm(`DANGER: Are you sure you want to DELETE user "${user.displayName}"?\n\nThis will remove them from all classes and delete their data permanently. This cannot be undone.`)) return;
+
+        setIsDeleting(true);
+        try {
+            await deleteUserAccount(user.uid);
+            onDeleteUser(user.uid);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to delete user.");
+            setIsDeleting(false);
         }
     };
 
@@ -651,6 +664,14 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                             className="px-6 py-3 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition shadow-md flex items-center gap-2"
                         >
                             <span>👓</span> View as Student
+                        </button>
+                        <button
+                            onClick={handleDeleteUser}
+                            disabled={isDeleting}
+                            className="px-4 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition shadow-md disabled:opacity-50"
+                            title="Delete User Account"
+                        >
+                            🗑️
                         </button>
                     </div>
                 </div>
@@ -993,7 +1014,14 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                         {/* Main Content Area */}
                         <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
                              {selectedUser ? (
-                                <StudentInspector user={selectedUser} onImpersonate={onImpersonate} />
+                                <StudentInspector
+                                    user={selectedUser}
+                                    onImpersonate={onImpersonate}
+                                    onDeleteUser={(uid) => {
+                                        setUsers(prev => prev.filter(u => u.uid !== uid));
+                                        setSelectedUser(null);
+                                    }}
+                                />
                              ) : (
                                 <div className="flex-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
                                     <span className="text-6xl mb-4 opacity-50">👋</span>

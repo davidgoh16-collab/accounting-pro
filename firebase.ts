@@ -138,3 +138,11 @@ export const removeClassMember = async (classId: string, studentId: string) => {
         studentIds: arrayRemove(studentId)
     });
 };
+
+export const deleteUserAccount = async (uid: string) => {
+    // 1. Remove from all classes
+    await removeStudentFromAllClasses(uid);
+    // 2. Delete User Document
+    const userRef = doc(db, 'users', uid);
+    await deleteDoc(userRef);
+};
