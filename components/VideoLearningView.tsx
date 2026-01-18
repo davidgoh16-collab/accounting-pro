@@ -20,6 +20,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTopic, setSelectedTopic] = useState('All');
     const [selectedPaper, setSelectedPaper] = useState('All');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     const availableTopics = useMemo(() => {
         const videosForLevel = VIDEO_LIBRARY.filter(v =>
@@ -86,81 +87,104 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
             gradient="bg-gradient-to-r from-red-600 to-rose-600"
             onBack={onBack}
         >
-            <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 h-[85vh]">
-                {/* Left Sidebar: Video List */}
-                <div className="lg:col-span-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 space-y-3">
-                        {/* Paper Filters (Only for GCSE) */}
-                        {user.level === 'GCSE' && (
-                            <div className="flex gap-2 pb-2">
-                                {['All', 'Paper 1', 'Paper 2'].map(paper => (
-                                    <button
-                                        key={paper}
-                                        onClick={() => setSelectedPaper(paper)}
-                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            selectedPaper === paper
-                                                ? 'bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900'
-                                                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
-                                        }`}
-                                    >
-                                        {paper}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+            <div className={`w-full max-w-7xl mx-auto grid gap-8 h-[85vh] transition-all duration-300 ${isSidebarCollapsed ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
 
-                        {/* Topic Filters */}
-                        {availableTopics.length > 1 && (
-                             <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                                {availableTopics.map(topic => (
-                                    <button
-                                        key={topic}
-                                        onClick={() => setSelectedTopic(topic as string)}
-                                        className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
-                                            selectedTopic === topic
-                                                ? 'bg-red-500 text-white'
-                                                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
-                                        }`}
-                                    >
-                                        {topic}
-                                    </button>
-                                ))}
-                             </div>
-                        )}
+                {/* Expand Button (Visible only when sidebar is collapsed) */}
+                {isSidebarCollapsed && (
+                    <button
+                        onClick={() => setIsSidebarCollapsed(false)}
+                        className="fixed top-28 left-6 z-50 p-2 bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 rounded-full shadow-lg border border-stone-200 dark:border-stone-700 hover:scale-110 transition-transform"
+                        title="Show Video List"
+                    >
+                        <span className="text-xl">➡️</span>
+                    </button>
+                )}
 
-                        <input 
-                            type="text" 
-                            placeholder="Search videos..." 
-                            value={searchTerm} 
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:outline-none dark:text-white"
-                        />
-                    </div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
-                        {filteredVideos.map(video => (
-                            <button
-                                key={video.id}
-                                onClick={() => setSelectedVideo(video)}
-                                className={`w-full text-left p-3 rounded-xl transition-all border flex gap-3 ${selectedVideo?.id === video.id ? 'bg-red-50 dark:bg-red-900/20 border-red-500 ring-1 ring-red-500 shadow-md' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
-                            >
-                                <div className="relative w-24 h-16 flex-shrink-0 bg-black rounded-lg overflow-hidden">
-                                    <img src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`} alt="" className="w-full h-full object-cover" />
+                {/* Left Sidebar: Video List (Hidden when collapsed) */}
+                {!isSidebarCollapsed && (
+                    <div className="lg:col-span-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col overflow-hidden relative">
+                        {/* Collapse Button */}
+                        <button
+                            onClick={() => setIsSidebarCollapsed(true)}
+                            className="absolute top-2 right-2 z-10 p-1.5 bg-stone-100 dark:bg-stone-800 text-stone-500 rounded-full hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+                            title="Collapse Sidebar"
+                        >
+                            <span className="text-xs">⬅️</span>
+                        </button>
+
+                        <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 space-y-3 pt-8">
+                            {/* Paper Filters (Only for GCSE) */}
+                            {user.level === 'GCSE' && (
+                                <div className="flex gap-2 pb-2">
+                                    {['All', 'Paper 1', 'Paper 2'].map(paper => (
+                                        <button
+                                            key={paper}
+                                            onClick={() => setSelectedPaper(paper)}
+                                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                selectedPaper === paper
+                                                    ? 'bg-stone-800 text-white dark:bg-stone-100 dark:text-stone-900'
+                                                    : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
+                                            }`}
+                                        >
+                                            {paper}
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-bold line-clamp-2 ${selectedVideo?.id === video.id ? 'text-red-700 dark:text-red-300' : 'text-stone-700 dark:text-stone-300'}`}>{video.title}</p>
-                                    <span className="text-[10px] uppercase font-bold text-stone-400 mt-1 block">{video.level || 'A-Level'}</span>
-                                </div>
-                            </button>
-                        ))}
+                            )}
+
+                            {/* Topic Filters */}
+                            {availableTopics.length > 1 && (
+                                 <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                                    {availableTopics.map(topic => (
+                                        <button
+                                            key={topic}
+                                            onClick={() => setSelectedTopic(topic as string)}
+                                            className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                                                selectedTopic === topic
+                                                    ? 'bg-red-500 text-white'
+                                                    : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
+                                            }`}
+                                        >
+                                            {topic}
+                                        </button>
+                                    ))}
+                                 </div>
+                            )}
+
+                            <input
+                                type="text"
+                                placeholder="Search videos..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:outline-none dark:text-white"
+                            />
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
+                            {filteredVideos.map(video => (
+                                <button
+                                    key={video.id}
+                                    onClick={() => setSelectedVideo(video)}
+                                    className={`w-full text-left p-3 rounded-xl transition-all border flex gap-3 ${selectedVideo?.id === video.id ? 'bg-red-50 dark:bg-red-900/20 border-red-500 ring-1 ring-red-500 shadow-md' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                                >
+                                    <div className="relative w-24 h-16 flex-shrink-0 bg-black rounded-lg overflow-hidden">
+                                        <img src={`https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm font-bold line-clamp-2 ${selectedVideo?.id === video.id ? 'text-red-700 dark:text-red-300' : 'text-stone-700 dark:text-stone-300'}`}>{video.title}</p>
+                                        <span className="text-[10px] uppercase font-bold text-stone-400 mt-1 block">{video.level || 'A-Level'}</span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Right Content: Player & Quiz */}
-                <div className="lg:col-span-2 flex flex-col gap-6 overflow-y-auto custom-scrollbar relative pb-20">
+                <div className={`${isSidebarCollapsed ? 'lg:col-span-1' : 'lg:col-span-2'} flex flex-col gap-6 overflow-y-auto custom-scrollbar relative pb-20`}>
                     {selectedVideo ? (
-                        <>
+                        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'grid grid-cols-1 lg:grid-cols-5 gap-6 h-full' : 'flex flex-col gap-6'}`}>
                             {/* Video Player - Sticky */}
-                            <div className="sticky top-0 z-30 w-full aspect-video bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-stone-200 dark:border-stone-700 flex-shrink-0">
+                            <div className={`${isSidebarCollapsed ? 'lg:col-span-3 h-full overflow-hidden' : 'sticky top-0 z-30 w-full aspect-video flex-shrink-0'} bg-black rounded-3xl shadow-2xl overflow-hidden border-4 border-stone-200 dark:border-stone-700`}>
                                 <iframe 
                                     width="100%" 
                                     height="100%" 
@@ -173,7 +197,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                             </div>
 
                             {/* Interactive Session */}
-                            <div className="bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-6 relative z-20">
+                            <div className={`${isSidebarCollapsed ? 'lg:col-span-2 h-full overflow-y-auto custom-scrollbar' : 'relative z-20'} bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-6`}>
                                 <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4 flex items-center gap-2">
                                     <span>🧠</span> Interactive Session
                                 </h2>
@@ -269,7 +293,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                                     </div>
                                 )}
                             </div>
-                        </>
+                        </div>
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-stone-50 dark:bg-stone-800/50 rounded-3xl border border-dashed border-stone-300 dark:border-stone-700">
                             <span className="text-6xl mb-4 grayscale opacity-50">🎬</span>
