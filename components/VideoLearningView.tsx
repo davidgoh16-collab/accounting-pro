@@ -92,7 +92,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className={`text-sm font-bold line-clamp-2 ${selectedVideo?.id === video.id ? 'text-red-700 dark:text-red-300' : 'text-stone-700 dark:text-stone-300'}`}>{video.title}</p>
-                                    <span className="text-[10px] uppercase font-bold text-stone-400 mt-1 block">A-Level</span>
+                                    <span className="text-[10px] uppercase font-bold text-stone-400 mt-1 block">{video.level || 'A-Level'}</span>
                                 </div>
                             </button>
                         ))}

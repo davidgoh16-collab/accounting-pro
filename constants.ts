@@ -66,6 +66,51 @@ export const VIDEO_LIBRARY: VideoResource[] = [
     { id: 'v33', title: 'Global Commons', videoId: 'ThhrwcWG_v0', level: 'A-Level' },
     { id: 'v34', title: 'Human Population and the Environment', videoId: 'a3En6Vpl_ds', level: 'A-Level' },
     { id: 'v35', title: 'International Migration', videoId: 'muqHF7u5AQQ', level: 'A-Level' },
+
+    // --- GCSE VIDEOS ---
+    // Natural Hazards
+    { id: 'gcse_v1', title: 'Natural Hazards (Part 1)', videoId: 'LQp_82E2fTs', level: 'GCSE' },
+    { id: 'gcse_v2', title: 'Natural Hazards (Part 2)', videoId: '9AAWepfiu2Q', level: 'GCSE' },
+
+    // Tectonic Hazards
+    { id: 'gcse_v3', title: 'Tectonic Hazards (Part 1)', videoId: 'RzKj4zWfjLY', level: 'GCSE' },
+    { id: 'gcse_v4', title: 'Tectonic Hazards (Part 2)', videoId: 'zUaYhJrhnrE', level: 'GCSE' },
+    { id: 'gcse_v5', title: 'Tectonic Hazards (Part 3)', videoId: 'OhtAtNuFtzQ', level: 'GCSE' },
+    { id: 'gcse_v6', title: 'Tectonic Hazards (Part 4)', videoId: 'OzMeGF0GXWU', level: 'GCSE' },
+    { id: 'gcse_v7', title: 'Tectonic Hazards (Part 5)', videoId: 'GoCkjr5WfyQ', level: 'GCSE' },
+    { id: 'gcse_v8', title: 'Tectonic Hazards (Part 6)', videoId: '1RuhHqOdBnQ', level: 'GCSE' },
+    { id: 'gcse_v9', title: 'Tectonic Hazards (Part 7)', videoId: 'lrS_240BkBA', level: 'GCSE' },
+    { id: 'gcse_v10', title: 'Tectonic Hazards (Part 8)', videoId: 'tWVSmATx3jk', level: 'GCSE' },
+    { id: 'gcse_v11', title: 'Tectonic Hazards (Part 9)', videoId: '8R7lwY4vjv4', level: 'GCSE' },
+    { id: 'gcse_v12', title: 'Tectonic Hazards (Part 10)', videoId: 'T6Botca1_FQ', level: 'GCSE' },
+    { id: 'gcse_v13', title: 'Tectonic Hazards (Part 11)', videoId: 'hK-dUnWv7Zg', level: 'GCSE' },
+
+    // Weather Hazards
+    { id: 'gcse_v14', title: 'Weather Hazards (Part 1)', videoId: 'jvfB4YFRC3w', level: 'GCSE' },
+    { id: 'gcse_v15', title: 'Weather Hazards (Part 2)', videoId: '6hHMCgLtwao', level: 'GCSE' },
+    { id: 'gcse_v16', title: 'Weather Hazards (Part 3)', videoId: '72LhtyFZadw', level: 'GCSE' },
+    { id: 'gcse_v17', title: 'Weather Hazards (Part 4)', videoId: '0DIqel4KLW0', level: 'GCSE' },
+    { id: 'gcse_v18', title: 'Weather Hazards (Part 5)', videoId: 'iEopE8qCKGE', level: 'GCSE' },
+    { id: 'gcse_v19', title: 'Weather Hazards (Part 6)', videoId: '5MuabnhLOdY', level: 'GCSE' },
+    { id: 'gcse_v20', title: 'Weather Hazards (Part 7)', videoId: 'Cui7eS7tPJc', level: 'GCSE' },
+    { id: 'gcse_v21', title: 'Weather Hazards (Part 8)', videoId: 'pkCpqANQJA0', level: 'GCSE' },
+    { id: 'gcse_v22', title: 'Weather Hazards (Part 9)', videoId: 'HPuSZZaJnJ0', level: 'GCSE' },
+    { id: 'gcse_v23', title: 'Weather Hazards (Part 10)', videoId: '3KNDGPq1n9k', level: 'GCSE' },
+    { id: 'gcse_v24', title: 'Weather Hazards (Part 11)', videoId: 'lFNHFC4ZBgI', level: 'GCSE' },
+    { id: 'gcse_v25', title: 'Weather Hazards (Part 12)', videoId: 'rB4g0pE4Tw8', level: 'GCSE' },
+    { id: 'gcse_v26', title: 'Weather Hazards (Part 13)', videoId: 'Arhqus8MQGQ', level: 'GCSE' },
+    { id: 'gcse_v27', title: 'Weather Hazards (Part 14)', videoId: 'D-I2zlJLMm8', level: 'GCSE' },
+    { id: 'gcse_v28', title: 'Weather Hazards (Part 15)', videoId: 'FH8E2Q3qfJg', level: 'GCSE' },
+
+    // Climate Change
+    { id: 'gcse_v29', title: 'Climate Change (Part 1)', videoId: '3fyOyHMlyRQ', level: 'GCSE' },
+    { id: 'gcse_v30', title: 'Climate Change (Part 2)', videoId: 'OS8_p_J9VLE', level: 'GCSE' },
+    { id: 'gcse_v31', title: 'Climate Change (Part 3)', videoId: 'DpEUOOwQ_XU', level: 'GCSE' },
+    { id: 'gcse_v32', title: 'Climate Change (Part 4)', videoId: 'EglASOE5eBo', level: 'GCSE' },
+    { id: 'gcse_v33', title: 'Climate Change (Part 5)', videoId: 'DutpzaJpMHQ', level: 'GCSE' },
+    { id: 'gcse_v34', title: 'Climate Change (Part 6)', videoId: 'U_0kWdNaPzY', level: 'GCSE' },
+    { id: 'gcse_v35', title: 'Climate Change (Part 7)', videoId: '9N-pN5zHfZI', level: 'GCSE' },
+    { id: 'gcse_v36', title: 'Climate Change (Part 8)', videoId: 'aAN0_UxXli4', level: 'GCSE' },
 ];
 
 export const COMMAND_WORDS: CommandWord[] = [
