@@ -32,7 +32,7 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, onNavigate }) => {
 
     return (
         <HubLayout
-            title="Mocks Central"
+            title="Exam Central"
             subtitle="Prepare for your upcoming examinations."
             gradient="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-600"
             onBack={() => onNavigate('dashboard')}

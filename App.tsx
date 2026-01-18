@@ -416,8 +416,8 @@ const App: React.FC = () => {
                                 />
                                 <HubCard
                                     icon={<span className="text-4xl">🎯</span>}
-                                    title="Mocks"
-                                    description="Access targeted revision materials for specific mock exam series (e.g. Feb 2026)."
+                                    title="Exams"
+                                    description="Access targeted revision materials for upcoming exams and mock series."
                                     onClick={() => handleNavigate('mocks_hub')}
                                     shadowColor="shadow-rose-500/20"
                                     accentColor="text-rose-600 hover:text-rose-700"

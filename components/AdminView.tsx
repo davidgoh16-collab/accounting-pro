@@ -848,7 +848,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                             onClick={() => setViewMode('mocks')}
                             className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'mocks' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
                         >
-                            Mocks
+                            Exams
                         </button>
                         <button
                             onClick={() => setViewMode('settings')}

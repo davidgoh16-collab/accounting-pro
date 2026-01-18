@@ -5,6 +5,43 @@ import { parseTimetableFile } from '../services/geminiService';
 import { COURSE_LESSONS } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
 
+// --- Topic & Paper Mappings ---
+// Hardcoded mapping for topic filtering based on paper
+// Keys match COURSE_LESSONS chapter names or GCSE_SPEC_TOPICS keys
+const GCSE_PAPER_MAP: Record<string, string[]> = {
+    'Paper 1': [
+        'The Challenge of Natural Hazards',
+        'The Living World',
+        'Physical Landscapes in the UK'
+    ],
+    'Paper 2': [
+        'Urban Issues and Challenges',
+        'The Changing Economic World',
+        'The Challenge of Resource Management'
+    ],
+    'Paper 3': [
+        'Geographical Applications'
+    ]
+};
+
+const ALEVEL_PAPER_MAP: Record<string, string[]> = {
+    'Paper 1': [
+        'Water and Carbon Cycles',
+        'Coastal Systems and Landscapes',
+        'Hazards',
+        'Ecosystems Under Stress',
+        'Cold Environments',
+        'Hot Desert Systems'
+    ],
+    'Paper 2': [
+        'Global Systems and Global Governance',
+        'Changing Places',
+        'Contemporary Urban Environments',
+        'Population and the Environment',
+        'Resource Security'
+    ]
+};
+
 const MockManager: React.FC = () => {
     const [mocks, setMocks] = useState<MockConfig[]>([]);
     const [selectedMock, setSelectedMock] = useState<MockConfig | null>(null);
@@ -16,18 +53,27 @@ const MockManager: React.FC = () => {
     const [level, setLevel] = useState<UserLevel>('A-Level');
     const [isActive, setIsActive] = useState(false);
     const [exams, setExams] = useState<MockExam[]>([]);
-    const [topics, setTopics] = useState<string[]>([]);
+    const [topics, setTopics] = useState<string[]>([]); // Global topic pool for this series (optional usage)
 
     // Topic Selection State
     const [availableTopics, setAvailableTopics] = useState<string[]>([]);
-    const [topicSearch, setTopicSearch] = useState('');
 
     useEffect(() => {
         loadMocks();
-        // Extract all unique chapters from COURSE_LESSONS as topics
-        const uniqueTopics = Array.from(new Set(COURSE_LESSONS.map(l => l.chapter))).sort();
-        setAvailableTopics(uniqueTopics);
     }, []);
+
+    // Filter available topics whenever Level changes
+    useEffect(() => {
+        let relevantLessons = COURSE_LESSONS;
+        if (level === 'GCSE') {
+            relevantLessons = COURSE_LESSONS.filter(l => l.id.startsWith('G-'));
+        } else if (level === 'A-Level') {
+            relevantLessons = COURSE_LESSONS.filter(l => !l.id.startsWith('G-'));
+        }
+
+        const uniqueTopics = Array.from(new Set(relevantLessons.map(l => l.chapter))).sort();
+        setAvailableTopics(uniqueTopics);
+    }, [level]);
 
     const loadMocks = async () => {
         const data = await getMocks();
@@ -37,7 +83,7 @@ const MockManager: React.FC = () => {
     const handleCreateMock = () => {
         const newMock: MockConfig = {
             id: uuidv4(),
-            title: 'New Mock Series',
+            title: 'New Exam Series',
             level: 'A-Level',
             isActive: false,
             exams: [],
@@ -74,7 +120,7 @@ const MockManager: React.FC = () => {
         try {
             const updatedMock: MockConfig = {
                 ...selectedMock,
-                title: title || 'Untitled Mock',
+                title: title || 'Untitled Exam Series',
                 level: level || 'A-Level',
                 isActive: !!isActive,
                 exams: exams || [],
@@ -86,7 +132,7 @@ const MockManager: React.FC = () => {
             setSelectedMock(null);
         } catch (e) {
             console.error(e);
-            alert("Failed to save mock.");
+            alert("Failed to save exam series.");
         } finally {
             setLoading(false);
         }
@@ -104,7 +150,7 @@ const MockManager: React.FC = () => {
             setSelectedMock(null);
         } catch (e) {
             console.error(e);
-            alert("Failed to delete mock.");
+            alert("Failed to delete exam series.");
         } finally {
             setLoading(false);
         }
@@ -119,27 +165,19 @@ const MockManager: React.FC = () => {
             const reader = new FileReader();
 
             if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-                // Read CSV as text
                 reader.readAsText(file);
                 reader.onload = async () => {
                     const text = reader.result as string;
-                    // Pass as text/csv mime type, but just raw text in data for simpler handling if service supports it,
-                    // or encode to base64 to match uniform interface.
-                    // Let's encode to base64 for uniformity in service.
                     const base64 = btoa(text);
                     const extractedExams = await parseTimetableFile(base64, 'text/csv');
                     processExtractedExams(extractedExams);
                 };
             } else {
-                // Image or PDF -> Base64
                 reader.readAsDataURL(file);
                 reader.onload = async () => {
                     const result = reader.result as string;
-                    // extract raw base64 and mime
-                    // Data URL format: "data:[<mediatype>][;base64],<data>"
                     const [prefix, data] = result.split(',');
                     const mimeType = prefix.match(/:(.*?);/)?.[1] || file.type;
-
                     const extractedExams = await parseTimetableFile(result, mimeType);
                     processExtractedExams(extractedExams);
                 };
@@ -152,25 +190,43 @@ const MockManager: React.FC = () => {
     };
 
     const processExtractedExams = (extractedExams: any[]) => {
-        const newExams: MockExam[] = extractedExams.map((ex: any) => ({
-            id: uuidv4(),
-            title: `${ex.paper} (${ex.level})`,
-            paper: ex.paper,
-            date: ex.date,
-            time: ex.time,
-            duration: ex.duration,
-            topics: []
-        }));
+        const currentYear = new Date().getFullYear();
+        const newExams: MockExam[] = extractedExams.map((ex: any) => {
+            // Ensure date has a year if parsing failed to add it, or override logic
+            // Gemini usually returns YYYY-MM-DD.
+            // If we want to enforce current year:
+            let dateStr = ex.date;
+            try {
+                const d = new Date(ex.date);
+                d.setFullYear(currentYear); // Force current year default
+                dateStr = d.toISOString().split('T')[0];
+            } catch (e) { /* keep original if fail */ }
+
+            return {
+                id: uuidv4(),
+                title: `${ex.paper} (${ex.level})`,
+                paper: ex.paper,
+                date: dateStr,
+                time: ex.time,
+                duration: ex.duration,
+                topics: []
+            };
+        });
         setExams(prev => [...prev, ...newExams]);
         setLoading(false);
     };
 
     const handleAddExam = () => {
+        const currentYear = new Date().getFullYear();
+        const today = new Date();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
         const newExam: MockExam = {
             id: uuidv4(),
             title: 'New Exam',
             paper: 'Paper 1',
-            date: new Date().toISOString().split('T')[0],
+            date: `${currentYear}-${month}-${day}`,
             time: '09:00',
             duration: '1h 30m',
             topics: []
@@ -182,25 +238,23 @@ const MockManager: React.FC = () => {
         setExams(exams.map(e => e.id === id ? { ...e, [field]: value } : e));
     };
 
+    const updateExamYear = (id: string, year: number) => {
+        setExams(exams.map(e => {
+            if (e.id === id && e.date) {
+                const parts = e.date.split('-');
+                if (parts.length === 3) {
+                    // YYYY-MM-DD
+                    const newDate = `${year}-${parts[1]}-${parts[2]}`;
+                    return { ...e, date: newDate };
+                }
+            }
+            return e;
+        }));
+    };
+
     const removeExam = (id: string) => {
         setExams(exams.filter(e => e.id !== id));
     };
-
-    const toggleTopic = (topic: string) => {
-        if (topics.includes(topic)) {
-            setTopics(topics.filter(t => t !== topic));
-        } else {
-            setTopics([...topics, topic]);
-        }
-    };
-
-    // Also need to assign topics TO exams
-    // For simplicity, we'll let the user select topics for the whole mock series first (Topic Tracker),
-    // and then potentially assign them to specific exams?
-    // The requirement says: "select from a list the topics that are going to be on each mock which will then populate the schedule and topic tracker".
-    // This implies topics are per mock series OR per exam.
-    // In FebMocks, topics are per Exam.
-    // So let's allow assigning topics to Exams.
 
     const toggleExamTopic = (examId: string, topic: string) => {
         setExams(exams.map(e => {
@@ -215,20 +269,39 @@ const MockManager: React.FC = () => {
         }));
     };
 
+    // --- Helper to get filtered topics for a specific exam ---
+    const getFilteredTopicsForExam = (examPaper: string) => {
+        let paperTopics: string[] = [];
+
+        if (level === 'GCSE') {
+            paperTopics = GCSE_PAPER_MAP[examPaper] || [];
+        } else {
+            paperTopics = ALEVEL_PAPER_MAP[examPaper] || [];
+        }
+
+        // Return topics that are in availableTopics AND match the paper map
+        // (Intersection logic)
+        // Note: availableTopics is already filtered by level.
+
+        if (paperTopics.length === 0) return availableTopics; // Fallback: show all if no mapping found
+
+        return availableTopics.filter(t => paperTopics.includes(t));
+    };
+
     return (
         <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-6 h-[85vh] flex gap-6">
 
             {/* Sidebar List */}
             <div className="w-1/4 border-r border-stone-200 dark:border-stone-700 pr-6 flex flex-col">
                 <div className="mb-4">
-                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Mocks</h3>
+                    <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100">Exams</h3>
                     <p className="text-xs text-stone-500">Manage exam seasons.</p>
                 </div>
                 <button
                     onClick={handleCreateMock}
                     className="w-full py-2 mb-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition shadow-sm"
                 >
-                    + New Mock Series
+                    + New Exam Series
                 </button>
                 <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
                     {mocks.map(mock => (
@@ -319,12 +392,24 @@ const MockManager: React.FC = () => {
                                                 className="col-span-2 p-2 rounded border border-stone-300 dark:border-stone-600 text-sm font-bold"
                                                 placeholder="Exam Title"
                                             />
-                                            <input
-                                                type="date"
-                                                value={exam.date}
-                                                onChange={e => updateExam(exam.id, 'date', e.target.value)}
-                                                className="p-2 rounded border border-stone-300 dark:border-stone-600 text-sm"
-                                            />
+
+                                            {/* Date and Year */}
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="date"
+                                                    value={exam.date}
+                                                    onChange={e => updateExam(exam.id, 'date', e.target.value)}
+                                                    className="w-2/3 p-2 rounded border border-stone-300 dark:border-stone-600 text-sm"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    value={parseInt(exam.date.split('-')[0]) || new Date().getFullYear()}
+                                                    onChange={e => updateExamYear(exam.id, parseInt(e.target.value))}
+                                                    className="w-1/3 p-2 rounded border border-stone-300 dark:border-stone-600 text-sm font-bold text-center"
+                                                    placeholder="YYYY"
+                                                />
+                                            </div>
+
                                             <input
                                                 type="time"
                                                 value={exam.time}
@@ -351,9 +436,9 @@ const MockManager: React.FC = () => {
 
                                         {/* Topic Assignment for Exam */}
                                         <div className="mb-4">
-                                            <p className="text-xs font-bold text-stone-500 uppercase mb-2">Topics on this Exam:</p>
+                                            <p className="text-xs font-bold text-stone-500 uppercase mb-2">Topics on this Exam ({level} - {exam.paper}):</p>
                                             <div className="flex flex-wrap gap-2">
-                                                {availableTopics.map(topic => (
+                                                {getFilteredTopicsForExam(exam.paper).map(topic => (
                                                     <button
                                                         key={topic}
                                                         onClick={() => toggleExamTopic(exam.id, topic)}
@@ -366,6 +451,9 @@ const MockManager: React.FC = () => {
                                                         {topic}
                                                     </button>
                                                 ))}
+                                                {getFilteredTopicsForExam(exam.paper).length === 0 && (
+                                                    <p className="text-xs text-stone-400 italic">No topics found for this paper level.</p>
+                                                )}
                                             </div>
                                         </div>
 
@@ -385,7 +473,7 @@ const MockManager: React.FC = () => {
                             <div className="flex gap-4">
                                 <button onClick={() => { setIsEditing(false); setSelectedMock(null); }} className="px-6 py-2 text-stone-500 font-bold hover:bg-stone-100 rounded-lg">Cancel</button>
                                 <button onClick={handleSave} disabled={loading} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50">
-                                    {loading ? 'Saving...' : 'Save Mock Series'}
+                                    {loading ? 'Saving...' : 'Save Exam Series'}
                                 </button>
                             </div>
                         </div>
@@ -393,7 +481,7 @@ const MockManager: React.FC = () => {
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-stone-400">
                         <span className="text-6xl mb-4">📅</span>
-                        <p>Select a mock series to edit or create a new one.</p>
+                        <p>Select an exam series to edit or create a new one.</p>
                     </div>
                 )}
             </div>
