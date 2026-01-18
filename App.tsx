@@ -212,6 +212,36 @@ const App: React.FC = () => {
         return () => unsubscribe();
     }, []);
 
+    // Fetch Year Group whenever user changes (Login or Impersonation)
+    useEffect(() => {
+        const fetchYearGroup = async () => {
+            if (!user) {
+                setUserYearGroup(null);
+                return;
+            }
+
+            try {
+                const classesCol = collection(db, 'classes');
+                const q = query(classesCol, where('studentIds', 'array-contains', user.uid));
+                const classSnaps = await getDocs(q);
+                if (!classSnaps.empty) {
+                    const classData = classSnaps.docs[0].data();
+                    if (classData.yearGroup) {
+                        setUserYearGroup(classData.yearGroup);
+                        return;
+                    }
+                }
+                // If no class found or no year group, set to null
+                setUserYearGroup(null);
+            } catch (e) {
+                console.error("Failed to fetch user class", e);
+                setUserYearGroup(null);
+            }
+        };
+
+        fetchYearGroup();
+    }, [user?.uid]);
+
     useEffect(() => {
         const unsubscribe = onAuthChange(async (firebaseUser) => {
             if (firebaseUser) {
@@ -234,21 +264,6 @@ const App: React.FC = () => {
                     role = data.role;
                     userLevel = data.level; 
                     if (!userLevel) setShowLevelSelector(true);
-                }
-
-                // Fetch Class for Year Group
-                try {
-                    const classesCol = collection(db, 'classes');
-                    const q = query(classesCol, where('studentIds', 'array-contains', firebaseUser.uid));
-                    const classSnaps = await getDocs(q);
-                    if (!classSnaps.empty) {
-                        const classData = classSnaps.docs[0].data();
-                        if (classData.yearGroup) {
-                            setUserYearGroup(classData.yearGroup);
-                        }
-                    }
-                } catch (e) {
-                    console.error("Failed to fetch user class", e);
                 }
 
                 const authUser: AuthUser = {

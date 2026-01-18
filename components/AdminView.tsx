@@ -154,7 +154,7 @@ const ClassManager: React.FC<{
 }> = ({ classes, allUsers, onRefreshClasses }) => {
     const [selectedClass, setSelectedClass] = useState<ClassGroup | null>(null);
     const [newClassName, setNewClassName] = useState('');
-    const [newYearGroup, setNewYearGroup] = useState('11');
+    const [newYearGroup, setNewYearGroup] = useState(''); // Force explicit selection
     const [isCreating, setIsCreating] = useState(false);
     const [studentSearch, setStudentSearch] = useState('');
 
@@ -270,8 +270,9 @@ const ClassManager: React.FC<{
                     <select
                         value={newYearGroup}
                         onChange={e => setNewYearGroup(e.target.value)}
-                        className="px-2 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm font-bold"
+                        className={`px-2 py-2 rounded-lg border text-sm font-bold ${!newYearGroup ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800'}`}
                     >
+                        <option value="">Select Year</option>
                         <option value="10">Y10</option>
                         <option value="11">Y11</option>
                         <option value="12">Y12</option>
@@ -279,7 +280,7 @@ const ClassManager: React.FC<{
                     </select>
                     <button
                         onClick={handleCreateClass}
-                        disabled={isCreating || !newClassName.trim()}
+                        disabled={isCreating || !newClassName.trim() || !newYearGroup}
                         className="px-3 py-2 bg-indigo-600 text-white rounded-lg font-bold text-sm disabled:opacity-50"
                     >
                         +

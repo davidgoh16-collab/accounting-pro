@@ -370,9 +370,9 @@ const MockManager: React.FC = () => {
                             {/* Year Groups Selector */}
                             <div className="mb-6">
                                 <label className="block text-xs font-bold text-stone-500 uppercase mb-2">Target Year Groups</label>
-                                <div className="flex gap-4">
+                                <div className="flex flex-wrap gap-4 mb-2">
                                     {['10', '11', '12', '13'].map(yg => (
-                                        <label key={yg} className="flex items-center gap-2 cursor-pointer">
+                                        <label key={yg} className="flex items-center gap-2 cursor-pointer select-none bg-white dark:bg-stone-800 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 hover:border-indigo-400 transition-all">
                                             <input
                                                 type="checkbox"
                                                 checked={yearGroups.includes(yg)}
@@ -380,12 +380,15 @@ const MockManager: React.FC = () => {
                                                     if (e.target.checked) setYearGroups([...yearGroups, yg]);
                                                     else setYearGroups(yearGroups.filter(y => y !== yg));
                                                 }}
-                                                className="w-4 h-4 text-indigo-600 rounded border-stone-300"
+                                                className="w-4 h-4 text-indigo-600 rounded border-stone-300 focus:ring-indigo-500"
                                             />
                                             <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Year {yg}</span>
                                         </label>
                                     ))}
                                 </div>
+                                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
+                                    Visible to: {yearGroups.length > 0 ? `Year ${yearGroups.sort().join(', ')}` : 'All Years (Unrestricted)'}
+                                </p>
                             </div>
                         </div>
 
