@@ -1,9 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
-import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel } from './types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig } from './types';
 import { onAuthChange, signOutUser, db } from './firebase';
 import { User } from 'firebase/auth';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { getMocks } from './services/mockService';
 
 import LoginView from './components/LoginView';
 import Header from './components/Header';
@@ -28,12 +28,75 @@ import RagAnalysisView from './components/RagAnalysisView';
 import RevisionPlannerView from './components/RevisionPlannerView';
 import PodcastView from './components/PodcastView';
 import LearningHubView from './components/LearningHubView'; 
-import VideoLearningView from './components/VideoLearningView'; // Imported
+import VideoLearningView from './components/VideoLearningView';
 import MocksHubView from './components/MocksHubView';
 import FebMocksView from './components/FebMocksView';
+import MockDetailView from './components/MockDetailView';
 import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
+
+const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel }> = ({ mocks, userLevel }) => {
+    const nextExam = useMemo(() => {
+        const relevantMocks = mocks.filter(m => m.isActive && (!userLevel || m.level === userLevel));
+        const allExams = relevantMocks.flatMap(m => m.exams);
+        const now = new Date();
+        const futureExams = allExams.filter(e => new Date(e.date) > now);
+        futureExams.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        return futureExams[0];
+    }, [mocks, userLevel]);
+
+    const calculateTimeLeft = () => {
+        if (!nextExam) return {};
+        const difference = +new Date(nextExam.date) - +new Date();
+        let timeLeft = {};
+
+        if (difference > 0) {
+            timeLeft = {
+                d: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                h: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                m: Math.floor((difference / 1000 / 60) % 60),
+                s: Math.floor((difference / 1000) % 60)
+            };
+        }
+        return timeLeft;
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+        return () => clearTimeout(timer);
+    });
+
+    if (!nextExam) return null;
+
+    const t = timeLeft as any;
+
+    return (
+        <div className="w-full max-w-7xl mx-auto mb-8 animate-fade-in px-4 xl:px-0">
+             <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6 border border-white/10">
+                <div>
+                    <h2 className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">Next Upcoming Exam</h2>
+                    <p className="text-2xl lg:text-3xl font-bold">{nextExam.title}</p>
+                    <div className="flex gap-4 mt-2 text-sm lg:text-base opacity-90 font-medium">
+                        <span>🗓️ {new Date(nextExam.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long' })}</span>
+                        <span>⏰ {nextExam.time}</span>
+                        <span>⏳ {nextExam.duration}</span>
+                    </div>
+                </div>
+                <div className="bg-white/20 p-4 rounded-xl backdrop-blur-md flex gap-4 text-center min-w-[280px] justify-center">
+                    <div className="flex flex-col"><span className="text-3xl font-bold">{t.d || 0}</span><span className="text-xs uppercase opacity-80">Days</span></div>
+                    <div className="flex flex-col"><span className="text-3xl font-bold">{t.h || 0}</span><span className="text-xs uppercase opacity-80">Hrs</span></div>
+                    <div className="flex flex-col"><span className="text-3xl font-bold">{t.m || 0}</span><span className="text-xs uppercase opacity-80">Mins</span></div>
+                    <div className="flex flex-col"><span className="text-3xl font-bold">{t.s || 0}</span><span className="text-xs uppercase opacity-80">Secs</span></div>
+                </div>
+             </div>
+        </div>
+    );
+};
 
 const RecentActivity: React.FC<{ onViewSession: (session: CompletedSession) => void, userId: string } > = ({ onViewSession, userId }) => {
     const [history, setHistory] = useState<CompletedSession[]>([]);
@@ -90,6 +153,10 @@ const App: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [showLevelSelector, setShowLevelSelector] = useState(false);
 
+    // Mocks State
+    const [activeMocks, setActiveMocks] = useState<MockConfig[]>([]);
+    const [selectedMockId, setSelectedMockId] = useState<string | null>(null);
+
     const [featureFlags, setFeatureFlags] = useState({
         birdGame: true,
         blockBlast: true,
@@ -108,6 +175,19 @@ const App: React.FC = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [page]);
+
+    // Fetch Mocks
+    useEffect(() => {
+        const fetchMocks = async () => {
+            try {
+                const mocks = await getMocks();
+                setActiveMocks(mocks.filter(m => m.isActive));
+            } catch (e) {
+                console.error("Failed to fetch active mocks", e);
+            }
+        };
+        fetchMocks();
+    }, []);
 
     // Updated to use onSnapshot for real-time updates
     useEffect(() => {
@@ -180,10 +260,14 @@ const App: React.FC = () => {
         }
     };
 
-    const handleNavigate = (newPage: Page) => {
+    const handleNavigate = (newPage: Page, param?: any) => {
         setPage(newPage);
         setSessionToView(null);
         setDraftToResume(null);
+
+        if (newPage === 'mock_detail' && param) {
+            setSelectedMockId(param);
+        }
     };
 
     const handleStartGame = (gamePage: Page, topic: string) => {
@@ -251,6 +335,8 @@ const App: React.FC = () => {
                     subtitle={theme.subtitle} 
                     gradient={theme.hubGradient}
                 >
+                    <CountdownWidget mocks={activeMocks} userLevel={user.level} />
+
                     <div className="w-full max-w-7xl mx-auto space-y-12">
                         
                         {/* Section 1: Learning & Knowledge */}
@@ -381,6 +467,16 @@ const App: React.FC = () => {
             {page === 'video_learning' && <VideoLearningView user={user} onBack={() => handleNavigate('dashboard')} />} 
             {page === 'mocks_hub' && <MocksHubView user={user} onNavigate={handleNavigate} />}
             {page === 'feb_mocks' && <FebMocksView user={user} onBack={() => handleNavigate('mocks_hub')} />}
+
+            {page === 'mock_detail' && selectedMockId && (
+                <MockDetailView
+                    user={user}
+                    onBack={() => handleNavigate('mocks_hub')}
+                    mockId={selectedMockId}
+                    mockData={activeMocks.find(m => m.id === selectedMockId)!}
+                />
+            )}
+
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}

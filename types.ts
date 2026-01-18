@@ -358,3 +358,41 @@ export interface ClassGroup {
     name: string;
     studentIds: string[];
 }
+
+export interface TopicTrackerItem {
+    topic: string;
+    status: 'red' | 'amber' | 'green' | 'not_started';
+}
+
+export interface ScheduleItem {
+    id: string;
+    task: string;
+    date: string;
+    completed: boolean;
+}
+
+export interface ChecklistItem {
+    id: string;
+    task: string;
+    completed: boolean;
+}
+
+export interface MockExam {
+    id: string;
+    title: string;
+    paper: string;
+    date: string;
+    time: string;
+    duration: string;
+    topics: string[];
+}
+
+export interface MockConfig {
+    id: string;
+    title: string;
+    isActive: boolean;
+    level: UserLevel;
+    exams: MockExam[];
+    topics: string[]; // List of all topics covered in this mock series
+    createdAt: string;
+}

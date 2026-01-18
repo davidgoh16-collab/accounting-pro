@@ -7,6 +7,7 @@ import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
 import SessionDetailView from './SessionDetailView';
 import RevisionPlannerContent from './RevisionPlannerContent';
+import MockManager from './MockManager';
 import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
@@ -763,7 +764,7 @@ const ChatLogViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 };
 
 const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
-    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes'>('students');
+    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks'>('students');
     const [users, setUsers] = useState<AuthUser[]>([]);
     const [classes, setClasses] = useState<ClassGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -819,7 +820,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
         <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent">
             <button 
                 onClick={onBack}
-                className="fixed top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-white dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
+                className="fixed top-24 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-white dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
             >
                 <span>&larr;</span> Back
             </button>
@@ -844,6 +845,12 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                             Classes
                         </button>
                         <button
+                            onClick={() => setViewMode('mocks')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'mocks' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                        >
+                            Mocks
+                        </button>
+                        <button
                             onClick={() => setViewMode('settings')}
                             className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'settings' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
                         >
@@ -854,6 +861,8 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                 
                 {viewMode === 'settings' ? (
                     <FeatureSettingsPanel />
+                ) : viewMode === 'mocks' ? (
+                    <MockManager />
                 ) : viewMode === 'classes' ? (
                     <ClassManager classes={classes} allUsers={users} onRefreshClasses={fetchClasses} />
                 ) : (

@@ -775,3 +775,34 @@ export const generatePreReleaseQuestion = async (imageBase64: string): Promise<G
         markScheme: { title: "Mark Scheme", content: data.markScheme?.content || "" }
     };
 });
+
+export const parseTimetableImage = async (imageBase64: string): Promise<any[]> => handleApiCall(async () => {
+    const ai = getAiClient();
+    const base64Data = imageBase64.split(',')[1] || imageBase64;
+
+    const prompt = `Analyze this exam timetable image. Extract the dates, times, and durations for Geography exams (Paper 1, Paper 2, Paper 3) for both GCSE and A-Level if present.
+
+    Return a JSON ARRAY of objects with this structure:
+    {
+        "level": "GCSE" | "A-Level",
+        "paper": "Paper 1" | "Paper 2" | "Paper 3",
+        "date": "YYYY-MM-DD",
+        "time": "HH:MM",
+        "duration": "Xh Ym" (e.g. "1h 30m")
+    }
+
+    Ignore non-geography exams.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-1.5-pro',
+        contents: [
+            { role: 'user', parts: [
+                { text: prompt },
+                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+            ]}
+        ],
+        config: { responseMimeType: 'application/json' }
+    });
+
+    return JSON.parse(cleanJson(response.text || '[]'));
+});
