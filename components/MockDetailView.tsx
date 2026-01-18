@@ -5,6 +5,22 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import HubLayout from './HubLayout';
 import PreReleaseView from './FebMocks/PreReleaseView';
+import { GCSE_SPEC_TOPICS, COURSE_LESSONS } from '../constants';
+
+// --- Helper to expand high-level topics into sub-topics ---
+const getSubTopics = (topicName: string): string[] => {
+    // 1. Try manual granular list (mostly GCSE)
+    if (GCSE_SPEC_TOPICS[topicName]) {
+        return GCSE_SPEC_TOPICS[topicName];
+    }
+    // 2. Try COURSE_LESSONS (A-Level & GCSE fallback)
+    const lessons = COURSE_LESSONS.filter(l => l.chapter === topicName).map(l => l.title);
+    if (lessons.length > 0) {
+        return lessons;
+    }
+    // 3. Fallback to the topic name itself
+    return [topicName];
+};
 
 // --- Static Data (Skills & Resources) ---
 const skills = [
@@ -116,12 +132,6 @@ const MockExamsList: React.FC<{ exams: MockExam[] }> = ({ exams }) => (
 const MockSchedule: React.FC<{ user: AuthUser, mockId: string, exams: MockExam[] }> = ({ user, mockId, exams }) => {
     const [completed, setCompleted] = useState<Record<string, boolean>>({});
 
-    // Generate a simple schedule based on topics if not manually overridden?
-    // For now, let's just show a list of topics to revise as a checklist, grouped by exam.
-    // The original FebMock had a specific day-by-day schedule.
-    // Dynamically generating a day-by-day schedule is hard without a start date.
-    // We will list topics as "To Do" items.
-
     useEffect(() => {
         const docRef = doc(db, 'users', user.uid, 'mocks', mockId);
         const unsubscribe = onSnapshot(docRef, (snap) => {
@@ -142,34 +152,50 @@ const MockSchedule: React.FC<{ user: AuthUser, mockId: string, exams: MockExam[]
         <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 p-8 animate-fade-in">
              <h3 className="font-bold text-stone-700 dark:text-stone-300 mb-6 uppercase tracking-wide text-sm">Revision Checklist</h3>
              <div className="grid md:grid-cols-2 gap-8">
-                {exams.map((exam) => (
-                    <div key={exam.id} className="bg-stone-50 dark:bg-stone-800/50 rounded-xl p-5 border border-stone-100 dark:border-stone-700">
-                        <h4 className="font-bold text-stone-800 dark:text-stone-200 mb-4 border-b border-stone-200 dark:border-stone-700 pb-2">{exam.title}</h4>
-                        <div className="space-y-3">
-                            {exam.topics.map((topic, idx) => {
-                                const id = `${exam.id}_${idx}`;
-                                const isCompleted = completed[id];
-                                return (
-                                    <div
-                                        key={id}
-                                        onClick={() => toggleItem(id)}
-                                        className={`
-                                            flex items-center justify-between p-3 bg-white dark:bg-stone-900 rounded shadow-sm cursor-pointer transition-all w-full
-                                            border-l-4 ${isCompleted ? 'border-green-500 opacity-50 grayscale' : 'border-stone-300 hover:shadow-md'}
-                                        `}
-                                    >
-                                        <span className="text-sm font-medium break-words text-stone-800 dark:text-stone-200">
-                                            {topic}
-                                        </span>
-                                        <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-500 border-green-500' : 'border-stone-300 dark:border-stone-600'}`}>
-                                            {isCompleted && <span className="text-white text-xs">✓</span>}
+                {exams.map((exam) => {
+                    // Expand topics for checklist
+                    const allSubTopics = exam.topics.flatMap(topic =>
+                        getSubTopics(topic).map(sub => ({ parent: topic, title: sub }))
+                    );
+
+                    return (
+                        <div key={exam.id} className="bg-stone-50 dark:bg-stone-800/50 rounded-xl p-5 border border-stone-100 dark:border-stone-700">
+                            <h4 className="font-bold text-stone-800 dark:text-stone-200 mb-4 border-b border-stone-200 dark:border-stone-700 pb-2">{exam.title}</h4>
+                            <div className="space-y-3">
+                                {allSubTopics.map((item, idx) => {
+                                    // Create a unique ID for the schedule item based on exam and index
+                                    // Use index to ensure uniqueness even if topics repeat
+                                    const id = `${exam.id}_item_${idx}`;
+                                    const isCompleted = completed[id];
+
+                                    return (
+                                        <div
+                                            key={id}
+                                            onClick={() => toggleItem(id)}
+                                            className={`
+                                                flex items-center justify-between p-3 bg-white dark:bg-stone-900 rounded shadow-sm cursor-pointer transition-all w-full
+                                                border-l-4 ${isCompleted ? 'border-green-500 opacity-50 grayscale' : 'border-stone-300 hover:shadow-md'}
+                                            `}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-stone-400 uppercase tracking-wider">{item.parent}</span>
+                                                <span className="text-sm font-medium break-words text-stone-800 dark:text-stone-200">
+                                                    {item.title}
+                                                </span>
+                                            </div>
+                                            <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-500 border-green-500' : 'border-stone-300 dark:border-stone-600'}`}>
+                                                {isCompleted && <span className="text-white text-xs">✓</span>}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                                {allSubTopics.length === 0 && (
+                                    <p className="text-stone-500 italic text-sm">No topics assigned to this exam yet.</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
              </div>
         </div>
     );
@@ -219,43 +245,58 @@ const MockTopicTracker: React.FC<{ user: AuthUser, mockId: string, exams: MockEx
 
     return (
         <div className="space-y-8 animate-fade-in">
-            {exams.map((exam) => (
-                <div key={exam.id} className="bg-white dark:bg-stone-900 rounded-xl shadow-lg overflow-hidden border border-stone-200 dark:border-stone-700">
-                    <div className="bg-stone-800 dark:bg-stone-950 p-4 text-white flex justify-between items-center">
-                        <h3 className="font-bold text-lg">{exam.title}</h3>
-                        <span className="text-xs uppercase tracking-wider bg-white/20 px-2 py-1 rounded">Topic Tracker</span>
-                    </div>
+            {exams.map((exam) => {
+                // Group by Chapter (Topic) -> SubTopics
+                return (
+                    <div key={exam.id} className="bg-white dark:bg-stone-900 rounded-xl shadow-lg overflow-hidden border border-stone-200 dark:border-stone-700">
+                        <div className="bg-stone-800 dark:bg-stone-950 p-4 text-white flex justify-between items-center">
+                            <h3 className="font-bold text-lg">{exam.title}</h3>
+                            <span className="text-xs uppercase tracking-wider bg-white/20 px-2 py-1 rounded">Topic Tracker</span>
+                        </div>
 
-                    <div className="bg-white dark:bg-stone-900">
-                        <button
-                            onClick={() => toggleSection(exam.id)}
-                            className="w-full p-4 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors focus:outline-none"
-                        >
-                            <h4 className="font-bold text-teal-700 dark:text-teal-400 uppercase text-sm tracking-wide flex items-center gap-2 text-left">
-                                Topics ({exam.topics.length})
-                            </h4>
-                            <span className={`transform transition-transform duration-300 text-stone-400 shrink-0 ${openSections[exam.id] ? 'rotate-180' : ''}`}>
-                                <ChevronDown size={20} />
-                            </span>
-                        </button>
+                        <div className="divide-y divide-stone-100 dark:divide-stone-800 bg-white dark:bg-stone-900">
+                            {exam.topics.map(topic => {
+                                const subTopics = getSubTopics(topic);
+                                const isOpen = openSections[`${exam.id}-${topic}`];
 
-                        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${openSections[exam.id] ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="p-4 pt-0 space-y-2 border-t border-stone-50 dark:border-stone-800">
-                                {exam.topics.map((topic) => (
-                                    <div key={topic} className="flex items-center justify-between group p-2 rounded hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
-                                        <span className="text-stone-700 dark:text-stone-300 text-sm font-medium pr-4 break-words flex-1">{topic}</span>
-                                        <div className="flex gap-2 shrink-0">
-                                            <button onClick={() => handleRate(exam.id, topic, 'R')} className={getBtnClass(getRating(exam.id, topic), 'R')}>R</button>
-                                            <button onClick={() => handleRate(exam.id, topic, 'A')} className={getBtnClass(getRating(exam.id, topic), 'A')}>A</button>
-                                            <button onClick={() => handleRate(exam.id, topic, 'G')} className={getBtnClass(getRating(exam.id, topic), 'G')}>G</button>
+                                return (
+                                    <div key={topic}>
+                                        <button
+                                            onClick={() => toggleSection(`${exam.id}-${topic}`)}
+                                            className="w-full p-4 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors focus:outline-none"
+                                        >
+                                            <h4 className="font-bold text-teal-700 dark:text-teal-400 uppercase text-sm tracking-wide flex items-center gap-2 text-left">
+                                                {topic}
+                                            </h4>
+                                            <span className={`transform transition-transform duration-300 text-stone-400 shrink-0 ${isOpen ? 'rotate-180' : ''}`}>
+                                                <ChevronDown size={20} />
+                                            </span>
+                                        </button>
+
+                                        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                                            <div className="p-4 pt-0 space-y-2 border-t border-stone-50 dark:border-stone-800">
+                                                {subTopics.map((subTopic) => (
+                                                    <div key={subTopic} className="flex items-center justify-between group p-2 rounded hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                                                        <span className="text-stone-700 dark:text-stone-300 text-sm font-medium pr-4 break-words flex-1">{subTopic}</span>
+                                                        <div className="flex gap-2 shrink-0">
+                                                            <button onClick={() => handleRate(exam.id, subTopic, 'R')} className={getBtnClass(getRating(exam.id, subTopic), 'R')}>R</button>
+                                                            <button onClick={() => handleRate(exam.id, subTopic, 'A')} className={getBtnClass(getRating(exam.id, subTopic), 'A')}>A</button>
+                                                            <button onClick={() => handleRate(exam.id, subTopic, 'G')} className={getBtnClass(getRating(exam.id, subTopic), 'G')}>G</button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                );
+                            })}
+                            {exam.topics.length === 0 && (
+                                <div className="p-4 text-stone-500 italic text-sm">No topics assigned to this exam.</div>
+                            )}
                         </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 };

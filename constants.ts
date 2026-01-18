@@ -855,3 +855,100 @@ export const COURSE_LESSONS: CourseLesson[] = [
     { id: 'G-Ch26', title: 'Issue evaluation', chapter: 'Geographical Applications' },
     { id: 'G-Ch27', title: 'Fieldwork and geographical enquiry', chapter: 'Geographical Applications' }
 ];
+
+// --- SPECIFICATION TOPICS (Granular) ---
+export const GCSE_SPEC_TOPICS: Record<string, string[]> = {
+    // Paper 1
+    "The Challenge of Natural Hazards": [
+        "Plate Tectonics Theory (Distribution, Margins)",
+        "Tectonic Hazards (Effects, Responses)",
+        "Management of Tectonic Hazards",
+        "Global Atmospheric Circulation",
+        "Tropical Storms (Formation, Structure, Climate Change effects)",
+        "Tropical Storm Case Study (Effects, Responses)",
+        "Extreme Weather in the UK (Case Study)",
+        "Climate Change (Evidence, Natural & Human Causes)",
+        "Climate Change Effects & Mitigation/Adaptation"
+    ],
+    "Physical Landscapes in the UK": [
+        // Merging Coasts and Rivers which are usually separate in spec but grouped in chapter here?
+        // Actually COURSE_LESSONS has one chapter "Physical Landscapes in the UK" for G-Ch9..12
+        // But FebMocksView separates Coasts and Rivers.
+        // We will include all sub-topics here.
+        "Wave types & Weathering processes",
+        "Mass movement & Erosion processes",
+        "Transportation (Longshore Drift) & Deposition",
+        "Erosional Landforms (Headlands, Bays, Caves, Arches, Stacks)",
+        "Depositional Landforms (Beaches, Spits, Bars)",
+        "Coastal Management (Hard Engineering vs Soft Engineering)",
+        "Managed Retreat (Case Study)",
+        "River Profiles (Long & Cross) & Processes",
+        "Erosional Landforms (Waterfalls, Gorges, Interlocking Spurs)",
+        "Erosion & Deposition Landforms (Meanders, Ox-bow lakes)",
+        "Depositional Landforms (Levees, Estuaries)",
+        "Flood Risk Factors (Physical & Human)",
+        "Flood Hydrographs",
+        "Flood Management Strategies (Hard & Soft)",
+        "Glacial processes (Freeze-thaw, plucking, abrasion)",
+        "Glacial landforms (Corries, Arêtes, Pyramidal peaks)",
+        "Glacial transportation & deposition",
+        "Economic opportunities in glaciated areas"
+    ],
+    "The Living World": [
+         "Ecosystems: Concepts and global distribution",
+         "Tropical Rainforests: Characteristics and adaptations",
+         "Tropical Rainforests: Deforestation (Causes/Impacts)",
+         "Tropical Rainforests: Management strategies",
+         "Hot Deserts: Characteristics and adaptations",
+         "Hot Deserts: Opportunities and Challenges",
+         "Hot Deserts: Desertification (Causes/Management)",
+         "Cold Environments: Characteristics and adaptations",
+         "Cold Environments: Opportunities and Challenges",
+         "Cold Environments: Management/Protection"
+    ],
+    // Paper 2
+    "Urban Issues and Challenges": [
+        "Global Urbanisation Trends & Megacities",
+        "Lagos: Location, Growth & Importance",
+        "Lagos: Challenges (Slums/Squatter Settlements, Crime, Waste)",
+        "Lagos: Urban Planning Strategies",
+        "London: Location, Importance & Migration",
+        "London: Opportunities (Cultural Mix, Employment, Transport)",
+        "London: Challenges (Inequality, Sprawl, Waste)",
+        "London: Urban Regeneration (e.g. Stratford/Docklands)",
+        "Sustainable Urban Living (Water, Energy, Waste, Transport)"
+    ],
+    "The Changing Economic World": [
+        "Measures of Development (GNI, HDI, etc.)",
+        "The DTM (Demographic Transition Model)",
+        "Causes of Uneven Development",
+        "Strategies to Reduce the Gap (Aid, Fairtrade, Tourism)",
+        "Nigeria: Industrial Structure & TNCs (e.g. Shell)",
+        "Nigeria: Aid & Environmental Impacts",
+        "UK Economy (De-industrialisation, Post-industrial)",
+        "UK Transport Infrastructure & North-South Divide"
+    ],
+    "The Challenge of Resource Management": [
+        "Global Distribution of Food, Water, Energy",
+        "Provision of Food, Water, Energy in the UK",
+        "Energy: Global Demand & Insecurity Factors",
+        "Energy: Impacts of Insecurity",
+        "Energy: Strategies to Increase Supply (Renewable/Non-renewable)",
+        "Energy: Sustainable Energy (Case Study)",
+        "Food: Global supply and consumption",
+        "Food: Impacts of insecurity",
+        "Water: Global supply and consumption",
+        "Water: Impacts of insecurity"
+    ],
+    // Paper 3
+    "Geographical Applications": [
+        "Cartographic Skills (Maps, Grid Refs, Scale)",
+        "Graphical Skills (Bar, Line, Pie, Scatter, Chloropleth)",
+        "Statistical Skills (Mean, Median, Mode, Range, Quartiles)",
+        "Fieldwork Enquiry Process (Hypothesis to Conclusion)",
+        "Data Collection Methods (Primary vs Secondary)",
+        "Data Presentation & Analysis",
+        "Evaluation of Fieldwork Methods",
+        "Issue Evaluation (Decision Making)"
+    ]
+};

@@ -297,8 +297,8 @@ const MockManager: React.FC = () => {
                                 <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100">Exams</h3>
                                 <div className="flex gap-2">
                                     <label className="cursor-pointer px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-2">
-                                        <span>📷</span> Upload Timetable (Img/PDF/CSV)
-                                        <input type="file" accept="image/*,.pdf,.csv" className="hidden" onChange={handleTimetableUpload} />
+                                        <span>📷</span> Upload Timetable (Img/PDF/CSV/Excel)
+                                        <input type="file" accept="image/*,.pdf,.csv,.xlsx,.xls" className="hidden" onChange={handleTimetableUpload} />
                                     </label>
                                     <button onClick={handleAddExam} className="px-3 py-1.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-700 dark:text-stone-200 text-xs font-bold rounded-lg transition">
                                         + Manual Add
