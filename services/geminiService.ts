@@ -730,7 +730,7 @@ export const chatWithPreRelease = async (history: ChatMessage[], message: string
     Be precise, quote figures if visible, and explain geographical concepts related to the resource.`;
 
     const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-1.5-pro', // Use Pro for vision capabilities
+        model: 'gemini-2.5-pro', // Use Pro for vision capabilities
         contents: contents,
         config: { systemInstruction }
     });
@@ -749,7 +749,7 @@ export const generatePreReleaseQuestion = async (imageBase64: string): Promise<G
     Ensure the question requires using the resource (e.g., "Using Figure X...", "Describe the pattern...", "Calculate...").`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-pro',
+        model: 'gemini-2.5-pro',
         contents: [
             { role: 'user', parts: [
                 { text: prompt },
@@ -794,7 +794,7 @@ export const parseTimetableImage = async (imageBase64: string): Promise<any[]> =
     Ignore non-geography exams.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-1.5-pro',
+        model: 'gemini-2.5-pro',
         contents: [
             { role: 'user', parts: [
                 { text: prompt },
