@@ -92,19 +92,32 @@ const cleanJson = (text: string): string => {
     return clean.trim();
 };
 
-export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
+export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
     const levelContext = params.level === 'GCSE' ? "AQA GCSE Geography (Specification 8035)" : "AQA A-Level Geography";
     
-    // Default includeFigure to true if not provided, or handle alternating logic upstream.
-    // Actually, prompt should explicitly ask for or forbid figure.
-    const figureInstruction = params.includeFigure === false
-        ? "Do NOT generate a figure or resource. The question should be answerable without a stimulus."
-        : "You MUST generate a relevant 'figureDescription' for a stimulus (map, graph, photo) that the question is based on.";
+    // Figure instruction
+    const figureInstruction = params.includeFigure
+        ? "You MUST generate a relevant 'figureDescription' for a stimulus (map, graph, photo) that the question is based on."
+        : "Do NOT generate a figure or resource. The question should be answerable without a stimulus.";
 
     let promptExtraInstructions = "";
     if (params.level === 'A-Level' && params.marks === 6) {
-        promptExtraInstructions = `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Require TESLA model in mark scheme.`;
+        promptExtraInstructions += `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Require TESLA model in mark scheme. `;
+    }
+
+    if (params.subTopic && params.subTopic !== 'All Sub-topics') {
+        promptExtraInstructions += `Focus strictly on the sub-topic: "${params.subTopic}". `;
+    }
+
+    if (params.forceFormationQuestion) {
+        promptExtraInstructions += `This MUST be a 4-mark "Explain the formation of..." question. `;
+        if (params.includeFigure) {
+            promptExtraInstructions += `The question must ask to explain the formation of the landform shown in the figure (do not name the feature in the question, just refer to Figure X). `;
+        } else {
+            promptExtraInstructions += `The question must name a specific landform (e.g., spit, waterfall, corrie) and ask for its formation. `;
+        }
+        promptExtraInstructions += `Mark scheme must award marks for: 1. Identifying/Defining the feature (if applicable) or stating the start point. 2. Sequenced explanation of formation processes. `;
     }
 
     const fullPrompt = `Generate a new, unique ${levelContext} exam question.

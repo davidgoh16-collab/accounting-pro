@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Question, SessionData, CaseStudyMaster, MarkedModelAnswer, PracticeMode, ChatMessage, AIFeedback, CompletedSession, AnswerSegment, AuthUser, ChatSessionLog, DraftSession } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
 import { MASTER_CASE_STUDIES } from '../database';
 import { getHint, getMotivationalMessage, generateQuestion, generateFigure, generateModelAnswer, streamTutorResponse, generateCaseStudyApplication, markStudentAnswer, generateSessionSummary } from '../services/geminiService';
 import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -175,6 +175,9 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
     const availableUnits = user.level === 'GCSE' ? GCSE_UNITS : ALEVEL_UNITS;
     const [unitFilter, setUnitFilter] = useState<string>(availableUnits[1]);
     const [marksFilter, setMarksFilter] = useState<number>(user.level === 'GCSE' ? 9 : 6);
+    const [subTopicFilter, setSubTopicFilter] = useState<string>('All Sub-topics');
+    const [includeFigure, setIncludeFigure] = useState(false);
+    const [isFormationQuestion, setIsFormationQuestion] = useState(false);
     
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [stage, setStage] = useState(1);
@@ -188,6 +191,12 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
     const [modelAnswer, setModelAnswer] = useState<MarkedModelAnswer | null>(null);
     const [isModelAnswerLoading, setIsModelAnswerLoading] = useState(false);
     const [startTime, setStartTime] = useState('');
+
+    const availableSubTopics = useMemo(() => {
+        if (unitFilter === 'All Units') return [];
+        const topicsMap = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        return topicsMap[unitFilter] || [];
+    }, [unitFilter, user.level]);
     
     const [practiceMode, setPracticeMode] = useState<PracticeMode>('standard');
     const [supportMode, setSupportMode] = useState<'closed' | 'open'>('closed');
@@ -252,6 +261,11 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
             startTime
         };
     }, [studentAnswer, structuredPlan, figureNotes, liveAnswer, practiceMode, time, startTime]);
+
+    // Reset sub-topic when unit changes
+    useEffect(() => {
+        setSubTopicFilter('All Sub-topics');
+    }, [unitFilter]);
 
     // Load Draft
     useEffect(() => {
@@ -587,16 +601,15 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
         setCurrentDraftId(null);
 
         try {
-            // Alternating figure logic: Even counts (0, 2, 4) get a figure, Odd counts (1, 3, 5) do not.
-            const includeFigure = questionCount % 2 === 0;
-
             setGenerationStatus('1/2: Crafting your question...');
             // Pass user level to generation service
             const questionData = await generateQuestion({
                 unit: unitFilter,
                 marks: marksFilter,
                 level: user.level || 'A-Level',
-                includeFigure: includeFigure
+                includeFigure: includeFigure,
+                subTopic: subTopicFilter,
+                forceFormationQuestion: isFormationQuestion
             });
             
             let figures: Question['figures'] = [];
@@ -983,20 +996,43 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                 </div>
             )}
             <div className="max-w-7xl mx-auto mt-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <select value={unitFilter} onChange={e => setUnitFilter(e.target.value)} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg md:col-span-1 bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${unitFilter !== 'All Units' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 mb-4`}>
+                    <select value={unitFilter} onChange={e => setUnitFilter(e.target.value)} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         {availableUnits.filter(u => u !== 'All Units').map(unit => <option key={unit} value={unit}>{unit}</option>)}
                     </select>
+
+                    {unitFilter !== 'All Units' && (
+                        <select value={subTopicFilter} onChange={e => setSubTopicFilter(e.target.value)} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                             <option value="All Sub-topics">All Sub-topics (Any)</option>
+                             {availableSubTopics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                        </select>
+                    )}
+
                     <select value={marksFilter} onChange={e => setMarksFilter(parseInt(e.target.value, 10))} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="4">4 Marks</option>
                         <option value="6">6 Marks (AO3/Data)</option>
                         <option value="9">9 Marks</option>
                         {user.level === 'A-Level' && <option value="20">20 Marks (Essay)</option>}
                     </select>
-                    <button onClick={handleGenerateQuestion} disabled={isGenerating} className="w-full md:col-span-1 p-3 bg-blue-500 text-white font-bold rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2 disabled:bg-stone-400 disabled:cursor-wait disabled:transform-none disabled:shadow-none">
+
+                    <button onClick={handleGenerateQuestion} disabled={isGenerating} className={`w-full p-3 bg-blue-500 text-white font-bold rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2 disabled:bg-stone-400 disabled:cursor-wait disabled:transform-none disabled:shadow-none ${unitFilter === 'All Units' ? 'sm:col-span-2 lg:col-span-1' : ''}`}>
                         <span className="text-xl">🌍</span>
-                        {isGenerating ? 'Generating...' : 'Generate Question'}
+                        {isGenerating ? 'Generating...' : 'Generate'}
                     </button>
+                </div>
+
+                <div className="flex flex-wrap gap-4 mb-8 items-center justify-center sm:justify-start">
+                    <label className="flex items-center gap-2 cursor-pointer bg-white/50 dark:bg-stone-800/50 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition shadow-sm">
+                        <input type="checkbox" checked={includeFigure} onChange={e => setIncludeFigure(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-stone-100 dark:bg-stone-700 border-stone-300 dark:border-stone-600" />
+                        <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Include Figure/Resource</span>
+                    </label>
+
+                    {user.level === 'GCSE' && marksFilter === 4 && (
+                        <label className="flex items-center gap-2 cursor-pointer bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-2 rounded-full border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition shadow-sm">
+                            <input type="checkbox" checked={isFormationQuestion} onChange={e => setIsFormationQuestion(e.target.checked)} className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500 bg-stone-100 dark:bg-stone-700 border-stone-300 dark:border-stone-600" />
+                            <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Practice "Formation" Question</span>
+                        </label>
+                    )}
                 </div>
                 
                 {!currentQuestion && !isGenerating && (
