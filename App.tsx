@@ -492,14 +492,6 @@ const App: React.FC = () => {
                                     shadowColor="shadow-emerald-500/20"
                                     accentColor="text-emerald-600 hover:text-emerald-700"
                                 />
-                                <HubCard
-                                    icon={<span className="text-4xl">💼</span>}
-                                    title="Careers & University"
-                                    description="Explore career paths, find university courses, and build your CV."
-                                    onClick={() => handleNavigate('careers_university')}
-                                    shadowColor="shadow-amber-500/20"
-                                    accentColor="text-amber-600 hover:text-amber-700"
-                                />
                             </div>
                         </section>
 

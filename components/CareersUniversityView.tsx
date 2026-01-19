@@ -129,7 +129,7 @@ const CareersExplorer: React.FC = () => {
                                 <p className="text-sm text-stone-600 mt-1">{career.description}</p>
                                 <p className="text-sm font-semibold text-rose-800 mt-2">Salary Range: {career.salaryRange}</p>
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                    {career.keySkills.map(skill => (
+                                    {(career.keySkills || []).map(skill => (
                                         <span key={skill} className="text-xs font-semibold bg-rose-100 text-rose-800 px-2 py-1 rounded-full">{skill}</span>
                                     ))}
                                 </div>
@@ -218,7 +218,7 @@ const LocalOpportunities: React.FC = () => {
 
             {opportunities.length > 0 && (
                 <div className="space-y-4">
-                    {opportunities.map((opp, index) => (
+                    {(opportunities || []).map((opp, index) => (
                         <div key={index} className="p-4 bg-white rounded-lg border animate-fade-in hover:shadow-md transition-shadow">
                             <h3 className="text-lg font-bold text-stone-800">{opp.title}</h3>
                             <div className="flex flex-wrap gap-2 mt-2 mb-3">
@@ -238,7 +238,7 @@ const LocalOpportunities: React.FC = () => {
                         <div className="mt-6 text-xs text-stone-500">
                             <p className="font-semibold">Sources:</p>
                             <ul className="list-disc list-inside">
-                                {sources.map((source, i) => (
+                                {(sources || []).map((source, i) => (
                                     <li key={i}><a href={source.uri} target="_blank" rel="noopener noreferrer" className="hover:underline">{source.title}</a></li>
                                 ))}
                             </ul>
@@ -337,7 +337,7 @@ const UniversityFinder: React.FC = () => {
 
             {courses.length > 0 && (
                 <div className="space-y-4">
-                    {courses.map((course, index) => (
+                    {(courses || []).map((course, index) => (
                         <div key={index} className="p-4 bg-white rounded-lg border animate-fade-in">
                             <h3 className="text-lg font-bold text-stone-800">{course.courseTitle}</h3>
                             <p className="text-sm text-stone-600 mt-1">{course.description}</p>
@@ -349,7 +349,7 @@ const UniversityFinder: React.FC = () => {
                         <div className="mt-6 text-xs text-stone-500">
                             <p className="font-semibold">Sources:</p>
                             <ul className="list-disc list-inside">
-                                {sources.map((source, i) => (
+                                {(sources || []).map((source, i) => (
                                     <li key={i}><a href={source.uri} target="_blank" rel="noopener noreferrer" className="hover:underline">{source.title}</a></li>
                                 ))}
                             </ul>
@@ -432,7 +432,7 @@ const CVBuilder: React.FC = () => {
                     <div className="p-4 bg-white rounded-lg border">
                         <h3 className="text-lg font-bold text-stone-800">Key Skills</h3>
                         <ul className="mt-2 space-y-3">
-                            {suggestions.keySkills.map(item => (
+                            {(suggestions.keySkills || []).map(item => (
                                 <li key={item.skill}>
                                     <p className="font-semibold text-rose-800">{item.skill}</p>
                                     <p className="text-sm text-stone-600">{item.justification}</p>
