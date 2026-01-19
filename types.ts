@@ -250,6 +250,14 @@ export interface UniversityCourseInfo {
     url?: string;
 }
 
+export interface JobOpportunity {
+    title: string;
+    company: string;
+    location: string;
+    description: string;
+    link?: string;
+}
+
 export interface TransferableSkill {
     name?: string;
     description: string;

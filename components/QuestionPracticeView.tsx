@@ -193,6 +193,30 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
     const [isModelAnswerLoading, setIsModelAnswerLoading] = useState(false);
     const [startTime, setStartTime] = useState('');
 
+    // Determine if "Formation Question" option should be shown
+    const isFormationEligible = useMemo(() => {
+        if (user.level !== 'GCSE' || marksFilter !== 4) return false;
+        // Strictly limit to Physical Landscapes (Paper 1)
+        if (unitFilter !== 'Physical Landscapes in the UK') return false;
+
+        // If specific sub-topic selected, filter out non-landform topics (e.g. Management, Flooding)
+        if (subTopicFilter !== 'All Sub-topics') {
+            const lower = subTopicFilter.toLowerCase();
+            // Exclude human/management aspects
+            if (lower.includes('management') || lower.includes('engineering') || lower.includes('retreat') || lower.includes('risk') || lower.includes('hydrograph') || lower.includes('graph')) {
+                return false;
+            }
+        }
+        return true;
+    }, [user.level, marksFilter, unitFilter, subTopicFilter]);
+
+    // Reset formation toggle if no longer eligible
+    useEffect(() => {
+        if (!isFormationEligible && isFormationQuestion) {
+            setIsFormationQuestion(false);
+        }
+    }, [isFormationEligible, isFormationQuestion]);
+
     const availableSubTopics = useMemo(() => {
         if (unitFilter === 'All Units') return [];
         const topicsMap = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
@@ -1054,7 +1078,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                         )}
                     </div>
 
-                    {user.level === 'GCSE' && marksFilter === 4 && (
+                    {isFormationEligible && (
                         <label className="flex items-center gap-2 cursor-pointer bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-2 rounded-full border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition shadow-sm">
                             <input type="checkbox" checked={isFormationQuestion} onChange={e => setIsFormationQuestion(e.target.checked)} className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500 bg-stone-100 dark:bg-stone-700 border-stone-300 dark:border-stone-600" />
                             <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Practice "Formation" Question</span>

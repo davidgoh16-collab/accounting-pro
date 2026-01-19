@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent } from "../types";
+import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
@@ -543,19 +543,131 @@ export const generateCareerInfo = async (category: string): Promise<GeographyCar
     return JSON.parse(cleanJson(response.text || '[]'));
 };
 
-export const generateUniversityCourseInfo = async (interests: string): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
-    await checkDailyLimit();
+export const generateLocalOpportunities = async (location: string, level: string, radius: string = '10 miles'): Promise<{ opportunities: JobOpportunity[], sources: { uri: string; title: string }[] }> => handleApiCall(async () => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Uni courses for ${interests}`, config: { tools: [{googleSearch: {}}] } });
-    return { courses: [], sources: [] }; 
-};
+    const age = level === 'GCSE' ? '16-18' : '18+';
+    const type = level === 'GCSE' ? 'Apprenticeships, Work Experience, or Entry Level Jobs' : 'Degree Apprenticeships, Internships, or Entry Level Jobs';
 
-export const generateTopUKUniversityInfo = async (): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => {
-    await checkDailyLimit();
+    const prompt = `Find current local ${type} in Geography, Environmental Science, Travel, Tourism, or Sustainability near ${location} (within ${radius}). Suitable for age ${age}.
+
+    Use Google Search to find REAL, current opportunities.
+
+    Return a JSON object with this structure:
+    {
+      "opportunities": [
+        { "title": "string", "company": "string", "location": "string", "description": "Brief summary", "link": "url or 'Search online'" }
+      ]
+    }
+
+    Ensure the JSON is valid. If no specific live jobs are found, suggest typical local employers or roles found in the search results.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            tools: [{googleSearch: {}}],
+            responseMimeType: 'application/json'
+        }
+    });
+
+    const jsonText = cleanJson(response.text || '{}');
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => ({
+        uri: c.web?.uri || '',
+        title: c.web?.title || 'Source'
+    })).filter((s: any) => s.uri) || [];
+
+    try {
+        const parsed = JSON.parse(jsonText);
+        return {
+            opportunities: parsed.opportunities || [],
+            sources
+        };
+    } catch (e) {
+        console.error("Failed to parse opportunities JSON", e);
+        return { opportunities: [], sources: [] };
+    }
+});
+
+export const generateUniversityCourseInfo = async (interests: string, location?: string): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => handleApiCall(async () => {
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Top 5 UK Geog unis`, config: { tools: [{googleSearch: {}}] } });
-    return { courses: [], sources: [] }; 
-};
+    const locationPrompt = location ? `near ${location} (or reasonably accessible)` : `in the UK`;
+
+    const prompt = `Find 5 university courses related to "${interests}" ${locationPrompt}.
+    Filter by: Best match for the interest.
+
+    Use Google Search to find up-to-date entry requirements and course details.
+
+    Return a JSON object with this structure:
+    {
+      "courses": [
+        { "courseTitle": "string", "universityName": "string", "description": "string", "entryRequirements": "string", "url": "string" }
+      ]
+    }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            tools: [{googleSearch: {}}],
+            responseMimeType: 'application/json'
+        }
+    });
+
+    const jsonText = cleanJson(response.text || '{}');
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => ({
+        uri: c.web?.uri || '',
+        title: c.web?.title || 'Source'
+    })).filter((s: any) => s.uri) || [];
+
+    try {
+        const parsed = JSON.parse(jsonText);
+        return {
+            courses: parsed.courses || [],
+            sources
+        };
+    } catch (e) {
+        console.error("Failed to parse uni courses JSON", e);
+        return { courses: [], sources: [] };
+    }
+});
+
+export const generateTopUKUniversityInfo = async (): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => handleApiCall(async () => {
+    const ai = getAiClient();
+    const prompt = `Find the top 5 UK universities for Geography (based on recent league tables like Guardian, Times, or Complete University Guide).
+
+    Return a JSON object with this structure:
+    {
+      "courses": [
+        { "courseTitle": "BSc/BA Geography", "universityName": "string", "description": "Why it is top rated", "entryRequirements": "Typical offer", "url": "string" }
+      ]
+    }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: prompt,
+        config: {
+            tools: [{googleSearch: {}}],
+            responseMimeType: 'application/json'
+        }
+    });
+
+    const jsonText = cleanJson(response.text || '{}');
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => ({
+        uri: c.web?.uri || '',
+        title: c.web?.title || 'Source'
+    })).filter((s: any) => s.uri) || [];
+
+    try {
+        const parsed = JSON.parse(jsonText);
+        return {
+            courses: parsed.courses || [],
+            sources
+        };
+    } catch (e) {
+        console.error("Failed to parse top unis JSON", e);
+        return { courses: [], sources: [] };
+    }
+});
 
 export const generateTransferableSkillInfo = async (skillName: string): Promise<TransferableSkill> => {
     await checkDailyLimit();
