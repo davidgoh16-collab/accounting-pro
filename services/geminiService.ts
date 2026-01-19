@@ -565,8 +565,7 @@ export const generateLocalOpportunities = async (location: string, level: string
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            tools: [{googleSearch: {}}],
-            responseMimeType: 'application/json'
+            tools: [{googleSearch: {}}]
         }
     });
 
@@ -608,8 +607,7 @@ export const generateUniversityCourseInfo = async (interests: string, location?:
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            tools: [{googleSearch: {}}],
-            responseMimeType: 'application/json'
+            tools: [{googleSearch: {}}]
         }
     });
 
@@ -646,8 +644,7 @@ export const generateTopUKUniversityInfo = async (): Promise<{ courses: Universi
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            tools: [{googleSearch: {}}],
-            responseMimeType: 'application/json'
+            tools: [{googleSearch: {}}]
         }
     });
 
