@@ -227,8 +227,8 @@ const LocalOpportunities: React.FC = () => {
                                 <span className="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">{opp.type}</span>
                             </div>
                             <p className="text-sm text-stone-600 mb-3">{opp.description}</p>
-                            {opp.url && (
-                                <a href={opp.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
+                            {opp.link && (
+                                <a href={opp.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
                                     View Opportunity <span className="ml-1">&rarr;</span>
                                 </a>
                             )}

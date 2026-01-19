@@ -555,7 +555,7 @@ export const generateLocalOpportunities = async (location: string, level: string
     Return a JSON object with this structure:
     {
       "opportunities": [
-        { "title": "string", "company": "string", "location": "string", "description": "Brief summary", "link": "url or 'Search online'" }
+        { "title": "string", "company": "string", "location": "string", "description": "Detailed description including key responsibilities and why it's relevant to geography.", "link": "Direct URL to the job posting or company careers page" }
       ]
     }
 
@@ -669,7 +669,20 @@ export const generateTopUKUniversityInfo = async (): Promise<{ courses: Universi
 export const generateTransferableSkillInfo = async (skillName: string): Promise<TransferableSkill> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Skill info ${skillName}`, config: { responseMimeType: 'application/json' } });
+    const prompt = `Provide detailed information about the transferable skill: "${skillName}" in the context of Geography.
+
+    Return a JSON object with this structure:
+    {
+        "name": "${skillName}",
+        "description": "What is it and how do you develop it?",
+        "applicationInCareers": "How is this skill applied in real-world careers?"
+    }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
