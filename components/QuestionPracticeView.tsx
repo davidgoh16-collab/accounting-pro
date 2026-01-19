@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Question, SessionData, CaseStudyMaster, MarkedModelAnswer, PracticeMode, ChatMessage, AIFeedback, CompletedSession, AnswerSegment, AuthUser, ChatSessionLog, DraftSession } from '../types';
 import { ALEVEL_UNITS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
 import { MASTER_CASE_STUDIES } from '../database';
-import { getHint, getMotivationalMessage, generateQuestion, generateFigure, generateModelAnswer, streamTutorResponse, generateCaseStudyApplication, markStudentAnswer, generateSessionSummary } from '../services/geminiService';
+import { getHint, getMotivationalMessage, generateQuestion, generateFigure, generateModelAnswer, streamTutorResponse, generateCaseStudyApplication, markStudentAnswer, generateSessionSummary, getImageLimitStatus } from '../services/geminiService';
 import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FigureDisplay, AnnotatedAnswerDisplay } from './SharedQuestionComponents';
@@ -178,6 +178,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
     const [subTopicFilter, setSubTopicFilter] = useState<string>('All Sub-topics');
     const [includeFigure, setIncludeFigure] = useState(false);
     const [isFormationQuestion, setIsFormationQuestion] = useState(false);
+    const [imageLimitStatus, setImageLimitStatus] = useState<{ used: number, limit: number } | null>(null);
     
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [stage, setStage] = useState(1);
@@ -266,6 +267,19 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
     useEffect(() => {
         setSubTopicFilter('All Sub-topics');
     }, [unitFilter]);
+
+    // Fetch Image Limit Status
+    useEffect(() => {
+        const fetchLimit = async () => {
+            const status = await getImageLimitStatus();
+            setImageLimitStatus(status);
+            // If limit reached, auto-uncheck
+            if (status.limit !== -1 && status.used >= status.limit) {
+                setIncludeFigure(false);
+            }
+        };
+        fetchLimit();
+    }, [user, currentQuestion]); // Re-fetch when question changes (generation might have used quota)
 
     // Load Draft
     useEffect(() => {
@@ -1022,10 +1036,23 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-8 items-center justify-center sm:justify-start">
-                    <label className="flex items-center gap-2 cursor-pointer bg-white/50 dark:bg-stone-800/50 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition shadow-sm">
-                        <input type="checkbox" checked={includeFigure} onChange={e => setIncludeFigure(e.target.checked)} className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-stone-100 dark:bg-stone-700 border-stone-300 dark:border-stone-600" />
-                        <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Include Figure/Resource</span>
-                    </label>
+                    <div className="relative group">
+                        <label className={`flex items-center gap-2 cursor-pointer bg-white/50 dark:bg-stone-800/50 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-700 shadow-sm transition ${imageLimitStatus && imageLimitStatus.limit !== -1 && imageLimitStatus.used >= imageLimitStatus.limit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:bg-stone-800'}`}>
+                            <input
+                                type="checkbox"
+                                checked={includeFigure}
+                                onChange={e => setIncludeFigure(e.target.checked)}
+                                disabled={!!imageLimitStatus && imageLimitStatus.limit !== -1 && imageLimitStatus.used >= imageLimitStatus.limit}
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-stone-100 dark:bg-stone-700 border-stone-300 dark:border-stone-600 disabled:cursor-not-allowed"
+                            />
+                            <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Include Figure/Resource</span>
+                        </label>
+                        {imageLimitStatus && imageLimitStatus.limit !== -1 && imageLimitStatus.used >= imageLimitStatus.limit && (
+                            <div className="absolute left-0 -top-12 bg-red-100 text-red-800 text-xs px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity w-64 pointer-events-none border border-red-200 z-50">
+                                Daily figure limit reached ({imageLimitStatus.limit}/{imageLimitStatus.limit}). Refreshes tomorrow.
+                            </div>
+                        )}
+                    </div>
 
                     {user.level === 'GCSE' && marksFilter === 4 && (
                         <label className="flex items-center gap-2 cursor-pointer bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-2 rounded-full border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition shadow-sm">

@@ -25,6 +25,7 @@ interface TopicProgressStats {
 
 const FeatureSettingsPanel: React.FC = () => {
     const [limit, setLimit] = useState<number>(50);
+    const [imageLimit, setImageLimit] = useState<number>(5);
     const [toggles, setToggles] = useState({
         birdGame: true,
         blockBlast: true,
@@ -44,6 +45,7 @@ const FeatureSettingsPanel: React.FC = () => {
                 if (snap.exists()) {
                     const data = snap.data();
                     setLimit(data.dailyRequestLimit ?? 50);
+                    setImageLimit(data.dailyImageLimit ?? 5);
                     setToggles(prev => ({ ...prev, ...data.featureToggles }));
                 }
             } catch (e) {
@@ -60,6 +62,7 @@ const FeatureSettingsPanel: React.FC = () => {
         try {
             await setDoc(doc(db, 'settings', 'global'), {
                 dailyRequestLimit: limit,
+                dailyImageLimit: imageLimit,
                 featureToggles: toggles
             }, { merge: true });
             alert("Settings saved successfully!");
@@ -108,6 +111,18 @@ const FeatureSettingsPanel: React.FC = () => {
                             type="number"
                             value={limit}
                             onChange={(e) => setLimit(parseInt(e.target.value))}
+                            className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
+                        />
+                    </div>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+                        <div>
+                            <p className="font-semibold text-stone-700 dark:text-stone-200">Daily Figure Generation Limit</p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400">Separate limit for image/diagram generations. (Default: 5)</p>
+                        </div>
+                        <input
+                            type="number"
+                            value={imageLimit}
+                            onChange={(e) => setImageLimit(parseInt(e.target.value))}
                             className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
                         />
                     </div>

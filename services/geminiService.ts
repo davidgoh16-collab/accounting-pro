@@ -56,6 +56,59 @@ const checkDailyLimit = async (): Promise<void> => {
     }
 };
 
+export const getImageLimitStatus = async (): Promise<{ used: number, limit: number }> => {
+    const user = auth.currentUser;
+    if (!user) return { used: 0, limit: 0 };
+
+    try {
+        const settingsRef = doc(db, 'settings', 'global');
+        const settingsSnap = await getDoc(settingsRef);
+        const limit = settingsSnap.exists() ? (settingsSnap.data().dailyImageLimit ?? 5) : 5;
+
+        if (limit === -1) return { used: 0, limit: 9999 };
+
+        const today = new Date().toISOString().split('T')[0];
+        const usageRef = doc(db, 'users', user.uid, 'usage_stats', today);
+        const usageSnap = await getDoc(usageRef);
+        const used = usageSnap.exists() ? (usageSnap.data().imageCount ?? 0) : 0;
+
+        return { used, limit };
+    } catch (e) {
+        console.error("Failed to fetch image limit status", e);
+        return { used: 0, limit: 5 };
+    }
+};
+
+const checkAndIncrementImageLimit = async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const { used, limit } = await getImageLimitStatus();
+
+        if (limit !== -1 && used >= limit) {
+            throw new Error(`Daily figure generation limit of ${limit} reached. Please try again tomorrow.`);
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        const usageRef = doc(db, 'users', user.uid, 'usage_stats', today);
+
+        // Ensure doc exists before updating imageCount specifically
+        // If we are calling this, we probably haven't called checkDailyLimit yet for this specific action?
+        // But usage_stats doc might not exist if this is the first action of the day.
+        const usageSnap = await getDoc(usageRef);
+
+        if (!usageSnap.exists()) {
+            await setDoc(usageRef, { count: 0, imageCount: 1, date: today });
+        } else {
+            await updateDoc(usageRef, { imageCount: increment(1) });
+        }
+    } catch (e: any) {
+        console.error("Image limit check failed:", e);
+        throw e;
+    }
+};
+
 const handleApiCall = async <T>(apiCall: () => Promise<T>): Promise<T> => {
     try {
         await checkDailyLimit();
@@ -137,12 +190,9 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
 });
 
 export const generateFigure = async (description: string): Promise<string> => {
-    // We try to check limit, but if figure fails, we return placeholder.
-    // However, if limit is reached, we probably want to throw so the user knows why?
-    // The previous implementation returned a placeholder on ANY error.
-    // Let's check limit first.
+    // Check specific image limit
     try {
-        await checkDailyLimit();
+        await checkAndIncrementImageLimit();
         const ai = getAiClient();
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
