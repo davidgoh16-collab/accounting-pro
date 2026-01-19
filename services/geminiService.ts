@@ -674,9 +674,11 @@ export const generateTransferableSkillInfo = async (skillName: string): Promise<
     Return a JSON object with this structure:
     {
         "name": "${skillName}",
-        "description": "What is it and how do you develop it?",
-        "applicationInCareers": "How is this skill applied in real-world careers?"
-    }`;
+        "description": ["Key point 1", "Key point 2", "Key point 3"],
+        "applicationInCareers": ["Career application 1", "Career application 2", "Career application 3"]
+    }
+
+    Ensure the points are concise, easy to read, and plain text (no markdown, no asterisks).`;
 
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',

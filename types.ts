@@ -260,8 +260,8 @@ export interface JobOpportunity {
 
 export interface TransferableSkill {
     name?: string;
-    description: string;
-    applicationInCareers: string;
+    description: string[];
+    applicationInCareers: string[];
 }
 
 export interface CVSuggestions {

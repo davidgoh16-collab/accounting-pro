@@ -67,14 +67,22 @@ const SkillModal: React.FC<{ skill: string; onClose: () => void }> = ({ skill, o
                     {isLoading && <LoadingSpinner text={`Loading details for ${skill}...`} />}
                     {error && <ErrorDisplay message={error} />}
                     {data && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div>
-                                <h3 className="font-bold text-rose-700">What is it & How do you develop it?</h3>
-                                <p className="text-stone-600 mt-1">{data.description}</p>
+                                <h3 className="font-bold text-rose-700 text-lg mb-2">What is it & How do you develop it?</h3>
+                                <ul className="list-disc list-outside ml-5 space-y-2 text-stone-600">
+                                    {(data.description || []).map((point, i) => (
+                                        <li key={i}>{point}</li>
+                                    ))}
+                                </ul>
                             </div>
                             <div>
-                                <h3 className="font-bold text-rose-700">Application in Careers</h3>
-                                <p className="text-stone-600 mt-1">{data.applicationInCareers}</p>
+                                <h3 className="font-bold text-rose-700 text-lg mb-2">Application in Careers</h3>
+                                <ul className="list-disc list-outside ml-5 space-y-2 text-stone-600">
+                                    {(data.applicationInCareers || []).map((point, i) => (
+                                        <li key={i}>{point}</li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
                     )}
