@@ -469,6 +469,14 @@ const App: React.FC = () => {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 <HubCard
+                                    icon={<span className="text-4xl">🏛️</span>}
+                                    title="Careers & University"
+                                    description="Explore university courses, find local opportunities, and build your CV."
+                                    onClick={() => handleNavigate('careers_university')}
+                                    shadowColor="shadow-amber-500/20"
+                                    accentColor="text-amber-600 hover:text-amber-700"
+                                />
+                                <HubCard
                                     icon={<span className="text-4xl">🎙️</span>}
                                     title="Podcast Studio"
                                     description="Create custom audio deep-dives on any topic. Hosted by Alex and Sam."
