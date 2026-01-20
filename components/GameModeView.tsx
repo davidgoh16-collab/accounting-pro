@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { GAME_QUESTIONS } from '../game-database';
+import { KEY_TERMS } from '../knowledge-database';
+import { generateQuizQuestion, getHint } from '../services/geminiService';
 import { MultipleChoiceQuestion, GameSessionResult, Question, AuthUser } from '../types';
-import { getHint } from '../services/geminiService';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
@@ -76,6 +77,10 @@ const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
     // Question Tracking
     const [usedQuestionIds, setUsedQuestionIds] = useState<string[]>([]);
 
+    // Dynamic Question Queue
+    const [dynamicQuestions, setDynamicQuestions] = useState<MultipleChoiceQuestion[]>([]);
+    const loadingQuestionRef = useRef(false);
+
     const gameLoopRef = useRef<number | null>(null);
 
     const questionsForTopic = useMemo(() => {
@@ -91,10 +96,55 @@ const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
         return filtered.length > 0 ? filtered : GAME_QUESTIONS.filter(q => q.levels.includes(level));
     }, [topic, user.level]);
 
-    // Reset used questions if topic changes
+    // Pre-fetch dynamic questions
+    const fetchDynamicQuestion = useCallback(async () => {
+        if (loadingQuestionRef.current) return;
+        loadingQuestionRef.current = true;
+
+        try {
+            const level = user.level || 'A-Level';
+            let pool = KEY_TERMS.filter(term => term.levels.includes(level));
+            if (topic !== 'All Topics') {
+                pool = pool.filter(term => term.topic === topic);
+            }
+            // Fallback
+            if (pool.length === 0) pool = KEY_TERMS.filter(term => term.levels.includes(level));
+
+            if (pool.length > 0) {
+                const randomTerm = pool[Math.floor(Math.random() * pool.length)];
+                const qData = await generateQuizQuestion(randomTerm);
+
+                const newQ: MultipleChoiceQuestion = {
+                    id: `dyn_${Date.now()}_${Math.random()}`,
+                    question: qData.question,
+                    options: qData.options,
+                    correctAnswer: qData.correctAnswer,
+                    topic: randomTerm.topic,
+                    levels: [level]
+                };
+
+                setDynamicQuestions(prev => [...prev, newQ]);
+            }
+        } catch (e) {
+            console.error("Failed to fetch dynamic question", e);
+        } finally {
+            loadingQuestionRef.current = false;
+        }
+    }, [topic, user.level]);
+
+    // Reset used questions if topic changes and start fetching
     useEffect(() => {
         setUsedQuestionIds([]);
-    }, [topic]);
+        setDynamicQuestions([]);
+        fetchDynamicQuestion();
+    }, [topic, fetchDynamicQuestion]);
+
+    // Keep buffer full
+    useEffect(() => {
+        if (dynamicQuestions.length < 2 && !loadingQuestionRef.current) {
+            fetchDynamicQuestion();
+        }
+    }, [dynamicQuestions.length, fetchDynamicQuestion]);
 
     // Set correct initial globe position once the component has mounted
     useEffect(() => {
@@ -108,7 +158,18 @@ const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
             setHighScore(score);
         }
         
-        // Filter out used questions
+        // Prioritize dynamic questions
+        if (dynamicQuestions.length > 0) {
+            const nextQuestion = dynamicQuestions[0];
+            setDynamicQuestions(prev => prev.slice(1)); // Remove used question
+            setCurrentQuestion(nextQuestion);
+            // Trigger fetch for next one
+            fetchDynamicQuestion();
+            setHint(null);
+            return;
+        }
+
+        // Filter out used questions (Fallback)
         const unusedQuestions = questionsForTopic.filter(q => !usedQuestionIds.includes(q.id));
         let pool = unusedQuestions;
         let isReset = false;
@@ -129,10 +190,18 @@ const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
                 return [...prev, nextQuestion.id];
             });
         } else {
-            setCurrentQuestion(null);
+             // Emergency fallback if everything fails
+             setCurrentQuestion({
+                 id: 'emergency_fallback',
+                 question: 'What is the capital of the UK?',
+                 options: ['London', 'Paris', 'Berlin', 'Madrid'],
+                 correctAnswer: 'London',
+                 topic: 'General',
+                 levels: ['GCSE', 'A-Level']
+            });
         }
         setHint(null);
-    }, [score, highScore, setHighScore, questionsForTopic, usedQuestionIds]);
+    }, [score, highScore, setHighScore, questionsForTopic, usedQuestionIds, dynamicQuestions, fetchDynamicQuestion]);
     
     // Reset Game Logic
     const resetGame = useCallback((isContinuing: boolean = false) => {

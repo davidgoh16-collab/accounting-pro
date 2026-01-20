@@ -355,7 +355,13 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
         `Item ${index + 1}: ${item.name} (${item.type})\nContext: ${item.details}`
     ).join('\n\n');
 
-    const prompt = `Create a quiz with ${items.length} multiple-choice questions, one for each of the following items.
+    const seed = Math.floor(Math.random() * 1000000); // Random seed to force variance
+
+    const prompt = `Create a unique quiz with ${items.length} multiple-choice questions, one for each of the following items.
+
+    Random Seed: ${seed} (Ensure questions are different from previous generations if possible).
+
+    Focus on different angles for each question (e.g., definition, application, cause/effect, or a specific detail). Do not just ask "What is [Item]?".
 
     ${itemsContext}
 
@@ -449,7 +455,11 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const prompt = `Create a single multiple-choice quiz question for the topic/term: "${item.name}".
+    const seed = Math.floor(Math.random() * 1000000);
+    const prompt = `Create a single, unique multiple-choice quiz question for the topic/term: "${item.name}".
+
+    Random Seed: ${seed}.
+    Focus on a specific application, example, or deep understanding of the concept. Avoid simple definitions if possible.
 
     Context:
     ${item.details}
@@ -506,7 +516,10 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
 export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<SwipeQuizItem> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const prompt = `Create a "True/False" style statement for the case study: "${study.name}".
+    const seed = Math.floor(Math.random() * 1000000);
+    const prompt = `Create a unique "True/False" style statement for the case study: "${study.name}".
+
+    Random Seed: ${seed}.
 
     Context:
     ${study.details}

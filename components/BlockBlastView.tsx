@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { GAME_QUESTIONS } from '../game-database';
-import { MultipleChoiceQuestion, GameSessionResult, AuthUser } from '../types';
+import { KEY_TERMS } from '../knowledge-database';
+import { generateQuizQuestion } from '../services/geminiService';
+import { MultipleChoiceQuestion, GameSessionResult, AuthUser, FlashcardItem } from '../types';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
@@ -83,6 +85,10 @@ const BlockBlastView: React.FC<BlockBlastViewProps> = ({ topic, user, onExit }) 
     // Question Tracking
     const [usedQuestionIds, setUsedQuestionIds] = useState<string[]>([]);
 
+    // Dynamic Question Queue
+    const [dynamicQuestions, setDynamicQuestions] = useState<MultipleChoiceQuestion[]>([]);
+    const loadingQuestionRef = useRef(false);
+
     const questionsForTopic = useMemo(() => {
         const level = user.level || 'A-Level';
         let filtered = GAME_QUESTIONS.filter(q => q.levels.includes(level));
@@ -94,10 +100,56 @@ const BlockBlastView: React.FC<BlockBlastViewProps> = ({ topic, user, onExit }) 
         return filtered.length > 0 ? filtered : GAME_QUESTIONS.filter(q => q.levels.includes(level));
     }, [topic, user.level]);
 
-    // Reset used questions if topic changes
+    // Pre-fetch dynamic questions
+    const fetchDynamicQuestion = useCallback(async () => {
+        if (loadingQuestionRef.current) return;
+        loadingQuestionRef.current = true;
+
+        try {
+            const level = user.level || 'A-Level';
+            let pool = KEY_TERMS.filter(term => term.levels.includes(level));
+            if (topic !== 'All Topics') {
+                pool = pool.filter(term => term.topic === topic);
+            }
+            // Fallback
+            if (pool.length === 0) pool = KEY_TERMS.filter(term => term.levels.includes(level));
+
+            if (pool.length > 0) {
+                const randomTerm = pool[Math.floor(Math.random() * pool.length)];
+                const qData = await generateQuizQuestion(randomTerm);
+
+                const newQ: MultipleChoiceQuestion = {
+                    id: `dyn_${Date.now()}_${Math.random()}`,
+                    question: qData.question,
+                    options: qData.options,
+                    correctAnswer: qData.correctAnswer,
+                    topic: randomTerm.topic,
+                    levels: [level]
+                };
+
+                setDynamicQuestions(prev => [...prev, newQ]);
+            }
+        } catch (e) {
+            console.error("Failed to fetch dynamic question", e);
+        } finally {
+            loadingQuestionRef.current = false;
+        }
+    }, [topic, user.level]);
+
+    // Reset used questions if topic changes and start fetching
     useEffect(() => {
         setUsedQuestionIds([]);
-    }, [topic]);
+        setDynamicQuestions([]);
+        // Initial fetch
+        fetchDynamicQuestion();
+    }, [topic, fetchDynamicQuestion]);
+
+    // Keep buffer full
+    useEffect(() => {
+        if (dynamicQuestions.length < 2 && !loadingQuestionRef.current) {
+            fetchDynamicQuestion();
+        }
+    }, [dynamicQuestions.length, fetchDynamicQuestion]);
 
     const generatePiece = useCallback((): PieceType => {
         const type = SHAPE_KEYS[Math.floor(Math.random() * SHAPE_KEYS.length)] as keyof typeof SHAPES;
@@ -300,27 +352,44 @@ const BlockBlastView: React.FC<BlockBlastViewProps> = ({ topic, user, onExit }) 
         if (updatedPlacements % PLACEMENTS_PER_QUIZ === 0 && !checkGameOver(newTray, finalGrid)) {
             setGameState('quiz');
             
-            // Filter used questions
-            const unusedQuestions = questionsForTopic.filter(q => !usedQuestionIds.includes(q.id));
-            let pool = unusedQuestions;
-            let isReset = false;
-            
-            if (pool.length === 0) {
-                pool = questionsForTopic; // Reset pool
-                isReset = true;
-            }
-            
-            if (pool.length > 0) {
-                const randomIndex = Math.floor(Math.random() * pool.length);
-                const nextQuestion = pool[randomIndex];
+            // Prioritize dynamic questions
+            if (dynamicQuestions.length > 0) {
+                const nextQuestion = dynamicQuestions[0];
+                setDynamicQuestions(prev => prev.slice(1)); // Remove used question
                 setCurrentQuestion(nextQuestion);
-                
-                setUsedQuestionIds(prev => {
-                     if (isReset) return [nextQuestion.id];
-                     return [...prev, nextQuestion.id];
-                });
+                // Trigger fetch for next one
+                fetchDynamicQuestion();
             } else {
-                setCurrentQuestion(null);
+                // Fallback to static
+                const unusedQuestions = questionsForTopic.filter(q => !usedQuestionIds.includes(q.id));
+                let pool = unusedQuestions;
+                let isReset = false;
+
+                if (pool.length === 0) {
+                    pool = questionsForTopic; // Reset pool
+                    isReset = true;
+                }
+
+                if (pool.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * pool.length);
+                    const nextQuestion = pool[randomIndex];
+                    setCurrentQuestion(nextQuestion);
+
+                    setUsedQuestionIds(prev => {
+                         if (isReset) return [nextQuestion.id];
+                         return [...prev, nextQuestion.id];
+                    });
+                } else {
+                    // Emergency fallback if everything fails
+                    setCurrentQuestion({
+                         id: 'emergency_fallback',
+                         question: 'What is the capital of the UK?',
+                         options: ['London', 'Paris', 'Berlin', 'Madrid'],
+                         correctAnswer: 'London',
+                         topic: 'General',
+                         levels: ['GCSE', 'A-Level']
+                    });
+                }
             }
         }
 
