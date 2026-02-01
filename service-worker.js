@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'geo-pro-v2.1';
+const CACHE_NAME = 'geo-pro-v2.2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,30 +7,21 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
-  // Force this new service worker to become the active service worker
   self.skipWaiting();
-
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
-      .catch((err) => {
-          console.warn('Service Worker install failed:', err);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
+      .catch((err) => console.warn('SW install warning:', err))
   );
 });
 
 self.addEventListener('activate', (event) => {
-  // Take control of all clients immediately
   event.waitUntil(clients.claim());
-
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -40,35 +31,40 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only intercept GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  // 1. Only intercept GET requests
+  if (event.request.method !== 'GET') return;
 
-  // Skip cross-origin requests (like firebase, google apis, cdns) from caching logic
-  // to avoid opaque response issues or caching failures unless explicitly handled
-  if (!event.request.url.startsWith(self.location.origin)) {
-      return;
-  }
+  // 2. Ignore non-origin requests (CDN, APIs, Firebase)
+  // This prevents the SW from interfering with external API calls
+  if (!event.request.url.startsWith(self.location.origin)) return;
 
-  // Specific exclusions for API/Auth paths if they happen to be on the same origin (e.g. proxied)
-  // but usually they are external.
+  // 3. Ignore browser-extension requests or other protocols
+  if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
+    (async () => {
+      try {
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
         }
-        return fetch(event.request).catch(error => {
-            console.error('Fetch failed for:', event.request.url, error);
-            // Return a valid offline response so the promise doesn't reject
-            return new Response('Network error happening', {
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: new Headers({ 'Content-Type': 'text/plain' })
-            });
-        });
-      })
+
+        // If not in cache, fetch from network
+        try {
+            return await fetch(event.request);
+        } catch (networkError) {
+            console.warn('SW Fetch failed for:', event.request.url);
+            // Return a fallback response for navigation requests to prevent "This site can't be reached"
+            if (event.request.mode === 'navigate') {
+                return caches.match('/index.html');
+            }
+            // Rethrow or return error response
+            throw networkError;
+        }
+      } catch (error) {
+        // Final fallback to prevent "Uncaught (in promise)" in console
+        return new Response('Network error', { status: 503, statusText: 'Service Unavailable' });
+      }
+    })()
   );
 });
