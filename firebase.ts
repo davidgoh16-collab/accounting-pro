@@ -146,3 +146,15 @@ export const deleteUserAccount = async (uid: string) => {
     const userRef = doc(db, 'users', uid);
     await deleteDoc(userRef);
 };
+export const logUserActivity = async (uid: string, eventType: string, details: any = {}) => {
+    try {
+        const logsCol = collection(db, 'users', uid, 'activity_logs');
+        await addDoc(logsCol, {
+            type: eventType,
+            timestamp: new Date().toISOString(),
+            ...details
+        });
+    } catch (e) {
+        console.error("Failed to log user activity", e);
+    }
+};

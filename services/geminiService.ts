@@ -1025,3 +1025,49 @@ export const parseTimetableFile = async (data: string, mimeType: string = 'image
 
     return JSON.parse(cleanJson(response.text || '[]'));
 });
+
+export const generateFlashcards = async (topic: string, subTopic: string, level: string): Promise<FlashcardItem[]> => handleApiCall(async () => {
+    const ai = getAiClient();
+    const prompt = `Generate 10 high-quality flashcards for the ${level} Geography topic: "${topic}".
+    Focus specifically on the sub-topic: "${subTopic}".
+
+    Include a mix of:
+    - Key Terms (Definitions)
+    - Case Study Details (Facts/Figures for specific locations if relevant to this sub-topic)
+    - Key Concepts (Processes/Explanations)
+
+    Return a JSON ARRAY of objects with this structure:
+    {
+        "name": "Term or Concept Name",
+        "topic": "${topic}",
+        "details": "Definition or key facts",
+        "citation": "Context (e.g. 'Process: Erosion' or 'Case Study: Nigeria')",
+        "type": "term" | "case_study",
+        "levels": ["${level}"]
+    }
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json'
+        }
+    });
+
+    const jsonText = cleanJson(response.text || '[]');
+    try {
+        const parsed = JSON.parse(jsonText);
+        if (Array.isArray(parsed)) {
+            return parsed.map((item: any) => ({
+                ...item,
+                topic: topic, // Ensure topic matches request
+                levels: [level] // Ensure level matches request
+            }));
+        }
+        return [];
+    } catch (e) {
+        console.error("Failed to parse flashcards JSON", e);
+        return [];
+    }
+});

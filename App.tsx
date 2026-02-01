@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig } from './types';
-import { onAuthChange, signOutUser, db } from './firebase';
+import { onAuthChange, signOutUser, db, logUserActivity } from './firebase';
 import { User } from 'firebase/auth';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot, where } from 'firebase/firestore';
 import { getMocks } from './services/mockService';
@@ -276,6 +276,8 @@ const App: React.FC = () => {
                 };
                 setUser(authUser);
                 
+                logUserActivity(firebaseUser.uid, 'session_start', { email: firebaseUser.email });
+
                 if (role === 'admin' || checkAdmin(firebaseUser.email, firebaseUser.uid)) setIsAdmin(true);
 
             } else {

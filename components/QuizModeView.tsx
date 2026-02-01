@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FlashcardItem, CaseStudyQuizQuestion } from '../types';
 import { generateBatchQuizQuestions } from '../services/geminiService';
+import { logUserActivity, auth } from '../firebase';
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -44,6 +45,9 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    // Mistake tracking
+    const [incorrectItems, setIncorrectItems] = useState<FlashcardItem[]>([]);
+
     const loadBatch = useCallback(async () => {
         if (isLoadingBatch || nextLoadIndex >= deck.length) return;
         
@@ -77,14 +81,17 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         }
     }, [deck, nextLoadIndex, isLoadingBatch, questions.length]);
 
-    // Initial Load
+    // Initial Load & Logging
     useEffect(() => {
         if (deck.length > 0 && questions.length === 0 && nextLoadIndex === 0) {
             loadBatch();
+            if (auth.currentUser) {
+                logUserActivity(auth.currentUser.uid, 'quiz_start', { deckSize: deck.length });
+            }
         }
     }, [deck, questions.length, nextLoadIndex, loadBatch]);
 
-    // Buffer Maintenance: Load more when we are 2 questions away from the end
+    // Buffer Maintenance
     useEffect(() => {
         if (!isLoadingBatch && nextLoadIndex < deck.length && questions.length - currentQuestionIndex <= 2) {
             loadBatch();
@@ -104,6 +111,9 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         setIsCorrect(correct);
         if (correct) {
             setScore(prev => prev + 1);
+        } else {
+            // Track mistake
+            setIncorrectItems(prev => [...prev, questions[currentQuestionIndex].sourceItem]);
         }
     };
     
@@ -115,6 +125,9 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
     
     const handleRestart = () => {
         if (initialDeck) {
+            if (auth.currentUser) {
+                logUserActivity(auth.currentUser.uid, 'quiz_restart', { deckSize: initialDeck.length });
+            }
             setDeck(shuffleArray(initialDeck));
             setQuestions([]);
             setCurrentQuestionIndex(0);
@@ -123,7 +136,24 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
             setSelectedAnswer(null);
             setIsCorrect(null);
             setError(null);
-            // useEffect will trigger loadBatch
+            setIncorrectItems([]);
+        }
+    };
+
+    const handleRetryMistakes = () => {
+        if (incorrectItems.length > 0) {
+            if (auth.currentUser) {
+                logUserActivity(auth.currentUser.uid, 'quiz_retry_mistakes', { deckSize: incorrectItems.length });
+            }
+            setDeck(shuffleArray(incorrectItems));
+            setQuestions([]);
+            setCurrentQuestionIndex(0);
+            setNextLoadIndex(0);
+            setScore(0);
+            setSelectedAnswer(null);
+            setIsCorrect(null);
+            setError(null);
+            setIncorrectItems([]); // Clear mistakes for the new round (new mistakes will be added if they fail again)
         }
     };
 
@@ -131,6 +161,12 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
     const currentQuizItem = questions[currentQuestionIndex];
     const isFinished = !currentQuizItem && nextLoadIndex >= deck.length && !isLoadingBatch;
     const isGlobalLoading = !currentQuizItem && isLoadingBatch;
+
+    useEffect(() => {
+        if (isFinished && auth.currentUser) {
+            logUserActivity(auth.currentUser.uid, 'quiz_complete', { score, total: questions.length, mistakes: incorrectItems.length });
+        }
+    }, [isFinished, score, questions.length, incorrectItems.length]);
 
     // --- RENDER ---
 
@@ -171,7 +207,15 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
                     <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100">Quiz Complete!</h1>
                     <p className="text-xl text-stone-600 dark:text-stone-300 mt-4">Your final score is:</p>
                     <p className="text-6xl font-bold text-fuchsia-600 dark:text-fuchsia-400 my-6">{score} / {questions.length}</p>
-                    <div className="flex gap-4 justify-center">
+                    <div className="flex flex-col gap-4 justify-center">
+                         {incorrectItems.length > 0 && (
+                            <button
+                                onClick={handleRetryMistakes}
+                                className="w-full py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 transition shadow-lg"
+                            >
+                                Retry {incorrectItems.length} Mistakes
+                            </button>
+                        )}
                         <button onClick={handleRestart} className="w-full py-3 bg-fuchsia-500 text-white font-bold rounded-lg hover:bg-fuchsia-600 transition shadow-lg">Play Again</button>
                         <button onClick={onBack} className="w-full py-3 bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold rounded-lg hover:bg-stone-300 dark:hover:bg-stone-600 transition">Exit</button>
                     </div>

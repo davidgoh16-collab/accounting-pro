@@ -8,6 +8,8 @@ import GameAnalysisView from './GameAnalysisView';
 import SessionDetailView from './SessionDetailView';
 import RevisionPlannerContent from './RevisionPlannerContent';
 import MockManager from './MockManager';
+import ActivityLogViewer from './ActivityLogViewer';
+import MockProgressViewer from './MockProgressViewer';
 import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
@@ -15,7 +17,7 @@ interface AdminViewProps {
     onBack: () => void;
 }
 
-type Tab = 'overview' | 'sessions' | 'games' | 'chats' | 'learning' | 'planner';
+type Tab = 'overview' | 'sessions' | 'games' | 'chats' | 'learning' | 'planner' | 'logs' | 'exams';
 
 interface TopicProgressStats {
     total: number;
@@ -695,11 +697,13 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
             <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-t-3xl shadow-xl flex-shrink-0 overflow-hidden">
                 <div className="flex border-b border-stone-200 dark:border-stone-700 overflow-x-auto">
                     <TabButton id="overview" label="Overview" icon="📊" />
-                    <TabButton id="learning" label="Academy Progress" icon="🎓" />
-                    <TabButton id="planner" label="Revision Planner" icon="📅" />
-                    <TabButton id="sessions" label="Practice Sessions" icon="📝" />
-                    <TabButton id="games" label="Game Stats" icon="🎮" />
-                    <TabButton id="chats" label="Communication Logs" icon="💬" />
+                    <TabButton id="logs" label="Activity" icon="📋" />
+                    <TabButton id="exams" label="Exam Prep" icon="📝" />
+                    <TabButton id="learning" label="Academy" icon="🎓" />
+                    <TabButton id="planner" label="Planner" icon="📅" />
+                    <TabButton id="sessions" label="Sessions" icon="📝" />
+                    <TabButton id="games" label="Games" icon="🎮" />
+                    <TabButton id="chats" label="Chats" icon="💬" />
                 </div>
             </div>
 
@@ -724,6 +728,8 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                         </div>
                     </div>
                 )}
+                {activeTab === 'logs' && <ActivityLogViewer user={user} />}
+                {activeTab === 'exams' && <MockProgressViewer user={user} />}
                 {activeTab === 'learning' && <LearningProgressViewer user={user} />}
                 {activeTab === 'planner' && <RevisionPlannerContent user={user} />}
                 {activeTab === 'sessions' && (
