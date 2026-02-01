@@ -193,7 +193,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                         </button>
                     </form>
                     <p className="text-center text-xs text-stone-400 mt-3">
-                        AI can make mistakes. Check important info. {researchMode ? 'Citations provided in text.' : 'Strictly adhering to AQA spec.'}
+                        AI can make mistakes. Do not share personal or sensitive information. {researchMode ? 'Citations provided in text.' : 'Strictly adhering to AQA spec.'}
                     </p>
                 </div>
             </div>

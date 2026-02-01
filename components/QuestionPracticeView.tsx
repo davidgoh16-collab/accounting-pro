@@ -1203,6 +1203,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                                                 </div>
                                                 <p className="text-stone-500 dark:text-stone-400 mt-1 mb-4">Plan and write your full answer below.</p>
                                                 <textarea value={studentAnswer} onChange={(e) => setStudentAnswer(e.target.value)} placeholder="Start writing..." className="w-full flex-grow min-h-[300px] p-4 appearance-none border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow custom-scrollbar bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"/>
+                                                <p className="text-[10px] text-stone-400 mt-1">Do not enter personal or sensitive information.</p>
                                                 
                                                 <FileUploadWidget />
 
@@ -1227,6 +1228,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                                                     </div>
                                                 </div>
                                                 <textarea value={studentAnswer} onChange={(e) => setStudentAnswer(e.target.value)} placeholder="Begin your answer when you start the timer..." className="w-full flex-grow min-h-[300px] p-4 appearance-none border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow custom-scrollbar bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"/>
+                                                <p className="text-[10px] text-stone-400 mt-1">Do not enter personal or sensitive information.</p>
                                                 
                                                 <FileUploadWidget />
 
@@ -1264,6 +1266,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                                                     <div className="flex-grow whitespace-pre-wrap text-sm text-stone-800 dark:text-stone-200 p-4 overflow-y-auto custom-scrollbar border border-stone-200 dark:border-stone-700 rounded-md bg-white dark:bg-stone-900">
                                                         {liveAnswer || <p className="text-stone-400 dark:text-stone-500 italic">Your answer will be built here as you chat with your tutor...</p>}
                                                     </div>
+                                                    <p className="text-[10px] text-stone-400 mt-1">Do not enter personal or sensitive information.</p>
                                                     <button onClick={() => handleMarkAnswer(liveAnswer)} disabled={isMarking || !liveAnswer.trim()} className="w-full mt-4 py-2 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-600 disabled:bg-stone-400">
                                                         {isMarking ? 'Marking...' : 'Mark Final Answer'}
                                                     </button>
@@ -1296,6 +1299,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                                                         <input type="text" value={tutorInput} onChange={(e) => setTutorInput(e.target.value)} placeholder="Respond to your tutor..." className="flex-1 w-full px-4 py-2 text-sm bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500" disabled={isTutorLoading} />
                                                         <button type="submit" disabled={isTutorLoading || !tutorInput.trim()} className="p-2 bg-blue-500 text-white rounded-full disabled:bg-stone-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"><span className="text-lg">⬆️</span></button>
                                                     </form>
+                                                    <p className="text-[10px] text-stone-400 text-center mt-2">Do not enter personal or sensitive information.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1337,6 +1341,7 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                                                     <TimerWidget />
 
                                                     <textarea value={studentAnswer} onChange={(e) => setStudentAnswer(e.target.value)} placeholder="Write your full, exam-style answer here." className="w-full h-96 mt-2 p-2 appearance-none border border-stone-300 dark:border-stone-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 custom-scrollbar bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"/>
+                                                    <p className="text-[10px] text-stone-400 mt-1">Do not enter personal or sensitive information.</p>
                                                     
                                                     <FileUploadWidget />
 

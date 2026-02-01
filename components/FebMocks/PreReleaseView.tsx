@@ -234,6 +234,7 @@ const PreReleaseView: React.FC = () => {
                                         <Send size={20} />
                                     </button>
                                 </div>
+                                <p className="text-[10px] text-stone-400 text-center mt-2">Do not enter personal or sensitive information.</p>
                             </div>
                         </>
                     ) : (

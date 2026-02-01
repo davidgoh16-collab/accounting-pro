@@ -29,6 +29,48 @@ const shuffleArray = (array: string[]) => {
     return newArr;
 };
 
+// Levenshtein Distance for fuzzy matching
+const levenshteinDistance = (a: string, b: string): number => {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+};
+
+const isFuzzyMatch = (userAnswer: string, correctAnswer: string): boolean => {
+    const normUser = userAnswer.trim().toLowerCase().replace(/[.,!?;:]/g, '');
+    const normCorrect = correctAnswer.trim().toLowerCase().replace(/[.,!?;:]/g, '');
+
+    if (!normUser || !normCorrect) return false;
+
+    // 1. Exact Match (Normalized)
+    if (normUser === normCorrect) return true;
+
+    // 2. Contains Match (if correct answer is long enough, e.g. sentence)
+    if (normCorrect.length > 10 && normUser.includes(normCorrect)) return true;
+    if (normUser.length > 10 && normCorrect.includes(normUser)) return true;
+
+    // 3. Levenshtein Fuzzy Match
+    const distance = levenshteinDistance(normUser, normCorrect);
+    // Allow 1 error per 5 characters, max 3 errors
+    const allowedErrors = Math.min(3, Math.floor(normCorrect.length / 5));
+
+    return distance <= allowedErrors;
+};
+
 const DefinitionModal: React.FC<{ term: KeyTerm; onClose: () => void }> = ({ term, onClose }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
         <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-stone-200 dark:border-stone-700 relative" onClick={e => e.stopPropagation()}>
@@ -279,18 +321,27 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
             correct = block.items.every((val, index) => val === sortedItems[index]);
         } else if (block.type === 'fill_in_blank' && block.correctBlanks) {
             correct = block.correctBlanks.every((val, index) => 
-                fillBlanksAnswers[index]?.trim().toLowerCase() === val.trim().toLowerCase()
+                // Use fuzzy match for blanks too
+                isFuzzyMatch(fillBlanksAnswers[index] || '', val)
             );
         } else if (block.type === 'diagram_match' && block.items) {
             correct = block.items.every((item, index) => matchedLabels[index + 1] === item);
         } else if (block.type === 'text_input') {
-            const userText = userAnswer.trim().toLowerCase();
-            const correctText = block.correctAnswer?.trim().toLowerCase() || "";
+            const userText = userAnswer.trim();
+            const correctText = block.correctAnswer?.trim() || "";
+
             if (block.keywords && block.keywords.length > 0) {
-                const matchingCount = block.keywords.filter(keyword => userText.includes(keyword.toLowerCase())).length;
+                // If keywords are present, check if user answer contains most of them
+                const matchingCount = block.keywords.filter(keyword => isFuzzyMatch(userText, keyword)).length;
+                // Require 50% of keywords, or if only 1, require it.
                 correct = matchingCount >= Math.ceil(block.keywords.length / 2);
+
+                // Also do a direct fuzzy match against the "correctAnswer" if provided, just in case keywords fail but intent is right
+                if (!correct && correctText) {
+                    correct = isFuzzyMatch(userText, correctText);
+                }
             } else {
-                correct = userText === correctText || (correctText.length > 5 && userText.includes(correctText));
+                correct = isFuzzyMatch(userText, correctText);
             }
         } else {
             correct = userAnswer === block.correctAnswer;
@@ -413,6 +464,7 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
                         {currentBlock.type === 'text_input' && (
                             <div>
                                 <textarea value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} disabled={isAnswerSubmitted} placeholder="Type your explanation..." className={`w-full p-4 text-lg rounded-xl border-2 outline-none transition-all h-32 ${isAnswerSubmitted ? isCorrect ? "border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-900/30" : "border-red-500 bg-red-50 text-red-900 dark:bg-red-900/30" : "border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 focus:border-indigo-500"}`}/>
+                                <p className="text-[10px] text-stone-400 mt-1">Do not enter personal or sensitive information.</p>
                                 {isAnswerSubmitted && !isCorrect && <p className="mt-2 text-stone-500 dark:text-stone-400 text-sm">Suggested answer: <span className="font-bold text-stone-800 dark:text-stone-200">{currentBlock.correctAnswer}</span></p>}
                             </div>
                         )}
@@ -424,7 +476,7 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
                                     <React.Fragment key={i}>
                                         <span className="text-stone-800 dark:text-stone-200">{part}</span>
                                         {i < arr.length - 1 && (
-                                            <input type="text" value={fillBlanksAnswers[i] || ''} onChange={(e) => { const newAns = [...fillBlanksAnswers]; newAns[i] = e.target.value; setFillBlanksAnswers(newAns); }} disabled={isAnswerSubmitted} className={`mx-1 px-2 py-1 border-b-2 outline-none w-32 text-center font-bold ${isAnswerSubmitted ? fillBlanksAnswers[i]?.toLowerCase() === currentBlock.correctBlanks?.[i].toLowerCase() ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-red-500 text-red-600 bg-red-50" : "border-indigo-300 focus:border-indigo-600 bg-indigo-50 dark:bg-stone-800 dark:text-white"}`}/>
+                                            <input type="text" value={fillBlanksAnswers[i] || ''} onChange={(e) => { const newAns = [...fillBlanksAnswers]; newAns[i] = e.target.value; setFillBlanksAnswers(newAns); }} disabled={isAnswerSubmitted} className={`mx-1 px-2 py-1 border-b-2 outline-none w-32 text-center font-bold ${isAnswerSubmitted ? isFuzzyMatch(fillBlanksAnswers[i], currentBlock.correctBlanks?.[i] || '') ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-red-500 text-red-600 bg-red-50" : "border-indigo-300 focus:border-indigo-600 bg-indigo-50 dark:bg-stone-800 dark:text-white"}`}/>
                                         )}
                                     </React.Fragment>
                                 ))}

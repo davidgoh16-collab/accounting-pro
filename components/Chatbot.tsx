@@ -162,6 +162,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
             <span className="text-lg">⬆️</span>
           </button>
         </form>
+        <p className="text-[10px] text-stone-400 text-center mt-2">
+            AI can make mistakes. Do not share personal or sensitive information.
+        </p>
       </footer>
       <style>{`
         .markdown-body a { text-decoration: underline; color: inherit; }

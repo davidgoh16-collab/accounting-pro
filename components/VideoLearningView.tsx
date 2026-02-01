@@ -270,6 +270,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                                                             className="w-full p-3 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm mb-3 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white"
                                                             rows={3}
                                                         />
+                                                        <p className="text-[10px] text-stone-400 mt-1 mb-2">Do not enter personal or sensitive information.</p>
                                                         <button 
                                                             onClick={() => toggleOpenEnded(idx)}
                                                             className="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline flex items-center gap-1"

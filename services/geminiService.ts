@@ -10,6 +10,14 @@ import { getSpecContext } from '../utils/contentUtils';
 
 const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
 
+// Safety settings for DfE compliance
+const SAFETY_SETTINGS = [
+    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+];
+
 const getAiClient = (): GoogleGenAI => {
     const API_KEY = process.env.API_KEY;
     if (API_KEY) {
@@ -167,7 +175,10 @@ export const detectDistress = async (text: string): Promise<boolean> => {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
-            config: { responseMimeType: 'application/json' }
+            config: {
+                responseMimeType: 'application/json',
+                safetySettings: SAFETY_SETTINGS
+            }
         });
         const result = JSON.parse(cleanJson(response.text || '{}'));
         return result.isDistress === true;
@@ -232,7 +243,10 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
         contents: fullPrompt,
-        config: { responseMimeType: 'application/json' }
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
     });
     return JSON.parse(cleanJson(response.text || '{}')) as GeneratedQuestionData;
 });
@@ -245,7 +259,11 @@ export const generateFigure = async (description: string): Promise<string> => {
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: `Geography exam figure: ${description}`,
-            config: { numberOfImages: 1, aspectRatio: "16:9" }
+            config: {
+                numberOfImages: 1,
+                aspectRatio: "16:9",
+                safetySettings: SAFETY_SETTINGS
+            }
         });
         if (response.generatedImages && response.generatedImages.length > 0) {
             return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
@@ -345,7 +363,7 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     }
 
     const tools = contextMode === 'research' ? [{ googleSearch: {} }] : undefined;
-    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 }, tools } : { tools };
+    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 }, tools, safetySettings: SAFETY_SETTINGS } : { tools, safetySettings: SAFETY_SETTINGS };
 
     const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...config, systemInstruction } });
 
@@ -376,7 +394,11 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
 export const getHint = async (question: Question): Promise<string> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Hint for: ${question.prompt}` });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Hint for: ${question.prompt}`,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
     return response.text || 'Think about the command word.';
 };
 
@@ -385,14 +407,25 @@ export const getMotivationalMessage = async (): Promise<string> => {
     // Let's include it for consistency, or skip to be nice. I'll include it.
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Motivational msg for student.` });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Motivational msg for student.`,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
     return response.text || 'Keep going!';
 };
 
 export const generateModelAnswer = async (question: Question): Promise<MarkedModelAnswer> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Model answer for ${question.prompt}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: `Model answer for ${question.prompt}`,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
@@ -402,14 +435,28 @@ export const streamTutorResponse = async (question: Question, history: ChatMessa
     const systemInstruction = `You are an interactive Geography tutor...`;
     const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
-    const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents, config: { systemInstruction } });
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-pro',
+        contents,
+        config: {
+            systemInstruction,
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
 export const generateCaseStudyApplication = async (question: Question, caseStudyName: string): Promise<{ summary: string; application: string }> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Apply ${caseStudyName} to ${question.prompt}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: `Apply ${caseStudyName} to ${question.prompt}`,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
@@ -451,7 +498,8 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            responseMimeType: 'application/json'
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
         }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
@@ -461,14 +509,22 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     // Summary is generated automatically after marking. It should count as part of the flow.
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summarize session.` });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Summarize session.`,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
     return response.text?.trim() || 'Session complete.';
 };
 
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const responseStream = await ai.models.generateContentStream({ model: 'gemini-2.5-pro', contents: [{role: 'user', parts: [{text: message}]}] });
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-pro',
+        contents: [{role: 'user', parts: [{text: message}]}],
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
 };
 
@@ -477,11 +533,19 @@ export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{
     const ai = getAiClient();
     // Handling parallel calls safely
     try {
-        const info = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Summary of ${study.name}` });
+        const info = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Summary of ${study.name}`,
+            config: { safetySettings: SAFETY_SETTINGS }
+        });
 
         let imageUrl = "https://placehold.co/600x400?text=Case+Study+Image";
         try {
-            const img = await ai.models.generateImages({ model: 'imagen-4.0-generate-001', prompt: `Image of ${study.name}`, config: { numberOfImages: 1 } });
+            const img = await ai.models.generateImages({
+                model: 'imagen-4.0-generate-001',
+                prompt: `Image of ${study.name}`,
+                config: { numberOfImages: 1, safetySettings: SAFETY_SETTINGS }
+            });
             if (img.generatedImages && img.generatedImages.length > 0) {
                 imageUrl = `data:image/png;base64,${img.generatedImages[0].image.imageBytes}`;
             }
@@ -533,7 +597,8 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
-            responseMimeType: 'application/json'
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
         }
     });
 
@@ -631,7 +696,8 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
-            responseMimeType: 'application/json'
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
         }
     });
 
@@ -692,7 +758,8 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
         contents: prompt,
         config: {
             systemInstruction: STRICT_AQA_CONTEXT,
-            responseMimeType: 'application/json'
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
         }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
@@ -701,7 +768,14 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
 export const generateCareerInfo = async (category: string): Promise<GeographyCareer[]> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Careers in ${category}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: `Careers in ${category}`,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
     return JSON.parse(cleanJson(response.text || '[]'));
 };
 
@@ -727,7 +801,8 @@ export const generateLocalOpportunities = async (location: string, level: string
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            tools: [{googleSearch: {}}]
+            tools: [{googleSearch: {}}],
+            safetySettings: SAFETY_SETTINGS
         }
     });
 
@@ -769,7 +844,8 @@ export const generateUniversityCourseInfo = async (interests: string, location?:
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            tools: [{googleSearch: {}}]
+            tools: [{googleSearch: {}}],
+            safetySettings: SAFETY_SETTINGS
         }
     });
 
@@ -806,7 +882,8 @@ export const generateTopUKUniversityInfo = async (): Promise<{ courses: Universi
         model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
-            tools: [{googleSearch: {}}]
+            tools: [{googleSearch: {}}],
+            safetySettings: SAFETY_SETTINGS
         }
     });
 
@@ -845,7 +922,10 @@ export const generateTransferableSkillInfo = async (skillName: string): Promise<
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
-        config: { responseMimeType: 'application/json' }
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -853,14 +933,25 @@ export const generateTransferableSkillInfo = async (skillName: string): Promise<
 export const generateCVSuggestions = async (jobTitle: string): Promise<CVSuggestions> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `CV for ${jobTitle}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: `CV for ${jobTitle}`,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 export const generateReelSummary = async (study: CaseStudyLocation): Promise<string> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Reel summary ${study.name}` });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Reel summary ${study.name}`,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
     return response.text || '';
 };
 
@@ -871,7 +962,14 @@ export const generateCaseStudyVideo = async (study: CaseStudyLocation, summary: 
 export const generateLessonPlan = async (topic: string, level: UserLevel): Promise<VideoLessonPlan> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: `Lesson plan for ${topic}`, config: { responseMimeType: 'application/json' } });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Lesson plan for ${topic}`,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
@@ -882,7 +980,11 @@ export const generateSlideImage = async (imagePrompt: string): Promise<string> =
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
             prompt: imagePrompt,
-            config: { numberOfImages: 1, aspectRatio: "16:9" }
+            config: {
+                numberOfImages: 1,
+                aspectRatio: "16:9",
+                safetySettings: SAFETY_SETTINGS
+            }
         });
         if (response.generatedImages && response.generatedImages.length > 0) {
             return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
@@ -904,7 +1006,11 @@ export const generateSlideAudio = async (text: string): Promise<AudioBuffer> => 
 export const generatePodcastScript = async (topic: string, level: string): Promise<string> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: `Podcast script ${topic}` });
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: `Podcast script ${topic}`,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
     return response.text || '';
 };
 
@@ -987,6 +1093,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
         }
     });
 
@@ -1031,7 +1138,10 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro', // Switched to Pro for better JSON adherence
         contents: prompt,
-        config: { responseMimeType: 'application/json' }
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
     });
 
     try {
@@ -1081,7 +1191,10 @@ export const chatWithPreRelease = async (history: ChatMessage[], message: string
     const responseStream = await ai.models.generateContentStream({
         model: 'gemini-2.5-pro', // Use Pro for vision capabilities
         contents: contents,
-        config: { systemInstruction }
+        config: {
+            systemInstruction,
+            safetySettings: SAFETY_SETTINGS
+        }
     });
 
     for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
@@ -1105,7 +1218,10 @@ export const generatePreReleaseQuestion = async (imageBase64: string): Promise<G
                 { inlineData: { mimeType: "image/jpeg", data: base64Data } }
             ]}
         ],
-        config: { responseMimeType: 'application/json' }
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
     });
 
     const data = JSON.parse(cleanJson(response.text || '{}'));
@@ -1169,7 +1285,10 @@ export const parseTimetableFile = async (data: string, mimeType: string = 'image
         contents: [
             { role: 'user', parts: parts }
         ],
-        config: { responseMimeType: 'application/json' }
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
     });
 
     return JSON.parse(cleanJson(response.text || '[]'));
@@ -1200,7 +1319,8 @@ export const generateFlashcards = async (topic: string, subTopic: string, level:
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
-            responseMimeType: 'application/json'
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
         }
     });
 

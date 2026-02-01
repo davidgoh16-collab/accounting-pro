@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 interface SafeguardingAlert {
     id: string;
     uid: string;
+    displayName?: string; // Added displayName
     message: string;
     timestamp: string;
     status: 'unresolved' | 'resolved';
@@ -22,7 +23,24 @@ const SafeguardingViewer: React.FC = () => {
             const col = collection(db, 'safeguarding_alerts');
             const q = query(col, orderBy('timestamp', 'desc'), limit(50));
             const snap = await getDocs(q);
-            setAlerts(snap.docs.map(d => ({ id: d.id, ...d.data() } as SafeguardingAlert)));
+
+            // Map basic alert data
+            const rawAlerts = snap.docs.map(d => ({ id: d.id, ...d.data() } as SafeguardingAlert));
+
+            // Enrich with user display names
+            const enrichedAlerts = await Promise.all(rawAlerts.map(async (alert) => {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', alert.uid));
+                    if (userDoc.exists()) {
+                        return { ...alert, displayName: userDoc.data().displayName || 'Unknown User' };
+                    }
+                } catch (e) {
+                    console.error(`Failed to fetch user name for ${alert.uid}`, e);
+                }
+                return { ...alert, displayName: 'Unknown User' };
+            }));
+
+            setAlerts(enrichedAlerts);
         } catch (e) {
             console.error("Failed to fetch safeguarding alerts", e);
         } finally {
@@ -68,9 +86,12 @@ const SafeguardingViewer: React.FC = () => {
                         <div className="flex justify-between items-start">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                                    {new Date(alert.timestamp).toLocaleString()} &bull; UID: {alert.uid}
+                                    {new Date(alert.timestamp).toLocaleString()}
                                 </p>
-                                <p className="font-semibold text-stone-800 mt-1">"{alert.message}"</p>
+                                <p className="text-sm font-semibold text-stone-800 dark:text-stone-700 mt-1">
+                                    User: <span className="text-indigo-600">{alert.displayName}</span> <span className="text-stone-400 text-xs">({alert.uid})</span>
+                                </p>
+                                <p className="font-bold text-stone-800 mt-2 bg-white p-2 rounded border border-stone-200">"{alert.message}"</p>
                             </div>
                             {alert.status === 'unresolved' ? (
                                 <button

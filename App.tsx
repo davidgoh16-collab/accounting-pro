@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig } from './types';
-import { onAuthChange, signOutUser, db, logUserActivity } from './firebase';
+import { onAuthChange, signOutUser, db } from './firebase';
 import { User } from 'firebase/auth';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot, where } from 'firebase/firestore';
 import { getMocks } from './services/mockService';
@@ -35,7 +35,6 @@ import MockDetailView from './components/MockDetailView';
 import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
-import FullChatView from './components/FullChatView';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -277,8 +276,6 @@ const App: React.FC = () => {
                 };
                 setUser(authUser);
                 
-                logUserActivity(firebaseUser.uid, 'session_start', { email: firebaseUser.email });
-
                 if (role === 'admin' || checkAdmin(firebaseUser.email, firebaseUser.uid)) setIsAdmin(true);
 
             } else {
@@ -525,8 +522,6 @@ const App: React.FC = () => {
                 />
             )}
 
-            {page === 'full_chat' && <FullChatView user={user} onBack={() => handleNavigate('dashboard')} />}
-
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
@@ -551,7 +546,7 @@ const App: React.FC = () => {
             
             {page === 'admin' && isAdmin && <AdminView onImpersonate={handleImpersonate} onBack={() => handleNavigate('dashboard')} />}
 
-            {featureFlags.aiTutor && <Chatbot user={user} onNavigate={handleNavigate} />}
+            {featureFlags.aiTutor && <Chatbot />}
         </div>
     );
 };
