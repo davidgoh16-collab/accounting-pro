@@ -104,7 +104,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
             <span className="text-3xl">🌍</span>
             <div className="flex flex-col">
                 <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100 leading-tight">Geo Pro Chat</h2>
-                <span className="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wider">Strict Mode</span>
+                <span className="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wider">Tutor Mode</span>
             </div>
         </div>
         <div className="flex gap-2">

@@ -54,7 +54,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                         timestamp: new Date().toISOString(),
                         preview: messages[messages.length - 1].text.substring(0, 50) + '...',
                         messages: messages,
-                        context: researchMode ? 'Research Mode' : 'Strict Mode'
+                        context: researchMode ? 'Research Mode' : 'Tutor Mode'
                     };
                     await setDoc(doc(db, 'users', user.uid, 'chat_logs', sessionId), log);
                 } catch (e) {
@@ -117,7 +117,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                         <p className="text-stone-500 dark:text-stone-400 text-sm">
                             {researchMode
                                 ? "Research Mode Active: Citations & External Sources Enabled."
-                                : "Strict Mode Active: AQA Specification Content Only."}
+                                : "Tutor Mode Active: AQA Specification Content Only."}
                         </p>
                     </div>
 
@@ -126,7 +126,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                             onClick={() => setResearchMode(false)}
                             className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${!researchMode ? 'bg-white dark:bg-stone-700 shadow text-green-600 dark:text-green-400' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
                         >
-                            Strict
+                            Tutor
                         </button>
                         <button
                             onClick={() => setResearchMode(true)}
