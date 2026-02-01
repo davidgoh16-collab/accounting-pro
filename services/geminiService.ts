@@ -4,7 +4,7 @@ import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIF
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
-import { auth, db } from '../firebase';
+import { auth, db, getCourseFiles } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
 
@@ -272,7 +272,9 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         }
     });
 
-    const contents = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+    const contents: any[] = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+
+    // Add user message
     contents.push({ role: 'user', parts: [{ text: message }] });
 
     const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
@@ -300,6 +302,36 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         2. Do NOT hallucinate case studies. Use only standard, well-known examples appropriate for AQA.
         3. Be concise and exam-focused.
         `;
+
+        // Inject files if in strict mode (RAG via Gemini multimodal input)
+        try {
+            const files = await getCourseFiles(level);
+            // Limit to top 10 files to avoid overloading context/quotas
+            const limitedFiles = files.slice(0, 10);
+
+            if (limitedFiles.length > 0) {
+                // Add files to the user's current message payload
+                // The SDK supports inline data or fileData. For gs:// URI, we use fileData.
+                const fileParts = limitedFiles.map(uri => ({
+                    fileData: {
+                        mimeType: 'application/pdf', // Assuming most resources are PDFs
+                        fileUri: uri
+                    }
+                }));
+
+                // Append file parts to the *last* user message (which is `contents[contents.length-1]`)
+                // Gemini API expects text parts + file parts in the same turn
+                if (contents.length > 0) {
+                    const lastMsg = contents[contents.length - 1];
+                    lastMsg.parts = [...lastMsg.parts, ...fileParts];
+                }
+
+                systemInstruction += `\n\n[SYSTEM: You have access to ${limitedFiles.length} course documents attached. Use them as the primary source of truth.]`;
+            }
+        } catch (e) {
+            console.error("Failed to inject course files", e);
+        }
+
     } else {
         systemInstruction += `
         RESEARCH MODE ENABLED.

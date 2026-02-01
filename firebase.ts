@@ -8,6 +8,7 @@ import {
     User
 } from "firebase/auth";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove, query, where, writeBatch, deleteDoc } from "firebase/firestore";
+import { getStorage, ref, listAll } from "firebase/storage";
 import { AuthUser, ClassGroup } from "./types";
 
 const firebaseConfig = {
@@ -23,6 +24,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 const microsoftProvider = new OAuthProvider('microsoft.com');
 
@@ -146,6 +148,7 @@ export const deleteUserAccount = async (uid: string) => {
     const userRef = doc(db, 'users', uid);
     await deleteDoc(userRef);
 };
+
 export const logUserActivity = async (uid: string, eventType: string, details: any = {}) => {
     try {
         const logsCol = collection(db, 'users', uid, 'activity_logs');
@@ -156,5 +159,21 @@ export const logUserActivity = async (uid: string, eventType: string, details: a
         });
     } catch (e) {
         console.error("Failed to log user activity", e);
+    }
+};
+
+export const getCourseFiles = async (level: string): Promise<string[]> => {
+    try {
+        const folder = level === 'GCSE' ? 'GCSE Geography' : 'A Level Geography';
+        const folderRef = ref(storage, folder);
+        const res = await listAll(folderRef);
+
+        // Construct gs:// URIs based on bucket and path
+        // Bucket: a-level-geography.firebasestorage.app
+        const bucket = 'a-level-geography.firebasestorage.app';
+        return res.items.map(item => `gs://${bucket}/${item.fullPath}`);
+    } catch (e) {
+        console.error(`Failed to list files for ${level}`, e);
+        return [];
     }
 };
