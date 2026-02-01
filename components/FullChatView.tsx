@@ -4,6 +4,7 @@ import { AuthUser, ChatMessage, ChatSessionLog } from '../types';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs, doc, setDoc } from 'firebase/firestore';
 import { streamChatResponse } from '../services/geminiService';
+import ReactMarkdown from 'react-markdown';
 
 interface FullChatViewProps {
     user: AuthUser;
@@ -28,8 +29,6 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
 
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data() as ChatSessionLog;
-                    // Only restore if less than 1 hour old to avoid stale context confusion?
-                    // For now, let's just restore it.
                     setSessionId(data.id);
                     setMessages(data.messages);
                 }
@@ -83,7 +82,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
         await streamChatResponse(
             history,
             input,
-            'complex', // Use complex/thinking model for full page
+            'complex',
             user.level || 'GCSE',
             researchMode ? 'research' : 'strict',
             (chunk) => {
@@ -155,9 +154,9 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                                     ? 'bg-indigo-600 text-white rounded-br-none'
                                     : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-bl-none border border-stone-200 dark:border-stone-700'
                             }`}>
-                                <div className="markdown-body whitespace-pre-wrap font-medium">
+                                <ReactMarkdown className="markdown-body whitespace-pre-wrap font-medium">
                                     {msg.text}
-                                </div>
+                                </ReactMarkdown>
                             </div>
                         </div>
                     ))}
@@ -181,7 +180,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder={researchMode ? "Ask a research question (citations will be provided)..." : "Ask a specification question..."}
+                            placeholder={researchMode ? "Ask a research question..." : "Ask a specification question..."}
                             className="flex-1 px-6 py-4 rounded-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm text-lg"
                             disabled={isLoading}
                         />
@@ -194,10 +193,16 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                         </button>
                     </form>
                     <p className="text-center text-xs text-stone-400 mt-3">
-                        AI can make mistakes. Check important info. {researchMode ? 'Citations provided where possible.' : 'Strictly adhering to AQA spec.'}
+                        AI can make mistakes. Check important info. {researchMode ? 'Citations provided in text.' : 'Strictly adhering to AQA spec.'}
                     </p>
                 </div>
             </div>
+            <style>{`
+                .markdown-body a { color: #2563eb; text-decoration: underline; }
+                .dark .markdown-body a { color: #60a5fa; }
+                .markdown-body ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
+                .markdown-body ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
+            `}</style>
         </div>
     );
 };

@@ -4,6 +4,7 @@ import { streamChatResponse } from '../services/geminiService';
 import { ChatMessage, ChatSessionLog, AuthUser, Page } from '../types';
 import { auth, db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatbotProps {
     user: AuthUser;
@@ -127,7 +128,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
             <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'user' ? 'bg-green-500 text-white rounded-br-none' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-bl-none'}`}>
-              <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+              <ReactMarkdown className="text-sm whitespace-pre-wrap">
+                  {msg.text}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
@@ -160,6 +163,11 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
           </button>
         </form>
       </footer>
+      <style>{`
+        .markdown-body a { text-decoration: underline; color: inherit; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1em; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1em; }
+      `}</style>
     </div>
   );
 };
