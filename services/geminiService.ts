@@ -5,7 +5,8 @@ import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../data
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
 import { auth, db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
+import { getSpecContext } from '../utils/contentUtils';
 
 const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
 
@@ -145,6 +146,45 @@ const cleanJson = (text: string): string => {
     return clean.trim();
 };
 
+export const detectDistress = async (text: string): Promise<boolean> => {
+    const ai = getAiClient();
+    const prompt = `Analyze the following student message for signs of severe emotional distress, self-harm intent, or serious safeguarding concerns.
+
+    Message: "${text}"
+
+    Return strictly JSON: { "isDistress": boolean, "reason": "string" }
+
+    Only flag TRUE for genuine, serious concerns (e.g. "I want to hurt myself", "I am depressed and can't go on").
+    Do NOT flag frustration with homework (e.g. "I hate geography", "This is killing me").`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: { responseMimeType: 'application/json' }
+        });
+        const result = JSON.parse(cleanJson(response.text || '{}'));
+        return result.isDistress === true;
+    } catch (e) {
+        console.error("Distress detection failed", e);
+        return false;
+    }
+};
+
+const logSafeguardingAlert = async (text: string, userId: string) => {
+    try {
+        await addDoc(collection(db, 'safeguarding_alerts'), {
+            uid: userId,
+            message: text,
+            timestamp: new Date().toISOString(),
+            status: 'unresolved'
+        });
+        console.warn(`Safeguarding alert logged for user ${userId}`);
+    } catch (e) {
+        console.error("Failed to log safeguarding alert", e);
+    }
+};
+
 export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
     const levelContext = params.level === 'GCSE' ? "AQA GCSE Geography (Specification 8035)" : "AQA A-Level Geography";
@@ -212,16 +252,61 @@ export const generateFigure = async (description: string): Promise<string> => {
     }
 };
 
-export const streamChatResponse = async (history: ChatMessage[], message: string, mode: 'fast' | 'complex', onChunk: (chunk: string) => void): Promise<void> => {
+export const streamChatResponse = async (history: ChatMessage[], message: string, mode: 'fast' | 'complex', level: UserLevel = 'GCSE', contextMode: 'strict' | 'research' = 'strict', onChunk: (chunk: string) => void): Promise<void> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const user = auth.currentUser;
+
+    // Background Distress Check
+    detectDistress(message).then(isDistressed => {
+        if (isDistressed && user) {
+            logSafeguardingAlert(message, user.uid);
+        }
+    });
+
     const contents = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
+
     const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
-    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 } } : {};
-    const systemInstruction = `You are Geo Pro, an expert Geography tutor.`;
+
+    let systemInstruction = `You are Geo Pro, an expert Geography tutor for ${level} students.`;
+
+    if (contextMode === 'strict') {
+        const specContext = getSpecContext(level);
+        systemInstruction += `
+        STRICT MODE ENABLED.
+        You must ONLY answer questions using content from the AQA ${level} Geography specification.
+
+        Reference Context:
+        ${specContext}
+
+        Rules:
+        1. If a student asks about a topic NOT in the list above, politely decline and explain it is not in their course.
+        2. Do NOT hallucinate case studies. Use only standard, well-known examples appropriate for AQA.
+        3. Be concise and exam-focused.
+        `;
+    } else {
+        systemInstruction += `
+        RESEARCH MODE ENABLED.
+        You may use Google Search to find real-world examples, recent events, and additional context.
+
+        Rules:
+        1. You MUST provide citations for external information (links to source).
+        2. Ensure information is relevant to AQA ${level} Geography (e.g. dont use degree-level concepts unless simplified).
+        `;
+    }
+
+    const tools = contextMode === 'research' ? [{ googleSearch: {} }] : undefined;
+    const config = mode === 'complex' ? { thinkingConfig: { thinkingBudget: 8192 }, tools } : { tools };
+
     const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...config, systemInstruction } });
-    for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
+
+    for await (const chunk of responseStream) {
+        // If google search is used, grounding metadata might be present in the full response,
+        // but for streaming text we just pass text.
+        // (Handling citations properly in stream is complex, simplification: Gemini often embeds links in text or we append them at end if we parse full response)
+        onChunk(chunk.text || '');
+    }
 };
 
 export const getHint = async (question: Question): Promise<string> => {

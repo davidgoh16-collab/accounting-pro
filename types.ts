@@ -27,7 +27,9 @@ export type Page =
     | 'video_learning'
     | 'mocks_hub'
     | 'feb_mocks'
-    | 'admin';
+    | 'admin'
+    | 'full_chat'
+    | 'mock_detail';
 
 export interface AuthUser {
     uid: string;

@@ -1,16 +1,20 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { streamChatResponse } from '../services/geminiService';
-import { ChatMessage, ChatSessionLog } from '../types';
+import { ChatMessage, ChatSessionLog, AuthUser, Page } from '../types';
 import { auth, db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
-const Chatbot: React.FC = () => {
+interface ChatbotProps {
+    user: AuthUser;
+    onNavigate: (page: Page) => void;
+}
+
+const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<'fast' | 'complex'>('fast');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [sessionId, setSessionId] = useState<string>(Date.now().toString());
 
@@ -20,7 +24,7 @@ const Chatbot: React.FC = () => {
     }
   }, [messages, isOpen]);
 
-  // Save chat to firestore whenever messages update (debounced slightly by nature of updates)
+  // Save chat to firestore whenever messages update
   useEffect(() => {
     if (messages.length > 0 && auth.currentUser) {
         const saveChat = async () => {
@@ -56,15 +60,28 @@ const Chatbot: React.FC = () => {
 
     const history = [...messages, userMessage];
 
-    await streamChatResponse(history, input, mode, (chunk) => {
-        setMessages(prev => prev.map(msg => 
-            msg.id === modelMessageId 
-                ? { ...msg, text: msg.text + chunk } 
-                : msg
-        ));
-    });
+    // Use STRICT mode for popup
+    await streamChatResponse(
+        history,
+        input,
+        'fast',
+        user.level || 'GCSE',
+        'strict',
+        (chunk) => {
+            setMessages(prev => prev.map(msg =>
+                msg.id === modelMessageId
+                    ? { ...msg, text: msg.text + chunk }
+                    : msg
+            ));
+        }
+    );
     
     setIsLoading(false);
+  };
+
+  const handleExpand = () => {
+      onNavigate('full_chat');
+      setIsOpen(false);
   };
 
   if (!isOpen) {
@@ -84,18 +101,27 @@ const Chatbot: React.FC = () => {
       <header className="flex items-center justify-between p-4 bg-stone-50/80 dark:bg-stone-800/80 border-b border-stone-200/80 dark:border-stone-700 rounded-t-3xl">
         <div className="flex items-center gap-2">
             <span className="text-3xl">🌍</span>
-            <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">Geo Pro Chat</h2>
+            <div className="flex flex-col">
+                <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100 leading-tight">Geo Pro Chat</h2>
+                <span className="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wider">Strict Mode</span>
+            </div>
         </div>
-        <button onClick={() => setIsOpen(false)} className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
-            <span className="text-2xl">❌</span>
-        </button>
+        <div className="flex gap-2">
+            <button onClick={handleExpand} className="text-stone-400 hover:text-indigo-500 dark:hover:text-indigo-400 p-1" title="Full Screen & Research Mode">
+                <span className="text-xl">↗️</span>
+            </button>
+            <button onClick={() => setIsOpen(false)} className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1">
+                <span className="text-xl">❌</span>
+            </button>
+        </div>
       </header>
       
       <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
         {messages.length === 0 && (
             <div className="text-center text-stone-500 dark:text-stone-400 mt-10">
                 <p>👋 Hi! I'm Geo Pro.</p>
-                <p className="text-sm">Ask me about definitions, case studies, or exam tips.</p>
+                <p className="text-sm mt-2">I can help with definitions and specification questions.</p>
+                <p className="text-xs mt-4 text-stone-400">For research & citations, switch to full screen mode (↗️).</p>
             </div>
         )}
         {messages.map((msg, index) => (
@@ -120,26 +146,12 @@ const Chatbot: React.FC = () => {
       </div>
 
       <footer className="p-4 border-t border-stone-200/80 dark:border-stone-700 bg-white/80 dark:bg-stone-900/80 rounded-b-3xl">
-        <div className="flex items-center justify-center mb-2">
-            <div className="bg-stone-100 dark:bg-stone-800 p-1 rounded-full flex text-sm border border-stone-200 dark:border-stone-700">
-                <button 
-                    onClick={() => setMode('fast')}
-                    className={`px-3 py-1 rounded-full transition-colors ${mode === 'fast' ? 'bg-white dark:bg-stone-600 text-green-600 dark:text-green-400 shadow' : 'text-stone-600 dark:text-stone-400'}`}>
-                    Fast
-                </button>
-                <button 
-                    onClick={() => setMode('complex')}
-                    className={`px-3 py-1 rounded-full transition-colors flex items-center gap-2 ${mode === 'complex' ? 'bg-white dark:bg-stone-600 text-green-600 dark:text-green-400 shadow' : 'text-stone-600 dark:text-stone-400'}`}>
-                    <span>🧠</span> Thinking Mode
-                </button>
-            </div>
-        </div>
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
+            placeholder="Ask a quick question..."
             className="flex-1 w-full px-4 py-2 text-sm bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
             disabled={isLoading}
           />

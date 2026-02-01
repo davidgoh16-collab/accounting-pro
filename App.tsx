@@ -35,6 +35,7 @@ import MockDetailView from './components/MockDetailView';
 import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
+import FullChatView from './components/FullChatView';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -524,6 +525,8 @@ const App: React.FC = () => {
                 />
             )}
 
+            {page === 'full_chat' && <FullChatView user={user} onBack={() => handleNavigate('dashboard')} />}
+
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
@@ -548,7 +551,7 @@ const App: React.FC = () => {
             
             {page === 'admin' && isAdmin && <AdminView onImpersonate={handleImpersonate} onBack={() => handleNavigate('dashboard')} />}
 
-            {featureFlags.aiTutor && <Chatbot />}
+            {featureFlags.aiTutor && <Chatbot user={user} onNavigate={handleNavigate} />}
         </div>
     );
 };

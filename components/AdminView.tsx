@@ -10,6 +10,7 @@ import RevisionPlannerContent from './RevisionPlannerContent';
 import MockManager from './MockManager';
 import ActivityLogViewer from './ActivityLogViewer';
 import MockProgressViewer from './MockProgressViewer';
+import SafeguardingViewer from './SafeguardingViewer';
 import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
@@ -838,7 +839,7 @@ const ChatLogViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 };
 
 const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
-    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks'>('students');
+    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks' | 'safeguarding'>('students');
     const [users, setUsers] = useState<AuthUser[]>([]);
     const [classes, setClasses] = useState<ClassGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -925,6 +926,12 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                             Exams
                         </button>
                         <button
+                            onClick={() => setViewMode('safeguarding')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'safeguarding' ? 'bg-red-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                        >
+                            Safeguarding
+                        </button>
+                        <button
                             onClick={() => setViewMode('settings')}
                             className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'settings' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
                         >
@@ -937,6 +944,8 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                     <FeatureSettingsPanel />
                 ) : viewMode === 'mocks' ? (
                     <MockManager />
+                ) : viewMode === 'safeguarding' ? (
+                    <SafeguardingViewer />
                 ) : viewMode === 'classes' ? (
                     <ClassManager classes={classes} allUsers={users} onRefreshClasses={fetchClasses} />
                 ) : (
