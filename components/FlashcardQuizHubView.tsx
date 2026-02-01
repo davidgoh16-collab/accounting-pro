@@ -77,12 +77,18 @@ const SelectionModal: React.FC<{
                     </select>
                 </div>
 
-                <div className="mt-8 flex gap-4">
+                <div className="mt-8 flex flex-col gap-3">
+                    <button onClick={handleStart} className="w-full py-3 bg-fuchsia-500 text-white font-bold rounded-lg hover:bg-fuchsia-600 transition shadow-lg shadow-fuchsia-500/20">
+                        {actionLabel} (Static Content)
+                    </button>
+                    <button
+                        onClick={() => { onStart('mixed', 'AI_SETUP'); onClose(); }}
+                        className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-600 hover:to-purple-700 transition shadow-lg"
+                    >
+                        ✨ Custom / Sub-topic Quiz (AI)
+                    </button>
                     <button onClick={onClose} className="w-full py-3 bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold rounded-lg hover:bg-stone-300 dark:hover:bg-stone-600 transition">
                         Cancel
-                    </button>
-                    <button onClick={handleStart} className="w-full py-3 bg-fuchsia-500 text-white font-bold rounded-lg hover:bg-fuchsia-600 transition shadow-lg shadow-fuchsia-500/20">
-                        {actionLabel}
                     </button>
                 </div>
             </div>
@@ -118,8 +124,12 @@ const FlashcardQuizHubView: React.FC<FlashcardQuizHubViewProps> = ({ onNavigate,
     };
 
     const handleStartQuiz = (mode: 'cases' | 'terms' | 'mixed', topic: string) => {
-        const deck = prepareDeck(mode, topic);
-        onStartQuiz(deck);
+        if (topic === 'AI_SETUP') {
+            onStartQuiz([]); // Empty deck triggers Setup Mode in QuizModeView
+        } else {
+            const deck = prepareDeck(mode, topic);
+            onStartQuiz(deck);
+        }
     };
 
     return (

@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { FlashcardItem, CaseStudyQuizQuestion } from '../types';
-import { generateBatchQuizQuestions } from '../services/geminiService';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { FlashcardItem, CaseStudyQuizQuestion, AuthUser } from '../types';
+import { generateBatchQuizQuestions, generateFlashcards } from '../services/geminiService';
 import { logUserActivity, auth } from '../firebase';
+import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -17,6 +18,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 interface QuizModeViewProps {
     initialDeck?: FlashcardItem[];
     onBack: () => void;
+    user?: AuthUser; // Optional to support legacy usage but required for generation
 }
 
 interface QuizItem {
@@ -24,7 +26,13 @@ interface QuizItem {
     sourceItem: FlashcardItem;
 }
 
-const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
+const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }) => {
+    // --- SETUP STATE (For when no initialDeck provided) ---
+    const [setupTopic, setSetupTopic] = useState('All Topics');
+    const [setupSubTopic, setSetupSubTopic] = useState('All Sub-topics');
+    const [isGeneratingDeck, setIsGeneratingDeck] = useState(false);
+
+    // --- QUIZ STATE ---
     const [deck, setDeck] = useState<FlashcardItem[]>(() => {
         if (initialDeck && initialDeck.length > 0) {
             return shuffleArray(initialDeck);
@@ -124,7 +132,20 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
     };
     
     const handleRestart = () => {
-        if (initialDeck) {
+        // If we came from Setup Mode (no initialDeck), we go back to Setup
+        if (!initialDeck || initialDeck.length === 0) {
+             setDeck([]);
+             setQuestions([]);
+             setCurrentQuestionIndex(0);
+             setNextLoadIndex(0);
+             setScore(0);
+             setSelectedAnswer(null);
+             setIsCorrect(null);
+             setError(null);
+             setIncorrectItems([]);
+             // We return to the Setup Screen naturally because deck is []
+        } else {
+            // If we came with an initial deck (e.g. from Flashcards), we restart that deck
             if (auth.currentUser) {
                 logUserActivity(auth.currentUser.uid, 'quiz_restart', { deckSize: initialDeck.length });
             }
@@ -153,14 +174,52 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
             setSelectedAnswer(null);
             setIsCorrect(null);
             setError(null);
-            setIncorrectItems([]); // Clear mistakes for the new round (new mistakes will be added if they fail again)
+            setIncorrectItems([]); // Clear mistakes for the new round
+        }
+    };
+
+    const handleGenerateDeckAndStart = async () => {
+        if (!user) return;
+        setIsGeneratingDeck(true);
+        try {
+            const level = user.level || 'A-Level';
+            // Generate flashcards first to use as the base for the quiz
+            // If All Topics/All Sub-topics, we might need a different strategy or just generate generic ones?
+            // geminiService generateFlashcards handles specific topics well.
+            // If 'All Topics' selected, maybe pick a random one? Or prompt user?
+            // For now, let's assume user picks a topic. If 'All Topics', we might fail or need a generic call.
+            // Actually, let's force topic selection in UI if possible, or pick random.
+
+            let targetTopic = setupTopic;
+            let targetSubTopic = setupSubTopic;
+
+            if (targetTopic === 'All Topics') {
+                // Pick a random topic
+                const specTopics = level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+                const keys = Object.keys(specTopics);
+                targetTopic = keys[Math.floor(Math.random() * keys.length)];
+                targetSubTopic = 'All Sub-topics';
+            }
+
+            const cards = await generateFlashcards(targetTopic, targetSubTopic, level);
+            if (cards.length === 0) {
+                alert("Could not generate questions for this topic. Please try another.");
+            } else {
+                setDeck(cards);
+                logUserActivity(user.uid, 'quiz_generated', { topic: targetTopic, subTopic: targetSubTopic });
+            }
+        } catch (e) {
+            console.error("Failed to generate quiz deck", e);
+            alert("Failed to start quiz.");
+        } finally {
+            setIsGeneratingDeck(false);
         }
     };
 
     // Derived States
     const currentQuizItem = questions[currentQuestionIndex];
-    const isFinished = !currentQuizItem && nextLoadIndex >= deck.length && !isLoadingBatch;
-    const isGlobalLoading = !currentQuizItem && isLoadingBatch;
+    const isFinished = deck.length > 0 && !currentQuizItem && nextLoadIndex >= deck.length && !isLoadingBatch;
+    const isGlobalLoading = deck.length > 0 && !currentQuizItem && isLoadingBatch;
 
     useEffect(() => {
         if (isFinished && auth.currentUser) {
@@ -168,7 +227,85 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
         }
     }, [isFinished, score, questions.length, incorrectItems.length]);
 
+    // Setup Data
+    const topics = useMemo(() => {
+        if (!user) return ['All Topics'];
+        const specTopics = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        return ['All Topics', ...Object.keys(specTopics).sort()];
+    }, [user]);
+
+    const subTopics = useMemo(() => {
+        if (setupTopic === 'All Topics' || !user) return ['All Sub-topics'];
+        const specTopics = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        return ['All Sub-topics', ...(specTopics[setupTopic] || [])];
+    }, [setupTopic, user]);
+
+    // Reset sub-topic when main topic changes
+    useEffect(() => {
+        setSetupSubTopic('All Sub-topics');
+    }, [setupTopic]);
+
+
     // --- RENDER ---
+
+    // 1. SETUP SCREEN (If no deck)
+    if (deck.length === 0 && !isGlobalLoading && !error) {
+        return (
+            <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent flex flex-col items-center">
+                <button
+                    onClick={onBack}
+                    className="fixed top-24 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-white dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
+                >
+                    <span>&larr;</span> Back
+                </button>
+
+                <div className="max-w-xl w-full mt-20 text-center">
+                    <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100 mb-2">Custom Quiz</h1>
+                    <p className="text-stone-600 dark:text-stone-400 mb-8">Select a topic to generate a unique quiz.</p>
+
+                    <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-8 space-y-6">
+                        <div>
+                            <label className="block text-left text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Topic</label>
+                            <select
+                                value={setupTopic}
+                                onChange={e => setSetupTopic(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-fuchsia-500 outline-none"
+                            >
+                                {topics.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+
+                        {setupTopic !== 'All Topics' && (
+                            <div className="animate-fade-in">
+                                <label className="block text-left text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Sub-Topic (Optional)</label>
+                                <select
+                                    value={setupSubTopic}
+                                    onChange={e => setSetupSubTopic(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold focus:ring-2 focus:ring-fuchsia-500 outline-none"
+                                >
+                                    {subTopics.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                        )}
+
+                        <button
+                            onClick={handleGenerateDeckAndStart}
+                            disabled={isGeneratingDeck}
+                            className="w-full py-4 bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isGeneratingDeck ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="animate-spin text-xl">⏳</span> Generating...
+                                </span>
+                            ) : (
+                                "Start Quiz ✨"
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (error && questions.length === 0) {
          return (
@@ -183,7 +320,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
          );
     }
 
-    if (isGlobalLoading) {
+    if (isGlobalLoading || isGeneratingDeck) {
         return (
              <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent flex flex-col items-center justify-center">
                  <button onClick={onBack} className="fixed top-24 left-4 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm text-stone-600 dark:text-stone-300 font-bold">Back</button>
@@ -193,7 +330,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
                     <div className="w-4 h-4 bg-fuchsia-500 rounded-full animate-pulse"></div>
                  </div>
                  <p className="text-stone-600 dark:text-stone-400 font-semibold mt-4">
-                     {nextLoadIndex === 0 ? "Generating your quiz..." : "Loading next questions..."}
+                     {isGeneratingDeck ? "Generating quiz questions..." : (nextLoadIndex === 0 ? "Preparing your quiz..." : "Loading next questions...")}
                  </p>
              </div>
         )
@@ -216,7 +353,9 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack }) => {
                                 Retry {incorrectItems.length} Mistakes
                             </button>
                         )}
-                        <button onClick={handleRestart} className="w-full py-3 bg-fuchsia-500 text-white font-bold rounded-lg hover:bg-fuchsia-600 transition shadow-lg">Play Again</button>
+                        <button onClick={handleRestart} className="w-full py-3 bg-fuchsia-500 text-white font-bold rounded-lg hover:bg-fuchsia-600 transition shadow-lg">
+                            {(!initialDeck || initialDeck.length === 0) ? 'New Quiz (Setup)' : 'Play Again'}
+                        </button>
                         <button onClick={onBack} className="w-full py-3 bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold rounded-lg hover:bg-stone-300 dark:hover:bg-stone-600 transition">Exit</button>
                     </div>
                 </div>

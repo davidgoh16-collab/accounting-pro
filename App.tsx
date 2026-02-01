@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig } from './types';
-import { onAuthChange, signOutUser, db } from './firebase';
+import { onAuthChange, signOutUser, db, logUserActivity } from './firebase';
 import { User } from 'firebase/auth';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot, where } from 'firebase/firestore';
 import { getMocks } from './services/mockService';
@@ -275,6 +275,7 @@ const App: React.FC = () => {
                     level: userLevel
                 };
                 setUser(authUser);
+                logUserActivity(authUser.uid, 'login', { timestamp: new Date().toISOString() });
                 
                 if (role === 'admin' || checkAdmin(firebaseUser.email, firebaseUser.uid)) setIsAdmin(true);
 
@@ -288,6 +289,15 @@ const App: React.FC = () => {
 
         return () => unsubscribe();
     }, []);
+
+    // Heartbeat logger (every 5 minutes)
+    useEffect(() => {
+        if (!user) return;
+        const interval = setInterval(() => {
+            logUserActivity(user.uid, 'heartbeat', { page });
+        }, 5 * 60 * 1000); // 5 minutes
+        return () => clearInterval(interval);
+    }, [user, page]);
 
     const handleLevelSelect = async (level: UserLevel) => {
         if (user) {
@@ -534,7 +544,7 @@ const App: React.FC = () => {
 
             {page === 'flashcard_quiz_hub' && <FlashcardQuizHubView onNavigate={handleNavigate} onStartQuiz={handleStartFlashcardQuiz} user={user} />}
             {page === 'flashcards' && <FlashcardView user={user} onQuiz={handleStartFlashcardQuiz} onBack={() => handleNavigate('flashcard_quiz_hub')} />}
-            {page === 'quiz_mode' && <QuizModeView initialDeck={flashcardDeck} onBack={() => handleNavigate('flashcard_quiz_hub')} />}
+            {page === 'quiz_mode' && <QuizModeView user={user} initialDeck={flashcardDeck} onBack={() => handleNavigate('flashcard_quiz_hub')} />}
 
             {page === 'case_study_explorer' && <CaseStudyExplorerView user={user} onBack={() => handleNavigate('dashboard')} />}
             {page === 'skills_practice' && <SkillsPracticeView user={user} onBack={() => handleNavigate('dashboard')} />}
