@@ -546,7 +546,7 @@ const App: React.FC = () => {
             
             {page === 'admin' && isAdmin && <AdminView onImpersonate={handleImpersonate} onBack={() => handleNavigate('dashboard')} />}
 
-            {featureFlags.aiTutor && <Chatbot />}
+            {featureFlags.aiTutor && user && <Chatbot user={user} onNavigate={handleNavigate} />}
         </div>
     );
 };
