@@ -8,7 +8,7 @@ import {
     User
 } from "firebase/auth";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove, query, where, writeBatch, deleteDoc } from "firebase/firestore";
-import { getStorage, ref, listAll } from "firebase/storage";
+import { getStorage, ref, listAll, getBytes, getMetadata } from "firebase/storage";
 import { AuthUser, ClassGroup } from "./types";
 
 const firebaseConfig = {
@@ -162,18 +162,62 @@ export const logUserActivity = async (uid: string, eventType: string, details: a
     }
 };
 
-export const getCourseFiles = async (level: string): Promise<string[]> => {
+const fileCache: Record<string, { data: string; mimeType: string }> = {};
+
+export const getCourseFiles = async (level: string): Promise<{name: string, path: string}[]> => {
     try {
         const folder = level === 'GCSE' ? 'GCSE Geography' : 'A Level Geography';
         const folderRef = ref(storage, folder);
         const res = await listAll(folderRef);
 
-        // Construct gs:// URIs based on bucket and path
-        // Bucket: a-level-geography.firebasestorage.app
-        const bucket = 'a-level-geography.firebasestorage.app';
-        return res.items.map(item => `gs://${bucket}/${item.fullPath}`);
+        return res.items.map(item => ({
+            name: item.name,
+            path: item.fullPath
+        }));
     } catch (e) {
         console.error(`Failed to list files for ${level}`, e);
         return [];
+    }
+};
+
+export const downloadFileAsBase64 = async (path: string): Promise<{ data: string; mimeType: string }> => {
+    if (fileCache[path]) {
+        return fileCache[path];
+    }
+
+    try {
+        const fileRef = ref(storage, path);
+        // Get metadata for MIME type
+        let mimeType = 'application/pdf'; // default
+        try {
+            const metadata = await getMetadata(fileRef);
+            if (metadata.contentType) {
+                mimeType = metadata.contentType;
+            }
+        } catch (e) {
+            console.warn(`Failed to fetch metadata for ${path}, using default mime type`, e);
+        }
+
+        const buffer = await getBytes(fileRef);
+
+        // Convert buffer to base64
+        const blob = new Blob([buffer], { type: mimeType });
+        const reader = new FileReader();
+
+        return new Promise((resolve, reject) => {
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                // remove "data:mime/type;base64,"
+                const base64Data = result.split(',')[1];
+                const cachedResult = { data: base64Data, mimeType };
+                fileCache[path] = cachedResult;
+                resolve(cachedResult);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        console.error(`Failed to download file ${path}`, e);
+        throw e;
     }
 };

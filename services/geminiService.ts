@@ -4,7 +4,7 @@ import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIF
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
-import { auth, db, getCourseFiles } from '../firebase';
+import { auth, db, getCourseFiles, downloadFileAsBase64 } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
 
@@ -313,50 +313,53 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         const specContext = getSpecContext(level);
         systemInstruction += `
         STRICT MODE ENABLED.
-        You must ONLY answer questions using content from the AQA ${level} Geography specification.
+        You must ONLY answer questions using content from the AQA ${level} Geography specification AND the attached course documents.
 
-        Reference Context:
+        Reference Context (Specification):
         ${specContext}
 
         Rules:
-        1. If a student asks about a topic NOT in the list above, politely decline and explain it is not in their course.
-        2. Do NOT hallucinate case studies. Use only standard, well-known examples appropriate for AQA.
-        3. Be concise and exam-focused.
+        1. Use the attached documents as the PRIMARY source of truth.
+        2. If a student asks about a topic NOT in the list or documents, politely decline.
+        3. Do NOT hallucinate case studies.
         `;
 
         // Inject files if in strict mode (RAG via Gemini multimodal input)
-        // DISABLE RAG TEMPORARILY due to API 400 Errors (Invalid Argument).
-        // It seems passing gs:// URIs directly via the client SDK requires specific auth/permissions
-        // that might not be set up, or the model version doesn't support it in this way.
-        /*
         try {
             const files = await getCourseFiles(level);
-            // Limit to top 10 files to avoid overloading context/quotas
-            const limitedFiles = files.slice(0, 10);
+            // Limit to top 5 files to avoid overloading context/bandwidth
+            const limitedFiles = files.slice(0, 5);
 
             if (limitedFiles.length > 0) {
-                // Add files to the user's current message payload
-                // The SDK supports inline data or fileData. For gs:// URI, we use fileData.
-                const fileParts = limitedFiles.map(uri => ({
-                    fileData: {
-                        mimeType: 'application/pdf', // Assuming most resources are PDFs
-                        fileUri: uri
+                const fileParts = [];
+                // Download files sequentially to avoid race conditions or limits
+                for (const file of limitedFiles) {
+                    try {
+                        const { data, mimeType } = await downloadFileAsBase64(file.path);
+                        fileParts.push({
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: data
+                            }
+                        });
+                    } catch (err) {
+                        console.warn(`Skipping file ${file.name} due to download error`, err);
                     }
-                }));
-
-                // Append file parts to the *last* user message (which is `contents[contents.length-1]`)
-                // Gemini API expects text parts + file parts in the same turn
-                if (contents.length > 0) {
-                    const lastMsg = contents[contents.length - 1];
-                    lastMsg.parts = [...lastMsg.parts, ...fileParts];
                 }
 
-                systemInstruction += `\n\n[SYSTEM: You have access to ${limitedFiles.length} course documents attached. Use them as the primary source of truth.]`;
+                if (fileParts.length > 0) {
+                    // Append file parts to the *last* user message (which is `contents[contents.length-1]`)
+                    // Gemini API expects text parts + file parts in the same turn
+                    if (contents.length > 0) {
+                        const lastMsg = contents[contents.length - 1];
+                        lastMsg.parts = [...lastMsg.parts, ...fileParts];
+                    }
+                    systemInstruction += `\n\n[SYSTEM: You have access to ${fileParts.length} course documents attached. Use them as the primary source of truth.]`;
+                }
             }
         } catch (e) {
             console.error("Failed to inject course files", e);
         }
-        */
 
     } else {
         systemInstruction += `
