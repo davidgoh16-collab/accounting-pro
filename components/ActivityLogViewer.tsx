@@ -22,10 +22,76 @@ const ActivityLogViewer: React.FC<ActivityLogViewerProps> = ({ user }) => {
     useEffect(() => {
         const fetchLogs = async () => {
             try {
+                // 1. Fetch Generic Logs
                 const logsCol = collection(db, 'users', user.uid, 'activity_logs');
-                const q = query(logsCol, orderBy('timestamp', 'desc'), limit(50));
-                const snapshot = await getDocs(q);
-                setLogs(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as ActivityLog)));
+                const logsQ = query(logsCol, orderBy('timestamp', 'desc'), limit(30));
+
+                // 2. Fetch Sessions
+                const sessionsCol = collection(db, 'users', user.uid, 'sessions');
+                const sessionsQ = query(sessionsCol, orderBy('completedAt', 'desc'), limit(30));
+
+                // 3. Fetch Games
+                const gamesCol = collection(db, 'users', user.uid, 'game_scores');
+                const gamesQ = query(gamesCol, orderBy('timestamp', 'desc'), limit(30));
+
+                // 4. Fetch Chats
+                const chatsCol = collection(db, 'users', user.uid, 'chat_logs');
+                const chatsQ = query(chatsCol, orderBy('timestamp', 'desc'), limit(30));
+
+                // Execute all queries
+                const [logsSnap, sessionsSnap, gamesSnap, chatsSnap] = await Promise.all([
+                    getDocs(logsQ),
+                    getDocs(sessionsQ),
+                    getDocs(gamesQ),
+                    getDocs(chatsQ)
+                ]);
+
+                const combinedLogs: ActivityLog[] = [];
+
+                // Process Generic Logs
+                logsSnap.docs.forEach(doc => {
+                    combinedLogs.push({ id: doc.id, ...doc.data() } as ActivityLog);
+                });
+
+                // Process Sessions
+                sessionsSnap.docs.forEach(doc => {
+                    const data = doc.data();
+                    combinedLogs.push({
+                        id: doc.id,
+                        type: 'practice_session',
+                        timestamp: data.completedAt,
+                        topic: data.question?.unit || 'Unknown Topic',
+                        score: `${data.aiFeedback?.score}/${data.aiFeedback?.totalMarks}`
+                    });
+                });
+
+                // Process Games
+                gamesSnap.docs.forEach(doc => {
+                    const data = doc.data();
+                    combinedLogs.push({
+                        id: doc.id,
+                        type: 'game_played',
+                        timestamp: data.timestamp,
+                        game: data.gameId || 'Game',
+                        score: data.score
+                    });
+                });
+
+                // Process Chats
+                chatsSnap.docs.forEach(doc => {
+                    const data = doc.data();
+                    combinedLogs.push({
+                        id: doc.id,
+                        type: 'chat_session',
+                        timestamp: data.timestamp,
+                        context: data.context || 'General Chat'
+                    });
+                });
+
+                // Sort and Slice
+                combinedLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                setLogs(combinedLogs.slice(0, 50));
+
             } catch (e) {
                 console.error("Failed to fetch activity logs", e);
             } finally {
@@ -49,9 +115,11 @@ const ActivityLogViewer: React.FC<ActivityLogViewerProps> = ({ user }) => {
 
     const getIcon = (type: string) => {
         if (type.includes('login')) return '🔑';
-        if (type.includes('quiz')) return '📝';
+        if (type.includes('quiz') || type === 'practice_session') return '📝';
         if (type.includes('flashcard')) return '🗂️';
         if (type.includes('video')) return '🎬';
+        if (type.includes('game')) return '🎮';
+        if (type.includes('chat')) return '💬';
         return '📌';
     };
 
@@ -61,7 +129,7 @@ const ActivityLogViewer: React.FC<ActivityLogViewerProps> = ({ user }) => {
 
     return (
         <div className="space-y-4">
-            <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-4">Recent Activity Stream</h3>
+            <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-4">Activity Stream (Combined)</h3>
             <div className="overflow-hidden rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-sm">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 font-semibold">
