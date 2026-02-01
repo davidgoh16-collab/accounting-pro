@@ -148,14 +148,20 @@ const cleanJson = (text: string): string => {
 
 export const detectDistress = async (text: string): Promise<boolean> => {
     const ai = getAiClient();
-    const prompt = `Analyze the following student message for signs of severe emotional distress, self-harm intent, or serious safeguarding concerns.
+    const prompt = `Analyze the following student message for signs of severe emotional distress, anxiety, self-harm intent, or serious safeguarding concerns.
 
     Message: "${text}"
 
     Return strictly JSON: { "isDistress": boolean, "reason": "string" }
 
-    Only flag TRUE for genuine, serious concerns (e.g. "I want to hurt myself", "I am depressed and can't go on").
-    Do NOT flag frustration with homework (e.g. "I hate geography", "This is killing me").`;
+    Flag TRUE for:
+    - Expressions of self-harm or suicide.
+    - Statements indicating feeling "low", "depressed", "anxious", or "hopeless" (mental health concerns).
+    - Indications of bullying or abuse.
+
+    Do NOT flag minor frustration with homework (e.g. "I hate geography", "This is killing me" in a hyperbolic sense).
+
+    Prioritize child safety. If in doubt, flag as TRUE.`;
 
     try {
         const response = await ai.models.generateContent({
@@ -167,6 +173,8 @@ export const detectDistress = async (text: string): Promise<boolean> => {
         return result.isDistress === true;
     } catch (e) {
         console.error("Distress detection failed", e);
+        // Fail-safe: if detection fails but text contains trigger words, maybe flag?
+        // For now, return false to avoid spamming if API is down.
         return false;
     }
 };
@@ -269,7 +277,14 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
 
     const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
 
-    let systemInstruction = `You are Geo Pro, an expert Geography tutor for ${level} students.`;
+    let systemInstruction = `You are an AI assistant for Geography, supporting ${level} students.`;
+
+    systemInstruction += `
+    SAFETY & ETHICS GUIDELINES (MANDATORY):
+    1. **No Anthropomorphism**: Do NOT imply you have feelings, opinions, consciousness, or a physical body. Do not say "I think", "I feel", or "I believe". Use neutral phrases like "The evidence suggests" or "It is generally understood".
+    2. **No Manipulation**: Do NOT use flattery, guilt, or fear to keep the student engaged. Be helpful but neutral.
+    3. **Progressive Disclosure**: Do NOT spoon-feed answers. If the student asks a question, guide them to the answer with hints or questions (scaffolding) rather than giving the full explanation immediately, unless they explicitly ask for a summary.
+    `;
 
     if (contextMode === 'strict') {
         const specContext = getSpecContext(level);
@@ -288,11 +303,12 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     } else {
         systemInstruction += `
         RESEARCH MODE ENABLED.
-        You may use Google Search to find real-world examples, recent events, and additional context.
+        You HAVE access to the 'googleSearch' tool. You MUST use it to find real-world examples, recent events, and additional context.
 
         Rules:
-        1. You MUST provide citations for external information (links to source).
-        2. Ensure information is relevant to AQA ${level} Geography (e.g. dont use degree-level concepts unless simplified).
+        1. You MUST use the googleSearch tool to verify facts.
+        2. You MUST provide citations for external information using Markdown links inline (e.g. "According to [BBC News](http://bbc.co.uk)...").
+        3. Ensure information is relevant to AQA ${level} Geography.
         `;
     }
 
@@ -301,11 +317,27 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
 
     const responseStream = await ai.models.generateContentStream({ model: modelName, contents: contents, config: { ...config, systemInstruction } });
 
+    const collectedSources: Set<string> = new Set();
+
     for await (const chunk of responseStream) {
-        // If google search is used, grounding metadata might be present in the full response,
-        // but for streaming text we just pass text.
-        // (Handling citations properly in stream is complex, simplification: Gemini often embeds links in text or we append them at end if we parse full response)
         onChunk(chunk.text || '');
+
+        // Extract grounding metadata if present (GroundingChunks)
+        // Note: The SDK structure for grounding metadata might vary, we check candidates[0]
+        const candidate = chunk.candidates?.[0];
+        if (candidate?.groundingMetadata?.groundingChunks) {
+            candidate.groundingMetadata.groundingChunks.forEach((c: any) => {
+                if (c.web?.uri && c.web?.title) {
+                    collectedSources.add(`[${c.web.title}](${c.web.uri})`);
+                }
+            });
+        }
+    }
+
+    // Append collected sources to the end of the message if Research Mode was active and sources were found
+    if (contextMode === 'research' && collectedSources.size > 0) {
+        const sourcesList = Array.from(collectedSources).map(s => `- ${s}`).join('\n');
+        onChunk(`\n\n### 📚 Sources:\n${sourcesList}`);
     }
 };
 
