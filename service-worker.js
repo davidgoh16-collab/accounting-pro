@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'geo-pro-v2';
+const CACHE_NAME = 'geo-pro-v2.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,6 +7,9 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', (event) => {
+  // Force this new service worker to become the active service worker
+  self.skipWaiting();
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -18,30 +21,10 @@ self.addEventListener('install', (event) => {
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests (like firebase, google apis, cdns) from caching logic
-  // to avoid opaque response issues or caching failures unless explicitly handled
-  if (!event.request.url.startsWith(self.location.origin)) {
-      return;
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).catch(error => {
-            // Return a reliable offline fallback if available, or just rethrow
-            // console.error('Fetch failed for:', event.request.url, error);
-            // Don't crash the promise chain with a raw error if possible
-            return new Response('Network error', { status: 408, headers: { 'Content-Type': 'text/plain' } });
-        });
-      })
-  );
-});
-
 self.addEventListener('activate', (event) => {
+  // Take control of all clients immediately
+  event.waitUntil(clients.claim());
+
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -53,5 +36,39 @@ self.addEventListener('activate', (event) => {
         })
       );
     })
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  // Only intercept GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Skip cross-origin requests (like firebase, google apis, cdns) from caching logic
+  // to avoid opaque response issues or caching failures unless explicitly handled
+  if (!event.request.url.startsWith(self.location.origin)) {
+      return;
+  }
+
+  // Specific exclusions for API/Auth paths if they happen to be on the same origin (e.g. proxied)
+  // but usually they are external.
+
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).catch(error => {
+            console.error('Fetch failed for:', event.request.url, error);
+            // Return a valid offline response so the promise doesn't reject
+            return new Response('Network error happening', {
+                status: 503,
+                statusText: 'Service Unavailable',
+                headers: new Headers({ 'Content-Type': 'text/plain' })
+            });
+        });
+      })
   );
 });
