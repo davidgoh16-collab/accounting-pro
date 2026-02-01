@@ -38,6 +38,9 @@ self.addEventListener('fetch', (event) => {
   // This prevents the SW from interfering with external API calls
   if (!event.request.url.startsWith(self.location.origin)) return;
 
+  // EXPLICIT: Ignore Google/Firebase services (redundant but safe)
+  if (event.request.url.includes('googleapis.com') || event.request.url.includes('firebasestorage')) return;
+
   // 3. Ignore browser-extension requests or other protocols
   if (!event.request.url.startsWith('http')) return;
 
