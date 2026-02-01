@@ -8,6 +8,8 @@ import { auth, db, getCourseFiles } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
 
+// --- MODEL CONFIGURATION ---
+// Using stable versions to prevent 400 Bad Request errors.
 
 const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
 
@@ -296,7 +298,7 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     // Add user message
     contents.push({ role: 'user', parts: [{ text: message }] });
 
-    const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
+    const modelName = mode === 'fast' ? MODELS.FLASH : MODELS.PRO;
 
     let systemInstruction = `You are an AI assistant for Geography, supporting ${level} students.`;
 
@@ -323,6 +325,10 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         `;
 
         // Inject files if in strict mode (RAG via Gemini multimodal input)
+        // DISABLE RAG TEMPORARILY due to API 400 Errors (Invalid Argument).
+        // It seems passing gs:// URIs directly via the client SDK requires specific auth/permissions
+        // that might not be set up, or the model version doesn't support it in this way.
+        /*
         try {
             const files = await getCourseFiles(level);
             // Limit to top 10 files to avoid overloading context/quotas
@@ -350,6 +356,7 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         } catch (e) {
             console.error("Failed to inject course files", e);
         }
+        */
 
     } else {
         systemInstruction += `
@@ -1163,7 +1170,7 @@ export const chatWithPreRelease = async (history: ChatMessage[], message: string
     const ai = getAiClient();
 
     // Construct history with the new model input format
-    // gemini-2.5-pro supports multimodal inputs
+    // gemini-1.5-pro supports multimodal inputs
     const contents: any[] = history.map(msg => ({
         role: msg.role === 'model' ? 'model' : 'user',
         parts: [{ text: msg.text }]
