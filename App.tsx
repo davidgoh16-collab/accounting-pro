@@ -36,6 +36,7 @@ import HubLayout from './components/HubLayout';
 import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
 import FullChatView from './components/FullChatView';
+import SmartRecommendations from './components/SmartRecommendations';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -384,6 +385,7 @@ const App: React.FC = () => {
                     gradient={theme.hubGradient}
                 >
                     <CountdownWidget mocks={activeMocks} userLevel={user.level} userYearGroup={userYearGroup} />
+                    <SmartRecommendations />
 
                     <div className="w-full max-w-7xl mx-auto space-y-12">
                         
