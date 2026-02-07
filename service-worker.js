@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'geo-pro-v2.2';
+const CACHE_NAME = 'geo-pro-v2.3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -34,15 +34,16 @@ self.addEventListener('fetch', (event) => {
   // 1. Only intercept GET requests
   if (event.request.method !== 'GET') return;
 
-  // 2. Ignore non-origin requests (CDN, APIs, Firebase)
+  // 2. Ignore browser-extension requests or other protocols
+  if (!event.request.url.startsWith('http')) return;
+
+  // 3. Ignore non-origin requests (CDN, APIs, Firebase)
   // This prevents the SW from interfering with external API calls
+  // (Moving this up to avoid processing external requests)
   if (!event.request.url.startsWith(self.location.origin)) return;
 
   // EXPLICIT: Ignore Google/Firebase services (redundant but safe)
   if (event.request.url.includes('googleapis.com') || event.request.url.includes('firebasestorage')) return;
-
-  // 3. Ignore browser-extension requests or other protocols
-  if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
     (async () => {
@@ -57,16 +58,23 @@ self.addEventListener('fetch', (event) => {
             return await fetch(event.request);
         } catch (networkError) {
             console.warn('SW Fetch failed for:', event.request.url);
+
             // Return a fallback response for navigation requests to prevent "This site can't be reached"
             if (event.request.mode === 'navigate') {
-                return caches.match('/index.html');
+                const index = await caches.match('/index.html');
+                if (index) return index;
             }
-            // Rethrow or return error response
-            throw networkError;
+
+            // Return a 404/503 response instead of throwing, to resolve the promise successfully
+            return new Response('Network error occurred', {
+                status: 503,
+                statusText: 'Service Unavailable',
+                headers: { 'Content-Type': 'text/plain' }
+            });
         }
       } catch (error) {
         // Final fallback to prevent "Uncaught (in promise)" in console
-        return new Response('Network error', { status: 503, statusText: 'Service Unavailable' });
+        return new Response('Internal error', { status: 500, statusText: 'Internal Server Error' });
       }
     })()
   );
