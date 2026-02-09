@@ -62,22 +62,31 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
     const history = [...messages, userMessage];
 
     // Use STRICT mode for popup
-    await streamChatResponse(
-        history,
-        input,
-        'fast',
-        user.level || 'GCSE',
-        'strict',
-        (chunk) => {
-            setMessages(prev => prev.map(msg =>
-                msg.id === modelMessageId
-                    ? { ...msg, text: msg.text + chunk }
-                    : msg
-            ));
-        }
-    );
-    
-    setIsLoading(false);
+    try {
+        await streamChatResponse(
+            history,
+            input,
+            'fast',
+            user.level || 'GCSE',
+            'strict',
+            (chunk) => {
+                setMessages(prev => prev.map(msg =>
+                    msg.id === modelMessageId
+                        ? { ...msg, text: msg.text + chunk }
+                        : msg
+                ));
+            }
+        );
+    } catch (e) {
+        console.error("Chat error:", e);
+        setMessages(prev => prev.map(msg =>
+            msg.id === modelMessageId
+                ? { ...msg, text: "I'm having trouble connecting right now. Please check your connection or try again later." }
+                : msg
+        ));
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   const handleExpand = () => {
@@ -127,8 +136,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
         )}
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-            <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'user' ? 'bg-green-500 text-white rounded-br-none' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-bl-none'}`}>
-              <ReactMarkdown className="text-sm whitespace-pre-wrap">
+            <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'user' ? 'bg-green-500 text-white rounded-br-none' : 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-bl-none'} text-sm whitespace-pre-wrap`}>
+              <ReactMarkdown>
                   {msg.text}
               </ReactMarkdown>
             </div>

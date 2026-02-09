@@ -1,12 +1,13 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent } from "../types";
+import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
 import { auth, db, getCourseFiles, downloadFileAsBase64 } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
+import { AQA_ALEVEL_SPEC, AQA_GCSE_SPEC } from '../data/specifications';
 
 // --- MODEL CONFIGURATION ---
 // Using stable versions to prevent 400 Bad Request errors.
@@ -28,6 +29,43 @@ const getAiClient = (): GoogleGenAI => {
     } else {
         console.error("API_KEY environment variable not set. AI features will be disabled.");
         throw new Error("API Key not available.");
+    }
+};
+
+const getUserContext = async (userId: string, level: UserLevel): Promise<string> => {
+    try {
+        let context = `User Profile:\n- Level: ${level}\n`;
+
+        // 1. Recent Sessions
+        const sessionsRef = collection(db, 'users', userId, 'sessions');
+        const qSessions = query(sessionsRef, orderBy('completedAt', 'desc'), limit(5));
+        const sessionsSnap = await getDocs(qSessions);
+        if (!sessionsSnap.empty) {
+            context += "- Recent Activity:\n";
+            sessionsSnap.docs.forEach(doc => {
+                const s = doc.data() as CompletedSession;
+                if (s.level === level) {
+                    context += `  * Topic: ${s.question.unit} - Score: ${s.aiFeedback.score}/${s.aiFeedback.totalMarks}\n`;
+                }
+            });
+        }
+
+        // 2. Weak Areas (Manual RAG)
+        const manualRef = doc(db, 'users', userId, 'manual_progress', 'rag_sheet');
+        const manualSnap = await getDoc(manualRef);
+        if (manualSnap.exists()) {
+            const ratings = manualSnap.data() as Record<string, string>;
+            const weak = Object.entries(ratings).filter(([_, status]) => status === 'Red').map(([topic]) => topic);
+            const strong = Object.entries(ratings).filter(([_, status]) => status === 'Green').map(([topic]) => topic);
+
+            if (weak.length > 0) context += `- Weak Areas (Focus needed): ${weak.join(', ')}\n`;
+            if (strong.length > 0) context += `- Strong Areas: ${strong.join(', ')}\n`;
+        }
+
+        return context;
+    } catch (e) {
+        console.error("Error fetching user context", e);
+        return ""; // Fail gracefully
     }
 };
 
@@ -302,6 +340,14 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
 
     let systemInstruction = `You are an AI assistant for Geography, supporting ${level} students.`;
 
+    // Fetch User Context
+    if (user) {
+        const userContext = await getUserContext(user.uid, level);
+        if (userContext) {
+            systemInstruction += `\n\n${userContext}`;
+        }
+    }
+
     systemInstruction += `
     SAFETY & ETHICS GUIDELINES (MANDATORY):
     1. **No Anthropomorphism**: Do NOT imply you have feelings, opinions, consciousness, or a physical body. Do not say "I think", "I feel", or "I believe". Use neutral phrases like "The evidence suggests" or "It is generally understood".
@@ -310,57 +356,20 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     `;
 
     if (contextMode === 'strict') {
-        const specContext = getSpecContext(level);
+        const specContent = level === 'GCSE' ? AQA_GCSE_SPEC : AQA_ALEVEL_SPEC;
         systemInstruction += `
         STRICT MODE ENABLED.
-        You must ONLY answer questions using content from the AQA ${level} Geography specification AND the attached course documents.
+        You must ONLY answer questions using content from the AQA ${level} Geography specification provided below.
 
         Reference Context (Specification):
-        ${specContext}
+        ${specContent}
 
         Rules:
-        1. Use the attached documents as the PRIMARY source of truth.
-        2. If a student asks about a topic NOT in the list or documents, politely decline.
+        1. Use the provided specification text as the PRIMARY source of truth.
+        2. If a student asks about a topic NOT in the specification, politely decline.
         3. Do NOT hallucinate case studies.
+        4. Tailor your response based on the "User Profile" provided above (e.g. if they are weak in a topic, provide more detail).
         `;
-
-        // Inject files if in strict mode (RAG via Gemini multimodal input)
-        try {
-            const files = await getCourseFiles(level);
-            // Limit to top 5 files to avoid overloading context/bandwidth
-            const limitedFiles = files.slice(0, 5);
-
-            if (limitedFiles.length > 0) {
-                const fileParts = [];
-                // Download files sequentially to avoid race conditions or limits
-                for (const file of limitedFiles) {
-                    try {
-                        const { data, mimeType } = await downloadFileAsBase64(file.path);
-                        fileParts.push({
-                            inlineData: {
-                                mimeType: mimeType,
-                                data: data
-                            }
-                        });
-                    } catch (err) {
-                        console.warn(`Skipping file ${file.name} due to download error`, err);
-                    }
-                }
-
-                if (fileParts.length > 0) {
-                    // Append file parts to the *last* user message (which is `contents[contents.length-1]`)
-                    // Gemini API expects text parts + file parts in the same turn
-                    if (contents.length > 0) {
-                        const lastMsg = contents[contents.length - 1];
-                        lastMsg.parts = [...lastMsg.parts, ...fileParts];
-                    }
-                    systemInstruction += `\n\n[SYSTEM: You have access to ${fileParts.length} course documents attached. Use them as the primary source of truth.]`;
-                }
-            }
-        } catch (e) {
-            console.error("Failed to inject course files", e);
-        }
-
     } else {
         systemInstruction += `
         RESEARCH MODE ENABLED.

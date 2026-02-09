@@ -157,6 +157,24 @@ const CareersExplorer: React.FC = () => {
 };
 
 const LocalOpportunities: React.FC = () => {
+    const featuredLinks = [
+        {
+            title: "Environment Agency Apprenticeships",
+            url: "https://environmentagencycareers.co.uk/early-careers/apprenticeships/?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
+            description: "Explore entry-level roles in environmental protection and flood risk management."
+        },
+        {
+            title: "Royal Geographical Society (RGS)",
+            url: "https://www.rgs.org/choose-geography/apprenticeships?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
+            description: "Discover how geography skills apply to a wide range of apprenticeship sectors."
+        },
+        {
+            title: "Government Apprenticeship Search",
+            url: "https://findapprenticeshiptraining.apprenticeships.education.gov.uk/courses/254?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
+            description: "Search for specific training courses and providers near you."
+        }
+    ];
+
     const [location, setLocation] = useState('');
     const [radius, setRadius] = useState('10 miles');
     const [level, setLevel] = useState<'GCSE' | 'A-Level'>('GCSE');
@@ -187,7 +205,31 @@ const LocalOpportunities: React.FC = () => {
 
     return (
         <div>
-             <p className="text-stone-600 mb-6">Find geography-related apprenticeships and job opportunities near you.</p>
+            <div className="mb-8">
+                <h3 className="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2">
+                    <span className="text-2xl">⭐</span> Featured Apprenticeships
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {featuredLinks.map((link, idx) => (
+                        <a
+                            key={idx}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block p-4 bg-white border border-stone-200 rounded-xl hover:shadow-md hover:border-rose-300 transition-all group"
+                        >
+                            <h4 className="font-bold text-rose-700 group-hover:text-rose-800 mb-1">{link.title}</h4>
+                            <p className="text-sm text-stone-600">{link.description}</p>
+                            <span className="text-xs text-stone-400 mt-2 block group-hover:text-rose-500 transition-colors">Learn more &rarr;</span>
+                        </a>
+                    ))}
+                </div>
+            </div>
+
+            <h3 className="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2">
+                <span className="text-2xl">🔍</span> Search Local Opportunities
+            </h3>
+            <p className="text-stone-600 mb-6">Find geography-related apprenticeships and job opportunities near you.</p>
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-3 mb-6 p-4 bg-white/50 backdrop-blur-sm border rounded-2xl">
                  <div className="flex-grow w-full md:w-auto space-y-2 md:space-y-0 md:flex md:gap-3">
                     <input

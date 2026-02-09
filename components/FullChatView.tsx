@@ -79,22 +79,31 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
 
         const history = [...messages, userMessage];
 
-        await streamChatResponse(
-            history,
-            input,
-            'complex',
-            user.level || 'GCSE',
-            researchMode ? 'research' : 'strict',
-            (chunk) => {
-                setMessages(prev => prev.map(msg =>
-                    msg.id === modelMessageId
-                        ? { ...msg, text: msg.text + chunk }
-                        : msg
-                ));
-            }
-        );
-
-        setIsLoading(false);
+        try {
+            await streamChatResponse(
+                history,
+                input,
+                'complex',
+                user.level || 'GCSE',
+                researchMode ? 'research' : 'strict',
+                (chunk) => {
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === modelMessageId
+                            ? { ...msg, text: msg.text + chunk }
+                            : msg
+                    ));
+                }
+            );
+        } catch (e) {
+            console.error("Chat error:", e);
+            setMessages(prev => prev.map(msg =>
+                msg.id === modelMessageId
+                    ? { ...msg, text: "I'm having trouble connecting right now. Please check your connection or try again later." }
+                    : msg
+            ));
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -153,8 +162,8 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                                 msg.role === 'user'
                                     ? 'bg-indigo-600 text-white rounded-br-none'
                                     : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-bl-none border border-stone-200 dark:border-stone-700'
-                            }`}>
-                                <ReactMarkdown className="markdown-body whitespace-pre-wrap font-medium">
+                            } markdown-body whitespace-pre-wrap font-medium`}>
+                                <ReactMarkdown>
                                     {msg.text}
                                 </ReactMarkdown>
                             </div>
