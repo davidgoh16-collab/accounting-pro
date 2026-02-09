@@ -93,6 +93,24 @@ const SkillModal: React.FC<{ skill: string; onClose: () => void }> = ({ skill, o
 };
 
 const CareersExplorer: React.FC = () => {
+    const featuredLinks = [
+        {
+            title: "Environment Agency Apprenticeships",
+            url: "https://environmentagencycareers.co.uk/early-careers/apprenticeships/?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
+            description: "Entry-level roles in environmental protection."
+        },
+        {
+            title: "Royal Geographical Society (RGS)",
+            url: "https://www.rgs.org/choose-geography/apprenticeships?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
+            description: "How geography skills apply to apprenticeships."
+        },
+        {
+            title: "Gov.uk Apprenticeship Search",
+            url: "https://findapprenticeshiptraining.apprenticeships.education.gov.uk/courses/254?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
+            description: "Search for specific training courses near you."
+        }
+    ];
+
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [careers, setCareers] = useState<GeographyCareer[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -113,6 +131,29 @@ const CareersExplorer: React.FC = () => {
     }, []);
 
     return (
+        <div className="space-y-8">
+            {/* Featured Apprenticeships Section */}
+            <div className="bg-gradient-to-r from-rose-50 to-orange-50 rounded-2xl p-6 border border-rose-100">
+                <h3 className="text-lg font-bold text-rose-800 mb-4 flex items-center gap-2">
+                    <span className="text-xl">⭐</span> Featured Apprenticeships
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {featuredLinks.map((link, idx) => (
+                        <a
+                            key={idx}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block p-4 bg-white border border-rose-200 rounded-xl hover:shadow-md hover:border-rose-400 transition-all group"
+                        >
+                            <h4 className="font-bold text-stone-800 group-hover:text-rose-600 mb-1 text-sm">{link.title}</h4>
+                            <p className="text-xs text-stone-600">{link.description}</p>
+                            <span className="text-xs text-rose-500 font-semibold mt-2 block opacity-0 group-hover:opacity-100 transition-opacity">Visit &rarr;</span>
+                        </a>
+                    ))}
+                </div>
+            </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1 space-y-3">
                 {CAREER_CATEGORIES.map(cat => (
@@ -153,28 +194,11 @@ const CareersExplorer: React.FC = () => {
                 )}
             </div>
         </div>
+        </div>
     );
 };
 
 const LocalOpportunities: React.FC = () => {
-    const featuredLinks = [
-        {
-            title: "Environment Agency Apprenticeships",
-            url: "https://environmentagencycareers.co.uk/early-careers/apprenticeships/?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
-            description: "Explore entry-level roles in environmental protection and flood risk management."
-        },
-        {
-            title: "Royal Geographical Society (RGS)",
-            url: "https://www.rgs.org/choose-geography/apprenticeships?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
-            description: "Discover how geography skills apply to a wide range of apprenticeship sectors."
-        },
-        {
-            title: "Government Apprenticeship Search",
-            url: "https://findapprenticeshiptraining.apprenticeships.education.gov.uk/courses/254?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
-            description: "Search for specific training courses and providers near you."
-        }
-    ];
-
     const [location, setLocation] = useState('');
     const [radius, setRadius] = useState('10 miles');
     const [level, setLevel] = useState<'GCSE' | 'A-Level'>('GCSE');
@@ -205,30 +229,6 @@ const LocalOpportunities: React.FC = () => {
 
     return (
         <div>
-            <div className="mb-8">
-                <h3 className="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2">
-                    <span className="text-2xl">⭐</span> Featured Apprenticeships
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {featuredLinks.map((link, idx) => (
-                        <a
-                            key={idx}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block p-4 bg-white border border-stone-200 rounded-xl hover:shadow-md hover:border-rose-300 transition-all group"
-                        >
-                            <h4 className="font-bold text-rose-700 group-hover:text-rose-800 mb-1">{link.title}</h4>
-                            <p className="text-sm text-stone-600">{link.description}</p>
-                            <span className="text-xs text-stone-400 mt-2 block group-hover:text-rose-500 transition-colors">Learn more &rarr;</span>
-                        </a>
-                    ))}
-                </div>
-            </div>
-
-            <h3 className="text-xl font-bold text-stone-800 mb-4 flex items-center gap-2">
-                <span className="text-2xl">🔍</span> Search Local Opportunities
-            </h3>
             <p className="text-stone-600 mb-6">Find geography-related apprenticeships and job opportunities near you.</p>
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-3 mb-6 p-4 bg-white/50 backdrop-blur-sm border rounded-2xl">
                  <div className="flex-grow w-full md:w-auto space-y-2 md:space-y-0 md:flex md:gap-3">
