@@ -1,29 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig } from './types';
+import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig, TeacherAssessment } from './types';
 import { onAuthChange, signOutUser, db, logUserActivity } from './firebase';
 import { User } from 'firebase/auth';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot, where } from 'firebase/firestore';
 import { getMocks } from './services/mockService';
+import { GradeDashboard } from './components/GradeDashboard';
 
 import LoginView from './components/LoginView';
 
-// 1. Define the interface matching your Firestore structure
-interface TeacherFeedbackRecord {
-    id: string;
-    studentEmail: string;
-    feedback: string;
-    improvementAreas?: string[]; // Updated from suggestedActions
-    assessmentTitle?: string;     // New field
-    topic?: string;
-    mark?: number;                // New field
-    maxMarks?: number;            // New field
-    percentage?: number;
-    timestamp?: any;
-}
-
 // 2. Create the Feedback Component
 const TeacherFeedbackSection: React.FC<{ userEmail: string | null }> = ({ userEmail }) => {
-    const [feedbackRecords, setFeedbackRecords] = useState<TeacherFeedbackRecord[]>([]);
+    const [feedbackRecords, setFeedbackRecords] = useState<TeacherAssessment[]>([]);
 
     useEffect(() => {
         if (!userEmail) return;
@@ -42,8 +29,11 @@ const TeacherFeedbackSection: React.FC<{ userEmail: string | null }> = ({ userEm
             const records = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
-            })) as TeacherFeedbackRecord[];
-            setFeedbackRecords(records);
+            })) as TeacherAssessment[];
+
+            // Filter out 'OVERALL_GRADES' documents
+            const filteredRecords = records.filter(r => r.type !== 'OVERALL_GRADES');
+            setFeedbackRecords(filteredRecords);
         });
 
         return () => unsubscribe();
@@ -501,6 +491,9 @@ const App: React.FC = () => {
                             <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
                                 <span className="text-3xl">🧠</span> Learning & Progress
                             </h2>
+
+                            <GradeDashboard />
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 <HubCard
                                     icon={<span className="text-4xl">🎓</span>}

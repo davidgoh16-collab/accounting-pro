@@ -408,3 +408,25 @@ export interface MockConfig {
     topics: string[]; // List of all topics covered in this mock series
     createdAt: string;
 }
+
+export interface TeacherAssessment {
+    id: string;
+    studentEmail: string;
+    feedback: string;
+    improvementAreas?: string[];
+    assessmentTitle?: string;
+    topic?: string;
+    mark?: number;
+    maxMarks?: number;
+    percentage?: number;
+    timestamp?: any;
+    type?: string;
+}
+
+export interface GradeProfile {
+    paper1: string;
+    paper2: string;
+    nea: string;
+    overall: string;
+    target: string;
+}
