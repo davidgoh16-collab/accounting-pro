@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { getStudentGradeProfile } from '../services/studentPerformanceService';
-import { GradeProfile } from '../types';
+import { GradeProfile, AuthUser } from '../types';
 
-export const GradeDashboard = () => {
+export const GradeDashboard = ({ user }: { user: AuthUser | null }) => {
     const [grades, setGrades] = useState<GradeProfile | null>(null);
 
     useEffect(() => {
-        getStudentGradeProfile().then(setGrades);
-    }, []);
+        if (user?.email) {
+            getStudentGradeProfile(user.email).then(setGrades);
+        }
+    }, [user?.email]);
 
     if (!grades) return null;
 

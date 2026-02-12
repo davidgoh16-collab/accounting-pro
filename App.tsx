@@ -492,7 +492,7 @@ const App: React.FC = () => {
                                 <span className="text-3xl">🧠</span> Learning & Progress
                             </h2>
 
-                            <GradeDashboard />
+                            <GradeDashboard user={user} />
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 <HubCard
