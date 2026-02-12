@@ -17,15 +17,33 @@ export const getStudentGradeProfile = async (studentEmail: string): Promise<Grad
 };
 
 // UPDATE: Filter out the 'OVERALL_GRADES' type
-export const getTeacherAssessments = async (): Promise<TeacherAssessment[]> => {
-    if (!auth.currentUser?.email) return [];
-    const q = query(
-        collection(db, 'student_performance_records'),
-        where('studentEmail', '==', auth.currentUser.email),
-        orderBy('timestamp', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as any))
-        .filter(item => item.type !== 'OVERALL_GRADES') as TeacherAssessment[];
+export const getTeacherAssessments = async (studentEmail?: string): Promise<TeacherAssessment[]> => {
+    const email = studentEmail || auth.currentUser?.email;
+    if (!email) {
+        console.warn("getTeacherAssessments: No email provided");
+        return [];
+    }
+
+    try {
+        // Try simple query first to avoid index issues
+        const q = query(
+            collection(db, 'student_performance_records'),
+            where('studentEmail', '==', email)
+        );
+        const snapshot = await getDocs(q);
+
+        const data = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as any))
+            .filter(item => item.type !== 'OVERALL_GRADES') as TeacherAssessment[];
+
+        // Client-side sort to be safe
+        return data.sort((a, b) => {
+            const timeA = a.timestamp?.seconds || 0;
+            const timeB = b.timestamp?.seconds || 0;
+            return timeB - timeA;
+        });
+    } catch (e) {
+        console.error("Error fetching assessments:", e);
+        return [];
+    }
 };

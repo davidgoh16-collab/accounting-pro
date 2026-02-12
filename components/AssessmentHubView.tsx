@@ -15,7 +15,7 @@ export const AssessmentHubView: React.FC<AssessmentHubViewProps> = ({ user, onBa
     useEffect(() => {
         const fetchAssessments = async () => {
             if (user?.email) {
-                const data = await getTeacherAssessments();
+                const data = await getTeacherAssessments(user.email);
                 setAssessments(data);
             }
             setIsLoading(false);
@@ -105,21 +105,30 @@ const AssessmentCard: React.FC<{ assessment: TeacherAssessment }> = ({ assessmen
                         </h3>
                     </div>
 
-                    {assessment.mark !== undefined && assessment.maxMarks !== undefined && (
-                        <div className="flex items-center gap-3 bg-stone-50 dark:bg-stone-950 px-4 py-2 rounded-lg border border-stone-100 dark:border-stone-800">
-                            <div className="text-right">
-                                <div className="text-2xl font-black text-stone-800 dark:text-stone-100 leading-none">
-                                    {assessment.mark}
-                                    <span className="text-sm text-stone-400 font-medium ml-0.5">/{assessment.maxMarks}</span>
-                                </div>
-                                {assessment.percentage !== undefined && (
-                                    <div className={`text-xs font-bold ${assessment.percentage >= 60 ? 'text-emerald-600' : assessment.percentage >= 40 ? 'text-amber-600' : 'text-red-600'}`}>
-                                        {assessment.percentage.toFixed(0)}%
-                                    </div>
-                                )}
+                    <div className="flex items-center gap-4">
+                        {assessment.grade && (
+                            <div className="flex flex-col items-end">
+                                <span className="text-xs uppercase font-bold text-stone-400 tracking-wider">Grade</span>
+                                <span className="text-2xl font-black text-violet-600 dark:text-violet-400">{assessment.grade}</span>
                             </div>
-                        </div>
-                    )}
+                        )}
+
+                        {assessment.mark !== undefined && assessment.maxMarks !== undefined && (
+                            <div className="flex items-center gap-3 bg-stone-50 dark:bg-stone-950 px-4 py-2 rounded-lg border border-stone-100 dark:border-stone-800">
+                                <div className="text-right">
+                                    <div className="text-2xl font-black text-stone-800 dark:text-stone-100 leading-none">
+                                        {assessment.mark}
+                                        <span className="text-sm text-stone-400 font-medium ml-0.5">/{assessment.maxMarks}</span>
+                                    </div>
+                                    {assessment.percentage !== undefined && (
+                                        <div className={`text-xs font-bold ${assessment.percentage >= 60 ? 'text-emerald-600' : assessment.percentage >= 40 ? 'text-amber-600' : 'text-red-600'}`}>
+                                            {assessment.percentage.toFixed(0)}%
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="bg-stone-50 dark:bg-stone-800/50 rounded-lg p-4 border-l-4 border-indigo-500 mb-4">

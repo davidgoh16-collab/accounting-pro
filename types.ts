@@ -422,6 +422,8 @@ export interface TeacherAssessment {
     percentage?: number;
     timestamp?: any;
     type?: string;
+    grade?: string;
+    sourceApp?: string;
 }
 
 export interface GradeProfile {
