@@ -52,13 +52,27 @@ export const AssessmentHubView: React.FC<AssessmentHubViewProps> = ({ user, onBa
             if (user?.email) {
                 const data = await getTeacherAssessments(user.email);
 
-                // Deduplicate logic: Map by ID first
+                // Deduplicate logic: Strict content match
                 const uniqueMap = new Map();
                 data.forEach(item => {
-                    // Use ID if available, otherwise create a signature
-                    const key = item.id || `${item.assessmentTitle}-${item.timestamp?.seconds}-${item.mark}`;
-                    if (!uniqueMap.has(key)) {
-                        uniqueMap.set(key, item);
+                    // Create a strict content signature to catch duplicates with different IDs
+                    // We ignore 'topic' because the user screenshot showed duplicates with "full_paper" vs "Full Paper 1"
+                    const dateStr = item.timestamp?.seconds ? new Date(item.timestamp.seconds * 1000).toDateString() : 'no-date';
+                    const title = (item.assessmentTitle || '').trim().toLowerCase();
+                    const mark = item.mark || 0;
+                    const max = item.maxMarks || 0;
+                    const grade = (item.grade || '').trim().toLowerCase();
+
+                    const signature = `${title}|${dateStr}|${mark}/${max}|${grade}`;
+
+                    if (!uniqueMap.has(signature)) {
+                        uniqueMap.set(signature, item);
+                    } else {
+                        // Optional: Keep the one with better metadata (e.g. longer topic name)
+                        const existing = uniqueMap.get(signature);
+                        if ((item.topic?.length || 0) > (existing.topic?.length || 0)) {
+                            uniqueMap.set(signature, item);
+                        }
                     }
                 });
 
