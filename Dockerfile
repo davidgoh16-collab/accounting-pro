@@ -12,24 +12,28 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Environment variables
-ARG GEMINI_API_KEY
-ENV GEMINI_API_KEY=$GEMINI_API_KEY
-
 # Build the application
 RUN npm run build
 
-# Stage 2: Serve the application with Nginx
-FROM nginx:alpine
+# Stage 2: Serve the application with Node.js
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package.json
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --omit=dev
 
 # Copy built assets from builder stage
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist ./dist
 
-# Copy Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy server.js
+COPY server.js .
 
 # Expose port 8080 (Cloud Run default)
 EXPOSE 8080
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start server
+CMD ["node", "server.js"]

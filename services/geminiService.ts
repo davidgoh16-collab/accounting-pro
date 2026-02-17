@@ -22,14 +22,73 @@ const SAFETY_SETTINGS = [
     { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
 ];
 
-const getAiClient = (): GoogleGenAI => {
-    const API_KEY = process.env.API_KEY;
-    if (API_KEY) {
-        return new GoogleGenAI({ apiKey: API_KEY });
-    } else {
-        console.error("API_KEY environment variable not set. AI features will be disabled.");
-        throw new Error("API Key not available.");
+// Proxy client to route requests through backend
+class ProxyClient {
+    models = {
+        generateContent: async (params: any) => {
+            const response = await fetch('/api/generate-content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Request failed' }));
+                throw new Error(error.error || error.message || 'Request failed');
+            }
+            return await response.json();
+        },
+        generateContentStream: async function* (params: any) {
+             const response = await fetch('/api/generate-content-stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Stream request failed' }));
+                throw new Error(error.error || error.message || 'Stream request failed');
+            }
+            if (!response.body) throw new Error('ReadableStream not supported');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.trim()) {
+                        try {
+                            const chunk = JSON.parse(line);
+                            yield chunk;
+                        } catch (e) {
+                            console.error('Error parsing stream chunk', e);
+                        }
+                    }
+                }
+            }
+        },
+        generateImages: async (params: any) => {
+             const response = await fetch('/api/generate-images', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Image generation failed' }));
+                throw new Error(error.error || error.message || 'Image generation failed');
+            }
+            return await response.json();
+        }
     }
+}
+
+const getAiClient = (): GoogleGenAI => {
+    return new ProxyClient() as unknown as GoogleGenAI;
 };
 
 const getUserContext = async (userId: string, level: UserLevel): Promise<string> => {
