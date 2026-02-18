@@ -123,7 +123,30 @@ export const CASE_STUDY_LOCATIONS: CaseStudyLocation[] = [
   { name: 'Mount Sinabung (2021)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 3.17, lng: 98.39, details: 'Indonesia. Reawakened 2010. 2021 eruption caused ash fall (2.8km high), respiratory issues. Permanent relocation of villages.', citation: 'Active Volcano', levels: ['IGCSE'] },
   { name: 'Cyclone Komen (2015)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 21.0, lng: 91.0, details: 'Myanmar/Bangladesh. Monsoon season. 800mm rain. Flooding killed 100+, displaced 1.2m. Poor infrastructure worsened impact.', citation: 'Tropical Cyclone', levels: ['IGCSE'] },
   { name: 'Amatrice Earthquake (2016)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 42.63, lng: 13.29, details: 'Italy. 6.2 Mag. Shallow focus (5.1km). 299 deaths. Medieval buildings collapsed ("Pancake" failure). "Italian Homes" rebuild initiative.', citation: 'Earthquake in HIC', levels: ['IGCSE'] },
-  { name: 'Taiwan Earthquake (2024)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 23.8, lng: 121.6, details: '7.4 Mag. Hualien. Landslides trapped people in tunnels. Advanced early warning system reduced casualties (17 deaths). Resilience.', citation: 'Earthquake Management', levels: ['IGCSE'] }
+  { name: 'Taiwan Earthquake (2024)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 23.8, lng: 121.6, details: '7.4 Mag. Hualien. Landslides trapped people in tunnels. Advanced early warning system reduced casualties (17 deaths). Resilience.', citation: 'Earthquake Management', levels: ['IGCSE'] },
+
+  // --- IGCSE: RIVER MANAGEMENT ---
+  { name: 'Three Gorges Dam (China)', topic: 'River environments', geography: 'Physical Geography', lat: 30.82, lng: 111.00, details: 'River management. Yangtze River. Largest hydroelectric dam. Flood control, energy (22,500 MW), navigation. Displacement of 1.3m people. Environmental concerns.', citation: 'River Management', levels: ['IGCSE'] },
+
+  // --- IGCSE: COASTAL MANAGEMENT ---
+  { name: 'Studland Bay', topic: 'Coastal environments', geography: 'Physical Geography', lat: 50.64, lng: -1.95, details: 'Coastal management. Dorset. Sand dunes. Conflict resolution between tourists, conservation (National Trust), and nudists. Soft engineering.', citation: 'Coastal Management', levels: ['IGCSE'] },
+  { name: 'Holderness Coast (IGCSE)', topic: 'Coastal environments', geography: 'Physical Geography', lat: 53.8, lng: -0.1, details: 'Fastest eroding coastline in Europe. Geology: Boulder Clay. Flamborough Head (Chalk). Management at Mappleton and Hornsea.', citation: 'Coastal Erosion', levels: ['IGCSE'] },
+
+  // --- IGCSE: ECONOMIC ACTIVITY ---
+  { name: 'Nike in Vietnam', topic: 'Economic activity and energy', geography: 'Human Geography', lat: 10.82, lng: 106.63, details: 'TNC in Emerging Country. Low labour costs. Employment for women. Multiplier effect. Issues: Working conditions, environmental standards.', citation: 'TNC Case Study', levels: ['IGCSE'] },
+  { name: 'Iceland (Geothermal)', topic: 'Economic activity and energy', geography: 'Human Geography', lat: 64.14, lng: -21.94, details: 'Energy Management. 100% renewable electricity (Geothermal/Hydro). Sustainable energy use. Hellisheidi Power Station.', citation: 'Sustainable Energy', levels: ['IGCSE'] },
+
+  // --- IGCSE: URBAN ENVIRONMENTS ---
+  { name: 'Mumbai (Dharavi)', topic: 'Urban environments', geography: 'Human Geography', lat: 19.07, lng: 72.87, details: 'Urban challenge in Emerging Country. Slum management. Informal economy ($1bn annual turnover). Redevelopment plans vs community needs.', citation: 'Urban Challenge', levels: ['IGCSE'] },
+  { name: 'London (Docklands)', topic: 'Urban environments', geography: 'Human Geography', lat: 51.50, lng: -0.02, details: 'Urban regeneration in Developed Country. LDDC. Economic growth (Canary Wharf). Social inequality. Gentrification.', citation: 'Urban Regeneration', levels: ['IGCSE'] },
+
+  // --- IGCSE: RURAL ENVIRONMENTS ---
+  { name: 'Kenya (Horticulture)', topic: 'Rural environments', geography: 'Human Geography', lat: -1.29, lng: 36.82, details: 'Rural change in Developing Country. Flower farming for export to Europe. Economic benefits vs Water usage (Lake Naivasha).', citation: 'Rural Change', levels: ['IGCSE'] },
+  { name: 'Lake District (Tourism)', topic: 'Rural environments', geography: 'Human Geography', lat: 54.46, lng: -3.08, details: 'Rural challenge in Developed Country. Tourism pressure (traffic, footpath erosion). Honeypot sites. Management strategies.', citation: 'Rural Tourism', levels: ['IGCSE'] },
+
+  // --- IGCSE: FRAGILE ENVIRONMENTS ---
+  { name: 'Sahel (Desertification)', topic: 'Fragile environments and climate change', geography: 'Physical Geography', lat: 15.0, lng: 0.0, details: 'Desertification. Causes: Overgrazing, deforestation, climate change. Management: Great Green Wall, stone lines (magic stones).', citation: 'Desertification', levels: ['IGCSE'] },
+  { name: 'Amazon Rainforest (Deforestation)', topic: 'Fragile environments and climate change', geography: 'Physical Geography', lat: -3.46, lng: -62.21, details: 'Deforestation causes: Cattle ranching, soy, logging. Impacts: Climate change, biodiversity loss. Sustainable management (ecotourism, reserves).', citation: 'Deforestation', levels: ['IGCSE'] }
 ];
 
 export const TOPIC_COLORS: { [key: string]: string } = {
