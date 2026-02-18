@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, GameSessionResult } from '../types';
-import { AQA_UNITS, GCSE_UNITS, GCSE_PAPER_MAPPING, ALEVEL_PAPER_MAPPING } from '../constants';
+import { AQA_UNITS, GCSE_UNITS, IGCSE_UNITS, GCSE_PAPER_MAPPING, ALEVEL_PAPER_MAPPING, IGCSE_PAPER_MAPPING } from '../constants';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { db } from '../firebase';
 import { collection, query, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
@@ -202,10 +202,12 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
 
     const relevantUnits = useMemo(() => {
         if (!user.level) return [];
+        if (user.level === 'IGCSE') return IGCSE_UNITS;
         return user.level === 'GCSE' ? GCSE_UNITS : AQA_UNITS;
     }, [user.level]);
 
     const paperMapping = useMemo(() => {
+        if (user.level === 'IGCSE') return IGCSE_PAPER_MAPPING;
         return user.level === 'GCSE' ? GCSE_PAPER_MAPPING : ALEVEL_PAPER_MAPPING;
     }, [user.level]);
 

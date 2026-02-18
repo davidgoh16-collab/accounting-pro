@@ -461,6 +461,14 @@ const App: React.FC = () => {
                 subtitle: "Your GCSE Geography Hub (AQA 8035)"
             };
         }
+        if (level === 'IGCSE') {
+            return {
+                bgClass: "bg-orange-50 dark:bg-stone-950",
+                bgPattern: "bg-[url('/grid.svg')]",
+                hubGradient: "bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500",
+                subtitle: "Your IGCSE Geography Hub (Edexcel)"
+            };
+        }
         return {
             bgClass: "bg-stone-100 dark:bg-stone-950", 
             bgPattern: "bg-[url('/grid.svg')]",

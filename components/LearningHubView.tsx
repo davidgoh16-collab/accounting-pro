@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CourseLesson, LessonProgress } from '../types';
-import { COURSE_LESSONS, GCSE_UNITS, AQA_UNITS } from '../constants';
+import { COURSE_LESSONS, GCSE_UNITS, AQA_UNITS, IGCSE_UNITS } from '../constants';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import HubLayout from './HubLayout';
@@ -115,6 +115,7 @@ const LearningHubView: React.FC<LearningHubViewProps> = ({ user, onBack }) => {
     const [loading, setLoading] = useState(true);
 
     const syllabusUnits = useMemo(() => {
+        if (user.level === 'IGCSE') return IGCSE_UNITS;
         if (user.level === 'GCSE') return GCSE_UNITS;
         return AQA_UNITS; 
     }, [user.level]);

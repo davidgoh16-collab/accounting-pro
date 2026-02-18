@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Question, SessionData, CaseStudyMaster, MarkedModelAnswer, PracticeMode, ChatMessage, AIFeedback, CompletedSession, AnswerSegment, AuthUser, ChatSessionLog, DraftSession } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
 import { MASTER_CASE_STUDIES } from '../database';
 import { getHint, getMotivationalMessage, generateQuestion, generateFigure, generateModelAnswer, streamTutorResponse, generateCaseStudyApplication, markStudentAnswer, generateSessionSummary, getImageLimitStatus } from '../services/geminiService';
 import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -172,9 +172,13 @@ interface QuestionPracticeViewProps {
 }
 
 const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessionToView, draftToResume, onBack }) => {
-    const availableUnits = user.level === 'GCSE' ? GCSE_UNITS : ALEVEL_UNITS;
+    const availableUnits = useMemo(() => {
+        if (user.level === 'IGCSE') return IGCSE_UNITS;
+        return user.level === 'GCSE' ? GCSE_UNITS : ALEVEL_UNITS;
+    }, [user.level]);
+
     const [unitFilter, setUnitFilter] = useState<string>(availableUnits[1]);
-    const [marksFilter, setMarksFilter] = useState<number>(user.level === 'GCSE' ? 9 : 6);
+    const [marksFilter, setMarksFilter] = useState<number>(user.level === 'GCSE' || user.level === 'IGCSE' ? 9 : 6);
     const [subTopicFilter, setSubTopicFilter] = useState<string>('All Sub-topics');
     const [includeFigure, setIncludeFigure] = useState(false);
     const [isFormationQuestion, setIsFormationQuestion] = useState(false);
@@ -219,7 +223,9 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
 
     const availableSubTopics = useMemo(() => {
         if (unitFilter === 'All Units') return [];
-        const topicsMap = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        let topicsMap = GCSE_SPEC_TOPICS;
+        if (user.level === 'A-Level') topicsMap = ALEVEL_SPEC_TOPICS;
+        if (user.level === 'IGCSE') topicsMap = IGCSE_SPEC_TOPICS;
         return topicsMap[unitFilter] || [];
     }, [unitFilter, user.level]);
     
