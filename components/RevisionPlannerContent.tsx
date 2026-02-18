@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AuthUser, RevisionSession, RevisionMethod } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS, COURSE_LESSONS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, COURSE_LESSONS, IGCSE_SPEC_TOPICS } from '../constants';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
 
@@ -43,10 +43,29 @@ const RevisionPlannerContent: React.FC<RevisionPlannerContentProps> = ({ user })
     const [newDuration, setNewDuration] = useState(30);
     const [newNotes, setNewNotes] = useState('');
 
-    const availableTopics = user.level === 'GCSE' ? GCSE_UNITS.filter(u => u !== 'All Units') : ALEVEL_UNITS.filter(u => u !== 'All Units');
+    const availableTopics = useMemo(() => {
+        if (user.level === 'IGCSE') return IGCSE_UNITS.filter(u => u !== 'All Units');
+        if (user.level === 'GCSE') return GCSE_UNITS.filter(u => u !== 'All Units');
+        return ALEVEL_UNITS.filter(u => u !== 'All Units');
+    }, [user.level]);
 
     // Get granular lessons for the current user level
     const relevantLessons = useMemo(() => {
+        if (user.level === 'IGCSE') {
+            // Flatten IGCSE Spec Topics into pseudo-lessons
+            const lessons = [];
+            let idCounter = 1;
+            for (const [topic, subTopics] of Object.entries(IGCSE_SPEC_TOPICS)) {
+                for (const sub of subTopics) {
+                    lessons.push({
+                        id: `I-${idCounter++}`,
+                        title: sub,
+                        chapter: topic
+                    });
+                }
+            }
+            return lessons;
+        }
         if (user.level === 'GCSE') return COURSE_LESSONS.filter(l => l.id.startsWith('G-'));
         return COURSE_LESSONS.filter(l => !l.id.startsWith('G-'));
     }, [user.level]);

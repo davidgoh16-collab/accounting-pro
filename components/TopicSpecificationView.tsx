@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { COURSE_LESSONS, ALEVEL_SPEC_TOPICS, GCSE_SPEC_TOPICS } from '../constants';
+import { COURSE_LESSONS, ALEVEL_SPEC_TOPICS, GCSE_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
 
 interface TopicSpecificationViewProps {
     topic: string;
@@ -15,7 +15,7 @@ const TopicSpecificationView: React.FC<TopicSpecificationViewProps> = ({ topic, 
 
     // 2. Try to find granular sub-topics from SPEC_TOPICS (New/Detailed)
     // We check both GCSE and A-Level maps.
-    const specSubTopics = ALEVEL_SPEC_TOPICS[topic] || GCSE_SPEC_TOPICS[topic] || [];
+    const specSubTopics = ALEVEL_SPEC_TOPICS[topic] || GCSE_SPEC_TOPICS[topic] || IGCSE_SPEC_TOPICS[topic] || [];
 
     // 3. Determine which data source to use
     // If we have granular spec topics, use them (they are more detailed).

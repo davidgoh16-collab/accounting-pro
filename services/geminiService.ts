@@ -7,12 +7,18 @@ import { KEY_TERMS } from "../knowledge-database";
 import { auth, db, getCourseFiles, downloadFileAsBase64 } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
-import { AQA_ALEVEL_SPEC, AQA_GCSE_SPEC } from '../data/specifications';
+import { AQA_ALEVEL_SPEC, AQA_GCSE_SPEC, EDEXCEL_IGCSE_SPEC } from '../data/specifications';
 
 // --- MODEL CONFIGURATION ---
 // Using stable versions to prevent 400 Bad Request errors.
 
 const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
+const STRICT_IGCSE_CONTEXT = "You are an expert Edexcel International GCSE Geography examiner. All content must be strictly aligned with the Pearson Edexcel International GCSE Geography (4GE1) specification.";
+
+const getStrictContext = (level?: UserLevel) => {
+    if (level === 'IGCSE') return STRICT_IGCSE_CONTEXT;
+    return STRICT_AQA_CONTEXT;
+};
 
 // Safety settings for DfE compliance
 const SAFETY_SETTINGS = [
@@ -306,7 +312,9 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
 
 export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
-    const levelContext = params.level === 'GCSE' ? "AQA GCSE Geography (Specification 8035)" : "AQA A-Level Geography";
+    let levelContext = "AQA GCSE Geography (Specification 8035)";
+    if (params.level === 'A-Level') levelContext = "AQA A-Level Geography";
+    if (params.level === 'IGCSE') levelContext = "Edexcel International GCSE Geography (4GE1)";
     
     // Figure instruction
     const figureInstruction = params.includeFigure
@@ -415,10 +423,15 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     `;
 
     if (contextMode === 'strict') {
-        const specContent = level === 'GCSE' ? AQA_GCSE_SPEC : AQA_ALEVEL_SPEC;
+        let specContent = AQA_GCSE_SPEC;
+        if (level === 'A-Level') specContent = AQA_ALEVEL_SPEC;
+        if (level === 'IGCSE') specContent = EDEXCEL_IGCSE_SPEC;
+
+        const specName = level === 'IGCSE' ? 'Edexcel International GCSE (4GE1)' : `AQA ${level}`;
+
         systemInstruction += `
         STRICT MODE ENABLED.
-        You must ONLY answer questions using content from the AQA ${level} Geography specification provided below.
+        You must ONLY answer questions using content from the ${specName} Geography specification provided below.
 
         Reference Context (Specification):
         ${specContent}
@@ -542,7 +555,9 @@ export const generateCaseStudyApplication = async (question: Question, caseStudy
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const prompt = `You are an expert AQA Geography examiner. Mark the following student answer.
+    const examinerType = question.level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
+
+    const prompt = `You are an expert ${examinerType} Geography examiner. Mark the following student answer.
 
     Question Context:
     - Title: "${question.title}"
@@ -551,7 +566,7 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
     - Level: ${question.level}
 
     Mark Scheme / Guidance:
-    ${question.markScheme?.content || 'No specific mark scheme provided. Use expert judgment based on AQA standards.'}
+    ${question.markScheme?.content || `No specific mark scheme provided. Use expert judgment based on ${examinerType} standards.`}
 
     Student Answer:
     "${studentAnswer}"
@@ -643,6 +658,8 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
     if (items.length === 0) return [];
 
     const ai = getAiClient();
+    const systemContext = getStrictContext(items[0]?.levels?.[0]);
+
     const itemsContext = items.map((item, index) =>
         `Item ${index + 1}: ${item.name} (${item.type})\nContext: ${item.details}`
     ).join('\n\n');
@@ -675,7 +692,7 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
-            systemInstruction: STRICT_AQA_CONTEXT,
+            systemInstruction: systemContext,
             responseMimeType: 'application/json',
             safetySettings: SAFETY_SETTINGS
         }
@@ -748,6 +765,8 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const systemContext = getStrictContext(item.levels?.[0]);
+
     const seed = Math.floor(Math.random() * 1000000);
     const prompt = `Create a single, unique multiple-choice quiz question for the topic/term: "${item.name}".
 
@@ -774,7 +793,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
-            systemInstruction: STRICT_AQA_CONTEXT,
+            systemInstruction: systemContext,
             responseMimeType: 'application/json',
             safetySettings: SAFETY_SETTINGS
         }
@@ -810,6 +829,8 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
 export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<SwipeQuizItem> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const systemContext = getStrictContext(study.levels?.[0]);
+
     const seed = Math.floor(Math.random() * 1000000);
     const prompt = `Create a unique "True/False" style statement for the case study: "${study.name}".
 
@@ -836,7 +857,7 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
-            systemInstruction: STRICT_AQA_CONTEXT,
+            systemInstruction: systemContext,
             responseMimeType: 'application/json',
             safetySettings: SAFETY_SETTINGS
         }
@@ -860,8 +881,9 @@ export const generateCareerInfo = async (category: string): Promise<GeographyCar
 
 export const generateLocalOpportunities = async (location: string, level: string, radius: string = '10 miles'): Promise<{ opportunities: JobOpportunity[], sources: { uri: string; title: string }[] }> => handleApiCall(async () => {
     const ai = getAiClient();
-    const age = level === 'GCSE' ? '16-18' : '18+';
-    const type = level === 'GCSE' ? 'Apprenticeships, Work Experience, or Entry Level Jobs' : 'Degree Apprenticeships, Internships, or Entry Level Jobs';
+    const isGCSE = level === 'GCSE' || level === 'IGCSE';
+    const age = isGCSE ? '16-18' : '18+';
+    const type = isGCSE ? 'Apprenticeships, Work Experience, or Entry Level Jobs' : 'Degree Apprenticeships, Internships, or Entry Level Jobs';
 
     const prompt = `Find current local ${type} in Geography, Environmental Science, Travel, Tourism, or Sustainability near ${location} (within ${radius}). Suitable for age ${age}.
 
@@ -1114,7 +1136,8 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         .map(t => t.name)
         .join(', ');
 
-    const prompt = `Create a highly engaging, interactive Geography lesson for a student studying ${level} (AQA Specification).
+    const specName = level === 'IGCSE' ? 'Edexcel International GCSE (4GE1)' : 'AQA Specification';
+    const prompt = `Create a highly engaging, interactive Geography lesson for a student studying ${level} (${specName}).
     
     Chapter: ${chapter}
     Lesson Title: ${lessonTitle}
@@ -1194,7 +1217,9 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
 export const generateVideoQuestions = async (videoTitle: string, level: string): Promise<VideoQuizContent> => handleApiCall(async () => {
     const ai = getAiClient();
     // Use A-Level specific wording only if the level is A-Level
-    const levelContext = level === 'A-Level' ? 'A-Level Geography' : 'Geography';
+    let levelContext = 'Geography';
+    if (level === 'A-Level') levelContext = 'A-Level Geography';
+    if (level === 'IGCSE') levelContext = 'Edexcel International GCSE Geography';
 
     const prompt = `Based on the ${levelContext} video titled "${videoTitle}", generate a short quiz to test understanding.
     

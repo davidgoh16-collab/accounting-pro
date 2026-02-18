@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Page, AuthUser } from '../types';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { GAME_QUESTIONS } from '../game-database';
+import { IGCSE_SPEC_TOPICS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
 import HubLayout from './HubLayout';
 import HubCard from './HubCard';
 
@@ -31,6 +32,15 @@ const TopicSelectionModal: React.FC<{
         const gameTopics = new Set(GAME_QUESTIONS.filter(q => q.levels.includes(level)).map(q => q.topic));
         const caseStudyTopics = new Set(CASE_STUDY_LOCATIONS.filter(c => c.levels.includes(level)).map(cs => cs.topic));
         const allTopics = new Set(['All Topics', ...gameTopics, ...caseStudyTopics]);
+
+        // Explicitly add topics from specification to ensure list is populated for new modes (e.g. IGCSE) even if no games/case studies exist yet
+        let specTopics = {};
+        if (level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
+        else if (level === 'GCSE') specTopics = GCSE_SPEC_TOPICS;
+        else specTopics = ALEVEL_SPEC_TOPICS;
+
+        Object.keys(specTopics).forEach(t => allTopics.add(t));
+
         return Array.from(allTopics).sort();
     }, [user.level]);
 
@@ -52,7 +62,7 @@ const TopicSelectionModal: React.FC<{
                     id="topic-select"
                     value={selectedTopic} 
                     onChange={e => setSelectedTopic(e.target.value)} 
-                    className="w-full mt-2 p-3 border border-stone-300 rounded-lg bg-white focus:ring-2 focus:ring-teal-500"
+                    className="w-full mt-2 p-3 border border-stone-300 rounded-lg bg-white text-stone-800 focus:ring-2 focus:ring-teal-500"
                 >
                     {topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
                 </select>

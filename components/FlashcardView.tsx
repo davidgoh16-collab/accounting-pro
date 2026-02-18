@@ -6,7 +6,7 @@ import { TOPIC_COLORS } from '../case-study-database';
 import { FlashcardItem, AuthUser } from '../types';
 import { db, logUserActivity } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
 import { generateFlashcards } from '../services/geminiService';
 
 type KnownStatus = 'known' | 'unknown';
@@ -51,12 +51,27 @@ const FlashcardView: React.FC<FlashcardViewProps> = ({ onQuiz, user, onBack }) =
         return [...cases, ...terms].sort((a, b) => a.name.localeCompare(b.name));
     }, [user.level]);
 
-    const topics = useMemo(() => ['All Topics', ...new Set(allItems.map(i => i.topic))].sort(), [allItems]);
+    const topics = useMemo(() => {
+        let allAvailableTopics = new Set(allItems.map(i => i.topic));
+
+        // Ensure Spec Topics are included even if no items exist for them yet (for AI generation)
+        if (user.level === 'IGCSE') {
+            Object.keys(IGCSE_SPEC_TOPICS).forEach(t => allAvailableTopics.add(t));
+        } else if (user.level === 'GCSE') {
+            Object.keys(GCSE_SPEC_TOPICS).forEach(t => allAvailableTopics.add(t));
+        } else {
+            Object.keys(ALEVEL_SPEC_TOPICS).forEach(t => allAvailableTopics.add(t));
+        }
+
+        return ['All Topics', ...Array.from(allAvailableTopics)].sort();
+    }, [allItems, user.level]);
     
     // Derived sub-topics based on user level and selected main topic
     const subTopics = useMemo(() => {
         if (topicFilter === 'All Topics') return ['All Sub-topics'];
-        const specTopics = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        let specTopics = GCSE_SPEC_TOPICS;
+        if (user.level === 'A-Level') specTopics = ALEVEL_SPEC_TOPICS;
+        if (user.level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
         return ['All Sub-topics', ...(specTopics[topicFilter] || [])];
     }, [topicFilter, user.level]);
 

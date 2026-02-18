@@ -13,7 +13,18 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({ onSelect }) => {
                 <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100 mb-2">Welcome to Geo Pro</h1>
                 <p className="text-stone-600 dark:text-stone-400 mb-8 text-lg">Select your study level to personalize your experience.</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <button
+                        onClick={() => onSelect('IGCSE')}
+                        className="group relative overflow-hidden bg-gradient-to-br from-amber-400 to-orange-600 p-1 rounded-2xl shadow-lg hover:shadow-amber-500/30 transition-all hover:-translate-y-1"
+                    >
+                        <div className="bg-white dark:bg-stone-900 h-full w-full rounded-xl p-6 flex flex-col items-center justify-center group-hover:bg-opacity-90 transition">
+                            <span className="text-5xl mb-4">🌏</span>
+                            <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 group-hover:text-amber-600 transition">IGCSE</h2>
+                            <p className="text-stone-500 dark:text-stone-400 mt-2 text-sm">Edexcel International GCSE</p>
+                        </div>
+                    </button>
+
                     <button 
                         onClick={() => onSelect('GCSE')}
                         className="group relative overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-600 p-1 rounded-2xl shadow-lg hover:shadow-emerald-500/30 transition-all hover:-translate-y-1"
