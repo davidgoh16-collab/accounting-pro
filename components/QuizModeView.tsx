@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FlashcardItem, CaseStudyQuizQuestion, AuthUser } from '../types';
 import { generateBatchQuizQuestions, generateFlashcards } from '../services/geminiService';
 import { logUserActivity, auth } from '../firebase';
-import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -195,7 +195,10 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }
 
             if (targetTopic === 'All Topics') {
                 // Pick a random topic
-                const specTopics = level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+                let specTopics = GCSE_SPEC_TOPICS;
+                if (level === 'A-Level') specTopics = ALEVEL_SPEC_TOPICS;
+                if (level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
+
                 const keys = Object.keys(specTopics);
                 targetTopic = keys[Math.floor(Math.random() * keys.length)];
                 targetSubTopic = 'All Sub-topics';
@@ -230,13 +233,17 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }
     // Setup Data
     const topics = useMemo(() => {
         if (!user) return ['All Topics'];
-        const specTopics = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        let specTopics = GCSE_SPEC_TOPICS;
+        if (user.level === 'A-Level') specTopics = ALEVEL_SPEC_TOPICS;
+        if (user.level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
         return ['All Topics', ...Object.keys(specTopics).sort()];
     }, [user]);
 
     const subTopics = useMemo(() => {
         if (setupTopic === 'All Topics' || !user) return ['All Sub-topics'];
-        const specTopics = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+        let specTopics = GCSE_SPEC_TOPICS;
+        if (user.level === 'A-Level') specTopics = ALEVEL_SPEC_TOPICS;
+        if (user.level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
         return ['All Sub-topics', ...(specTopics[setupTopic] || [])];
     }, [setupTopic, user]);
 

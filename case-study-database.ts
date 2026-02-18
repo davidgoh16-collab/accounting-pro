@@ -107,7 +107,23 @@ export const CASE_STUDY_LOCATIONS: CaseStudyLocation[] = [
   { name: 'SNWTP (China)', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 35.0, lng: 114.0, details: 'South-North Water Transfer Project. Large scale engineering. Moving water from surplus to deficit areas.', citation: 'Large Scale Water Transfer', levels: ['GCSE'] },
   { name: 'Micro-hydro, Nepal', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: 28.39, lng: 84.12, details: 'Sustainable energy in LIC. Run-of-river. Community owned. Appropriate technology.', citation: 'Sustainable Energy', levels: ['GCSE'] },
   { name: 'Lesotho Highland Water Project', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -29.6, lng: 28.2, details: 'Transferring water from Lesotho to South Africa (Vaal dam). Economic benefits vs displacement.', citation: 'Water Transfer', levels: ['GCSE'] },
-  { name: 'Makueni, Kenya', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -1.8, lng: 37.6, details: 'Sand dams. Local sustainable food strategy. Harvesting rainwater in dry season.', citation: 'Food Security Strategy', levels: ['GCSE'] }
+  { name: 'Makueni, Kenya', topic: 'The Challenge of Resource Management', geography: 'Human Geography', lat: -1.8, lng: 37.6, details: 'Sand dams. Local sustainable food strategy. Harvesting rainwater in dry season.', citation: 'Food Security Strategy', levels: ['GCSE'] },
+
+  // --- IGCSE: RIVER ENVIRONMENTS ---
+  { name: 'The River Tees (IGCSE)', topic: 'River environments', geography: 'Physical Geography', lat: 54.6, lng: -1.2, details: 'Upper Course: High Force waterfall (whinstone intrusion). Middle Course: Meanders near Barnard Castle. Lower Course: Industry near Middlesbrough, Tees Barrage.', citation: 'River Case Study', levels: ['IGCSE'] },
+
+  // --- IGCSE: COASTAL ENVIRONMENTS ---
+  { name: 'Miami Beach', topic: 'Coastal environments', geography: 'Physical Geography', lat: 25.79, lng: -80.13, details: 'Coastal management. Beach nourishment (18m cubic meters), seawalls, dunes. Conflicts: Economic vs Environmental costs. Tourism revival.', citation: 'Coastal Management', levels: ['IGCSE'] },
+  { name: 'Palisadoes Peninsula', topic: 'Coastal environments', geography: 'Physical Geography', lat: 17.93, lng: -76.78, details: 'Jamaica. Protects Kingston Harbour. Rock revetments, road elevation, boardwalk. Response to Hurricane Ivan/Sandy. Chinese investment (CHEC).', citation: 'Coastal Management', levels: ['IGCSE'] },
+
+  // --- IGCSE: HAZARDOUS ENVIRONMENTS ---
+  { name: 'Nepal Earthquake (2015)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 28.16, lng: 84.72, details: '7.8 Mag. Collision margin (Indo-Australian/Eurasian). 8,600 deaths. Tourism impacts (Everest). Long-term housing issues.', citation: 'Earthquake in LIC', levels: ['IGCSE'] },
+  { name: 'Haiti Earthquake (2021)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 18.35, lng: -73.5, details: '7.2 Mag. 2,250 deaths. Compound hazard (Hurricane Grace). Political instability hindered response. Shelter crisis.', citation: 'Earthquake Case Study', levels: ['IGCSE'] },
+  { name: 'Mount Merapi (2010)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: -7.54, lng: 110.44, details: 'Indonesia. Composite volcano. Pyroclastic flows. 353 deaths. 350,000 evacuated. Lahars. Long-term soil fertility benefits.', citation: 'Volcano Case Study', levels: ['IGCSE'] },
+  { name: 'Mount Sinabung (2021)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 3.17, lng: 98.39, details: 'Indonesia. Reawakened 2010. 2021 eruption caused ash fall (2.8km high), respiratory issues. Permanent relocation of villages.', citation: 'Active Volcano', levels: ['IGCSE'] },
+  { name: 'Cyclone Komen (2015)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 21.0, lng: 91.0, details: 'Myanmar/Bangladesh. Monsoon season. 800mm rain. Flooding killed 100+, displaced 1.2m. Poor infrastructure worsened impact.', citation: 'Tropical Cyclone', levels: ['IGCSE'] },
+  { name: 'Amatrice Earthquake (2016)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 42.63, lng: 13.29, details: 'Italy. 6.2 Mag. Shallow focus (5.1km). 299 deaths. Medieval buildings collapsed ("Pancake" failure). "Italian Homes" rebuild initiative.', citation: 'Earthquake in HIC', levels: ['IGCSE'] },
+  { name: 'Taiwan Earthquake (2024)', topic: 'Hazardous environments', geography: 'Physical Geography', lat: 23.8, lng: 121.6, details: '7.4 Mag. Hualien. Landslides trapped people in tunnels. Advanced early warning system reduced casualties (17 deaths). Resilience.', citation: 'Earthquake Management', levels: ['IGCSE'] }
 ];
 
 export const TOPIC_COLORS: { [key: string]: string } = {
@@ -129,7 +145,18 @@ export const TOPIC_COLORS: { [key: string]: string } = {
     'The Changing Economic World': '#a855f7',
     'The Challenge of Resource Management': '#3b82f6',
     'Resource Security': '#3b82f6',
-    'Geographical Applications': '#6366f1' // Added color for Paper 3
+    'Geographical Applications': '#6366f1', // Added color for Paper 3
+
+    // IGCSE Specific
+    'River environments': '#0ea5e9',
+    'Coastal environments': '#14b8a6',
+    'Hazardous environments': '#ef4444',
+    'Economic activity and energy': '#f59e0b',
+    'Rural environments': '#84cc16',
+    'Urban environments': '#f97316',
+    'Fragile environments and climate change': '#10b981',
+    'Globalisation and migration': '#8b5cf6',
+    'Development and human welfare': '#ec4899'
 };
 
 export const GEOGRAPHY_TYPES = ['All', 'Physical Geography', 'Human Geography'];

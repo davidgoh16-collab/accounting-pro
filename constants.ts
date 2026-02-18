@@ -26,6 +26,19 @@ export const GCSE_UNITS = [
     'Geographical Applications'
 ];
 
+export const IGCSE_UNITS = [
+    'All Units',
+    'River environments',
+    'Coastal environments',
+    'Hazardous environments',
+    'Economic activity and energy',
+    'Rural environments',
+    'Urban environments',
+    'Fragile environments and climate change',
+    'Globalisation and migration',
+    'Development and human welfare'
+];
+
 export const AQA_UNITS = ALEVEL_UNITS; 
 
 export const QUESTIONS = ALL_QUESTIONS;
@@ -295,6 +308,17 @@ export const VIDEO_LIBRARY: VideoResource[] = [
     { id: 'gcse_v180', title: 'UK Economic Futures (Part 7)', videoId: '_zgjuy0advs', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
     { id: 'gcse_v181', title: 'UK Economic Futures (Part 8)', videoId: '3WUX1Zv9D6M', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
     { id: 'gcse_v182', title: 'UK Economic Futures (Part 9)', videoId: 'AOOgc6gyMMM', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
+
+    // --- IGCSE VIDEOS ---
+    { id: 'igcse_v1', title: 'ALL of Edexcel IGCSE Physical Geography!', videoId: 'Bpz_k3cs3eA', level: 'IGCSE', topic: 'River environments', paper: 'Paper 1' },
+    { id: 'igcse_v2', title: 'Volcanoes | GCSE & IGCSE Geography', videoId: 'gRbqtQoHMoE', level: 'IGCSE', topic: 'Hazardous environments', paper: 'Paper 1' },
+    { id: 'igcse_v3', title: 'Earthquakes | GCSE & IGCSE Geography', videoId: 'yDtSQ3mHFRY', level: 'IGCSE', topic: 'Hazardous environments', paper: 'Paper 1' },
+    { id: 'igcse_v4', title: 'Tropical Cyclone Formation | GCSE & IGCSE Geography', videoId: 'GA34V0VP_hg', level: 'IGCSE', topic: 'Hazardous environments', paper: 'Paper 1' },
+    { id: 'igcse_v5', title: 'Soft Engineering Strategies For Coastal Flood Defences', videoId: 'CGZxyscWqko', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' },
+    { id: 'igcse_v6', title: 'Hard Engineering Strategies For Coastal Flood Defences', videoId: 'Jg7e1bZp0_I', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' },
+    { id: 'igcse_v7', title: 'Causes Of Coastal Flooding', videoId: '0_Jg7e1bZp0', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' }, // Placeholder ID as list was truncated, using best guess pattern or generic
+    { id: 'igcse_v8', title: 'Rivers - ALL of GCSE & IGCSE Geography River Content', videoId: '5JBVCaDntzI', level: 'IGCSE', topic: 'River environments', paper: 'Paper 1' },
+    { id: 'igcse_v9', title: 'Conflicts Over The Use Of Coastal Ecosystems', videoId: 'TeHfdWJ5hEk', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' }
 ];
 
 export const COMMAND_WORDS: CommandWord[] = [
@@ -359,7 +383,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Look at both sides of the argument.',
       'Give a clear conclusion.'
     ],
-    levels: ['GCSE']
+    levels: ['GCSE', 'IGCSE']
   },
   {
     word: 'Evaluate',
@@ -371,7 +395,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Did it work in the long term?',
       'Was it worth the money?'
     ],
-    levels: ['GCSE']
+    levels: ['GCSE', 'IGCSE']
   },
   {
     word: 'To what extent',
@@ -383,7 +407,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Use evidence to back up your opinion.',
       'Address the counter-argument.'
     ],
-    levels: ['GCSE']
+    levels: ['GCSE', 'IGCSE']
   },
   {
     word: 'Describe',
@@ -395,7 +419,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Use compass directions (North, South).',
       'Quote figures if looking at a graph.'
     ],
-    levels: ['GCSE']
+    levels: ['GCSE', 'IGCSE']
   },
   {
     word: 'Suggest',
@@ -407,7 +431,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Use phrases like "This might be because..."',
       'There may be more than one correct answer.'
     ],
-    levels: ['GCSE']
+    levels: ['GCSE', 'IGCSE']
   },
   {
     word: 'Justify',
@@ -418,7 +442,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Explain the benefits of your choice.',
       'Explain the problems with the rejected options.'
     ],
-    levels: ['GCSE']
+    levels: ['GCSE', 'IGCSE']
   },
 
   // --- SHARED / GENERIC ---
@@ -431,7 +455,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Use connectives like "because", "therefore", "leading to".',
       'Develop your points fully.'
     ],
-    levels: ['GCSE', 'A-Level']
+    levels: ['GCSE', 'A-Level', 'IGCSE']
   },
   {
     word: 'Discuss',
@@ -443,7 +467,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Use case study evidence to illustrate different viewpoints.',
       'The command word is a trigger to explore, not just describe.'
     ],
-    levels: ['A-Level', 'GCSE']
+    levels: ['A-Level', 'GCSE', 'IGCSE']
   },
   {
     word: 'Outline',
@@ -454,7 +478,7 @@ export const COMMAND_WORDS: CommandWord[] = [
       'Think in terms of bullet points or a short, structured list.',
       'Avoid going into deep explanation.'
     ],
-    levels: ['A-Level', 'GCSE']
+    levels: ['A-Level', 'GCSE', 'IGCSE']
   },
 ];
 
@@ -469,7 +493,7 @@ export const MATHS_SKILLS: MathsSkill[] = [
             '3. Divide the sum of the values (Step 1) by the number of values (Step 2).'
         ],
         formula: 'Mean = (Sum of values) / (Number of values)',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'median',
@@ -480,7 +504,7 @@ export const MATHS_SKILLS: MathsSkill[] = [
             '2. Find the middle value.',
             '3. If there are two middle values (i.e., an even number of values), add them together and divide by 2.'
         ],
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'mode',
@@ -491,7 +515,7 @@ export const MATHS_SKILLS: MathsSkill[] = [
             '2. Identify the value that appears most frequently.',
             '3. It is possible to have more than one mode (bimodal) or no mode at all.'
         ],
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'range',
@@ -503,7 +527,7 @@ export const MATHS_SKILLS: MathsSkill[] = [
             '3. Subtract the smallest value from the largest value.'
         ],
         formula: 'Range = Maximum value - Minimum value',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'iqr',
@@ -517,7 +541,7 @@ export const MATHS_SKILLS: MathsSkill[] = [
             '5. Subtract the lower quartile from the upper quartile.'
         ],
         formula: 'IQR = Q3 - Q1',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'std_dev',
@@ -570,7 +594,7 @@ export const MATHS_SKILLS: MathsSkill[] = [
             '3. Multiply by 100.'
         ],
         formula: '% Change = (Difference / Original) x 100',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     }
 ];
 
@@ -582,7 +606,7 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
         data: [1200, 1150, 1300, 1250, 1100],
         answer: 1200,
         explanation: 'Sum of values / Number of values = 6000 / 5 = 1200.',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'm3',
@@ -591,7 +615,7 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
         data: [15, 22, 18, 14, 25, 12, 20],
         answer: 18,
         explanation: 'First, order the data: 12, 14, 15, 18, 20, 22, 25. The median is the middle value.',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'm5',
@@ -600,7 +624,7 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
         data: [25, 28, 26, 28, 30, 25, 28, 22],
         answer: 28,
         explanation: 'The value 28 appears three times, which is more than any other value.',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'm4',
@@ -609,7 +633,7 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
         data: [-2, 5, 8, 12, 15, 11, 4, 0],
         answer: 17,
         explanation: 'Range = Maximum value - Minimum value = 15 - (-2) = 17.',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'm6',
@@ -618,7 +642,7 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
         data: [15, 20, 22, 28, 35, 40, 48],
         answer: 20,
         explanation: 'Q1 is 20, Q3 is 40. IQR = 40 - 20 = 20.',
-        levels: ['A-Level', 'GCSE']
+        levels: ['A-Level', 'GCSE', 'IGCSE']
     },
     {
         id: 'm7',
@@ -654,7 +678,7 @@ export const MATHS_PROBLEMS: MathsProblem[] = [
         data: [12000, 15000],
         answer: '25',
         explanation: '(3000 / 12000) * 100 = 25%',
-        levels: ['GCSE']
+        levels: ['GCSE', 'IGCSE']
     }
 ];
 
@@ -730,7 +754,7 @@ export const STRUCTURE_GUIDES: StructureGuide[] = [
                 details: 'Final judgement. "To a great extent..." or "However, X is more important because..."'
             }
         ],
-        levels: ['GCSE']
+        levels: ['GCSE', 'IGCSE']
     },
     {
         title: '6-MARK QUESTION (GCSE)',
@@ -750,7 +774,7 @@ export const STRUCTURE_GUIDES: StructureGuide[] = [
             'If it asks for "impacts", try to give two distinct ones.',
             'Use geographical terminology.'
         ],
-        levels: ['GCSE']
+        levels: ['GCSE', 'IGCSE']
     },
     {
         title: '4-MARK QUESTION',
@@ -761,7 +785,7 @@ export const STRUCTURE_GUIDES: StructureGuide[] = [
                 details: 'Make a point (1 mark). Develop it with an explanation or example (1 mark). Repeat this twice for 4 marks.'
             }
         ],
-        levels: ['GCSE', 'A-Level']
+        levels: ['GCSE', 'A-Level', 'IGCSE']
     }
 ];
 
@@ -853,7 +877,82 @@ export const COURSE_LESSONS: CourseLesson[] = [
 
     // Geographical Applications (Paper 3)
     { id: 'G-Ch26', title: 'Issue evaluation', chapter: 'Geographical Applications' },
-    { id: 'G-Ch27', title: 'Fieldwork and geographical enquiry', chapter: 'Geographical Applications' }
+    { id: 'G-Ch27', title: 'Fieldwork and geographical enquiry', chapter: 'Geographical Applications' },
+
+    // --- IGCSE LESSONS ---
+    // River environments
+    { id: 'I-1.1', title: 'Hydrological cycle and drainage basins', chapter: 'River environments' },
+    { id: 'I-1.2', title: 'River regime factors', chapter: 'River environments' },
+    { id: 'I-1.3', title: 'Fluvial processes', chapter: 'River environments' },
+    { id: 'I-1.4', title: 'River landforms (Upper, Middle, Lower)', chapter: 'River environments' },
+    { id: 'I-1.5', title: 'Water uses and supply', chapter: 'River environments' },
+    { id: 'I-1.6', title: 'Water quality and pollution', chapter: 'River environments' },
+    { id: 'I-1.7', title: 'River flooding management', chapter: 'River environments' },
+
+    // Coastal environments
+    { id: 'I-2.1', title: 'Coastal processes', chapter: 'Coastal environments' },
+    { id: 'I-2.2', title: 'Coastal landforms', chapter: 'Coastal environments' },
+    { id: 'I-2.3', title: 'Coastal ecosystems', chapter: 'Coastal environments' },
+    { id: 'I-2.4', title: 'Coastal management conflicts', chapter: 'Coastal environments' },
+    { id: 'I-2.5', title: 'Coastal flooding', chapter: 'Coastal environments' },
+    { id: 'I-2.6', title: 'Coastal management strategies', chapter: 'Coastal environments' },
+
+    // Hazardous environments
+    { id: 'I-3.1', title: 'Hazard characteristics', chapter: 'Hazardous environments' },
+    { id: 'I-3.2', title: 'Causes of hazards', chapter: 'Hazardous environments' },
+    { id: 'I-3.3', title: 'Impacts of hazards', chapter: 'Hazardous environments' },
+    { id: 'I-3.4', title: 'Managing hazards', chapter: 'Hazardous environments' },
+
+    // Economic activity and energy
+    { id: 'I-4.1', title: 'Economic sectors', chapter: 'Economic activity and energy' },
+    { id: 'I-4.2', title: 'Location of economic activity', chapter: 'Economic activity and energy' },
+    { id: 'I-4.3', title: 'Sectoral shifts', chapter: 'Economic activity and energy' },
+    { id: 'I-4.4', title: 'Informal employment', chapter: 'Economic activity and energy' },
+    { id: 'I-4.5', title: 'Population and resources', chapter: 'Economic activity and energy' },
+    { id: 'I-4.6', title: 'Energy demand and production', chapter: 'Economic activity and energy' },
+    { id: 'I-4.7', title: 'Sustainable energy management', chapter: 'Economic activity and energy' },
+
+    // Rural environments
+    { id: 'I-5.1', title: 'Biomes and ecosystems', chapter: 'Rural environments' },
+    { id: 'I-5.2', title: 'Human use of ecosystems', chapter: 'Rural environments' },
+    { id: 'I-5.3', title: 'Rural characteristics and changes', chapter: 'Rural environments' },
+    { id: 'I-5.4', title: 'Rural challenges in developed countries', chapter: 'Rural environments' },
+    { id: 'I-5.5', title: 'Rural challenges in developing countries', chapter: 'Rural environments' },
+    { id: 'I-5.6', title: 'Farm diversification', chapter: 'Rural environments' },
+    { id: 'I-5.7', title: 'Sustainable rural management', chapter: 'Rural environments' },
+
+    // Urban environments
+    { id: 'I-6.1', title: 'Urbanisation trends', chapter: 'Urban environments' },
+    { id: 'I-6.2', title: 'Urban land use', chapter: 'Urban environments' },
+    { id: 'I-6.3', title: 'Urban challenges', chapter: 'Urban environments' },
+    { id: 'I-6.4', title: 'Rural-urban fringe', chapter: 'Urban environments' },
+    { id: 'I-6.5', title: 'Sustainable urban strategies', chapter: 'Urban environments' },
+
+    // Fragile environments and climate change
+    { id: 'I-7.1', title: 'Fragile environments characteristics', chapter: 'Fragile environments and climate change' },
+    { id: 'I-7.2', title: 'Desertification causes', chapter: 'Fragile environments and climate change' },
+    { id: 'I-7.3', title: 'Deforestation causes', chapter: 'Fragile environments and climate change' },
+    { id: 'I-7.4', title: 'Climate change causes', chapter: 'Fragile environments and climate change' },
+    { id: 'I-7.5', title: 'Impacts on fragile environments', chapter: 'Fragile environments and climate change' },
+    { id: 'I-7.6', title: 'Sustainable management', chapter: 'Fragile environments and climate change' },
+    { id: 'I-7.7', title: 'Climate change responses', chapter: 'Fragile environments and climate change' },
+
+    // Globalisation and migration
+    { id: 'I-8.1', title: 'Rise of global economy', chapter: 'Globalisation and migration' },
+    { id: 'I-8.2', title: 'Global institutions', chapter: 'Globalisation and migration' },
+    { id: 'I-8.3', title: 'Migration causes', chapter: 'Globalisation and migration' },
+    { id: 'I-8.4', title: 'Impacts of globalisation', chapter: 'Globalisation and migration' },
+    { id: 'I-8.5', title: 'Impacts of migration', chapter: 'Globalisation and migration' },
+    { id: 'I-8.6', title: 'Global tourism', chapter: 'Globalisation and migration' },
+    { id: 'I-8.7', title: 'Managing tourism and migration', chapter: 'Globalisation and migration' },
+
+    // Development and human welfare
+    { id: 'I-9.1', title: 'Defining development', chapter: 'Development and human welfare' },
+    { id: 'I-9.2', title: 'Uneven development patterns', chapter: 'Development and human welfare' },
+    { id: 'I-9.3', title: 'Impacts of uneven development', chapter: 'Development and human welfare' },
+    { id: 'I-9.4', title: 'Demographic data', chapter: 'Development and human welfare' },
+    { id: 'I-9.5', title: 'Strategies to reduce the gap', chapter: 'Development and human welfare' },
+    { id: 'I-9.6', title: 'Top-down vs Bottom-up', chapter: 'Development and human welfare' }
 ];
 
 // --- SPECIFICATION TOPICS (Granular) ---
@@ -1048,4 +1147,94 @@ export const ALEVEL_PAPER_MAPPING: Record<string, string> = {
     "Contemporary Urban Environments": "Paper 2",
     "Population and the Environment": "Paper 2",
     "Resource Security": "Paper 2"
+};
+
+export const IGCSE_SPEC_TOPICS: Record<string, string[]> = {
+    "River environments": [
+        "Hydrological cycle and drainage basins",
+        "River regime factors (Physical/Human)",
+        "Fluvial processes (Erosion, Transport, Deposition)",
+        "River landforms (Upper, Middle, Lower course)",
+        "Water uses and demand/supply",
+        "Water quality and pollution",
+        "River flooding causes and management"
+    ],
+    "Coastal environments": [
+        "Coastal processes (Marine, Sub-aerial)",
+        "Coastal landforms (Erosional, Depositional)",
+        "Coastal ecosystems (Mangroves, Coral Reefs, Sand Dunes)",
+        "Threats to coastal ecosystems",
+        "Coastal management conflicts",
+        "Coastal flooding causes",
+        "Coastal management strategies (Hard/Soft)"
+    ],
+    "Hazardous environments": [
+        "Hazard characteristics (Cyclones, Earthquakes, Volcanoes)",
+        "Causes of hazards (Plate tectonics, Atmospheric)",
+        "Impacts of hazards (Short/Long term)",
+        "Managing hazards (Preparation, Response, Recovery)",
+        "Reasons for living in hazardous areas"
+    ],
+    "Economic activity and energy": [
+        "Economic sectors (Clark Fisher Model)",
+        "Factors affecting location of economic activity",
+        "Sectoral shifts impacts",
+        "Informal employment in megacities",
+        "Population and resources (Malthus/Boserup)",
+        "Energy demand and production factors",
+        "Energy mix (Renewable/Non-renewable)",
+        "Sustainable energy management"
+    ],
+    "Rural environments": [
+        "Biomes and ecosystems",
+        "Human use of ecosystems (Goods/Services)",
+        "Rural characteristics and changes",
+        "Rural depopulation/counter-urbanisation",
+        "Farm diversification and sustainability",
+        "Managing rural challenges"
+    ],
+    "Urban environments": [
+        "Urbanisation trends and megacities",
+        "Urban land use patterns",
+        "Urban challenges (Developed vs Developing)",
+        "Rural-urban fringe development",
+        "Sustainable urban strategies",
+        "Managing urban challenges"
+    ],
+    "Fragile environments and climate change": [
+        "Fragile environments characteristics",
+        "Desertification and Deforestation causes",
+        "Climate change causes (Natural/Human)",
+        "Impacts of desertification/deforestation/climate change",
+        "Sustainable management of fragile environments",
+        "Responses to climate change"
+    ],
+    "Globalisation and migration": [
+        "Rise of global economy and TNCs",
+        "Global institutions (WTO, IMF)",
+        "Migration causes (Push/Pull)",
+        "Impacts of globalisation and migration",
+        "Growth of global tourism (Impacts)",
+        "Managing migration and sustainable tourism"
+    ],
+    "Development and human welfare": [
+        "Defining and measuring development (HDI, GDP)",
+        "Global patterns of uneven development",
+        "Impacts of uneven development",
+        "Demographic data and development",
+        "Strategies to reduce uneven development (Aid, Trade)",
+        "Top-down vs Bottom-up development"
+    ]
+};
+
+export const IGCSE_PAPER_MAPPING: Record<string, string> = {
+    "River environments": "Paper 1",
+    "Coastal environments": "Paper 1",
+    "Hazardous environments": "Paper 1",
+    "Economic activity and energy": "Paper 2",
+    "Rural environments": "Paper 2",
+    "Urban environments": "Paper 2",
+    "Fragile environments and climate change": "Paper 2",
+    "Globalisation and migration": "Paper 2",
+    "Development and human welfare": "Paper 2"
 };

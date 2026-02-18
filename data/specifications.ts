@@ -1203,3 +1203,194 @@ Section B: Fieldwork
 
 Process: Enquiry question -> Method -> Presentation -> Analysis -> Conclusion -> Evaluation.
 `;
+
+export const EDEXCEL_IGCSE_SPEC = `
+Pearson Edexcel International GCSE Geography (4GE1) – Specification Notes
+
+Exam Board: Pearson Edexcel
+Course Structure: Two Papers
+
+Paper 1: Physical Geography
+Written exam: 1 hour 10 minutes | 70 marks | 40% of IGCSE
+
+Section A: Candidates choose two out of three topics from:
+1. River environments
+2. Coastal environments
+3. Hazardous environments
+
+Section B: Fieldwork
+Candidates choose one out of three fieldwork-related questions on: River environments, Coastal environments, or Hazardous environments.
+
+Detailed Content - Section A:
+
+Topic 1: River environments
+1.1 The world's water supply is contained in a closed system - the hydrological cycle
+a) The hydrological cycle: characteristics, stores and transfers.
+b) Features of a drainage basin: source, watershed, channel network, mouth.
+c) Factors affecting river regimes: precipitation, including storm hydrographs, temperature, vegetation, land use, water abstraction, dams. (1)
+
+1.2 Physical processes give rise to characteristic river landforms
+a) Fluvial processes involved in river valley and river channel formation: erosion (vertical and lateral), weathering and mass movement, transportation and deposition, and factors affecting these processes (climate, slope, geology, altitude and aspect).
+b) How channel shape (width, depth), valley profile (long and cross profiles), gradient, velocity, discharge, and sediment size and shape change along the course of a named river. (2)
+c) How river landscapes change over the course of a river, with distinctive upland and lowland landforms, including the formation of valleys, interlocking spurs, waterfalls, meanders, oxbow lakes, flood plains and levees. (3)
+Case studies of river management in a developed country and a developing country or an emerging country.
+
+1.3 River environments are of great importance to people and need to be sustainably managed
+a) Uses of water, including agriculture, industry, human hygiene and leisure, and the rising demand for and supply of water: areas of water shortage and water surplus.
+b) Reasons for variations in water quality, including pollution (sewage, industrial waste, agriculture) and the storage and supply of clean water (dams and reservoirs, pipelines, treatment works). (4)
+c) Causes of river flooding, including rainfall intensity, seasonal variations in discharge due to monsoons or snowmelt, relief, urbanisation, and the prediction and prevention of flooding. (5)
+
+Topic 2: Coastal environments
+2.1 Physical processes and human intervention give rise to characteristic coastal landforms
+a) Physical processes at work on the coast: marine processes (wave action, erosion, deposition and transportation, including longshore drift), weathering (mechanical, chemical and biological) and mass movement (sliding and slumping).
+b) Influence of geology, vegetation, people and sea-level changes on coastal environments. (1)
+c) Role of erosional and depositional processes in the development of landforms: headlands and bays, cliffs, wave-cut platforms, caves, arches, stacks and stumps, beaches, spits and bars. (2)
+
+2.2 Distinctive ecosystems develop along particular stretches of coastline
+a) Distributions and features of the world's coastal ecosystems (coral reefs, mangroves, sand dunes and salt marshes). (3)
+b) Abiotic and biotic characteristics of one named coastal ecosystem. (4)
+c) How small and large-scale coastal ecosystems are threatened by people and their activities (industrialisation, agricultural practices, tourism and deforestation).
+Case studies of coastal management in a developed country and a developing country or an emerging country.
+
+2.3 Coastal environments are of great importance to people and need to be sustainably managed
+a) Conflicts between different users of the coast, with different views on coastal management (conservation or development).
+b) Causes of coastal flooding (storm surges, tsunamis, climate change) and the prediction and prevention of flooding (forecasting, building design, planning and education).
+c) There are different coastal management strategies, including soft engineering (beach replenishment, cliff regrading, ecosystem rehabilitation and revegetation, managed retreat), hard engineering (groynes, revetments, sea walls, gabions, riprap) and shoreline management plans. (5)
+
+Topic 3: Hazardous environments
+3.1 Some places are more hazardous than others
+a) Characteristics, distribution and measurement of different types of natural hazards including tropical cyclones, earthquakes and volcanoes. (1)
+b) Causes of tropical cyclone hazards, including ocean temperature, atmospheric pressure, wind shear and Coriolis force.
+c) Causes of volcanic and earthquake hazards, including the role of plate boundaries and hotspots. (2)
+
+3.2 Hazards have an impact on people and the environment
+a) Reasons why people continue to live in areas at risk from hazard events.
+b) Some countries are more vulnerable (physically, socially and economically) than others to the impacts of natural hazards.
+c) The shorter-term and longer-term impacts of one earthquake, one volcano and one tropical cyclone hazard (3).
+Case studies of hazard management for an earthquake in a developed country and a developing country or an emerging country.
+
+3.3 Earthquakes present a hazard to many people and need to be managed carefully
+a) Preparation for earthquakes (warning and evacuation, building design, remote sensing and GIS). (4)
+b) Short-term responses and relief (emergency aid, shelter and supplies).
+c) Longer-term planning (risk assessment, hazard mapping and rebuilding programmes). (5)
+
+Paper 2: Human Geography
+Written exam: 1 hour 45 minutes | 105 marks | 60% of IGCSE
+
+Section A: Candidates choose two out of three topics from:
+4. Economic activity and energy
+5. Rural environments
+6. Urban environments
+
+Section B: Fieldwork
+Candidates choose one out of three fieldwork-related questions on: Economic activity and energy, Rural environments, or Urban environments.
+
+Section C: Global Issues
+Candidates choose one out of three questions from:
+7. Fragile environments and climate change
+8. Globalisation and migration
+9. Development and human welfare
+
+Detailed Content - Section A:
+
+Topic 4: Economic activity and energy
+4.1 The relative importance of different economic sectors and the location of economic activity varies spatially, and changes over time
+a) Classification of employment by economic sector (primary, secondary, tertiary and quaternary) and the reasons for the differences in the employment structures in countries at different levels of development (Clark Fisher Model). (1)
+b) Factors affecting the location of economic activity in each economic sector and how these factors can change over time.
+c) Reasons for the changes in the numbers of people employed in each economic sector, including the availability of raw materials, globalisation, mechanisation, demographic changes and government policies.
+
+4.2 The growth and decline of different economic sectors has resulted in a range of impacts and possible resource issues
+a) Positive and negative impacts of economic sector shifts in a named developed and a named developing or emerging country. (2)
+b) Informal employment: causes (economic development, rural-urban migration) and characteristics (advantages and disadvantages) in a named megacity. (3)
+c) Different theories (Malthus and Boserup) are used to explain the relationship between population and resources. (4)
+Case studies of energy resource management in a developed country and a developing country or an emerging country.
+
+4.3 Countries increasingly experience an energy gap and therefore seek energy security by developing a balanced energy mix and sustainable energy use
+a) Energy demand and production varies globally and is affected by a range of factors: population growth, increased wealth and technological advances.
+b) Non-renewable, e.g. coal, oil, natural gas, uranium and shale gas/oil, and renewable sources of energy, e.g. solar, wind, hydroelectric power (HEP), geothermal, biomass, have advantages and disadvantages for people and the environment.
+c) Energy can be managed in a sustainable way through education, efficiency and conservation (within industry, transport and the home). (5)
+
+Topic 5: Rural environments
+5.1 Rural environments are natural ecosystems that are exploited by human activities
+a) Distributions and characteristics of the world's biomes (tropical, temperate and boreal forests, tropical and temperate grasslands, deserts and tundra). (1)
+b) Examples of goods and services provided for people by natural ecosystems (timber, tourism, food, energy, water resources, health services, natural protection, and climate regulation).
+c) How humans use, modify and change ecosystems and rural environments to obtain food through farming systems (arable/pastoral, commercial/subsistence, intensive/extensive). (2)
+
+5.2 Rural environments have contrasting physical, social and economic characteristics and are experiencing significant changes
+a) Characteristics of a rural environment: landscape, climate, settlement, population, land use, employment, accessibility, management (development or conservation).
+b) Factors leading to rural changes in a named developed country: rural isolation, decline in farm employment, tourist pressures, suburbanisation, counter-urbanisation, and the negative multiplier effect.
+c) Factors leading to rural changes in a named developing country or emerging country: population growth, changing farm economy and landholdings, natural hazards, and rural-urban migration. (3)
+Case studies of rural environments in a developed country and in a developing country or an emerging country.
+
+5.3 Rural environments need to adapt to be socially, economically and environmentally sustainable
+a) The diversification of farming to generate new income streams: GM crops, specialist crops and food, organic farming, recreation and leisure. (4)
+b) The range of possible strategies aimed at making rural living more sustainable and improving the quality of life (soil and air quality, water supplies, crop yields, health, employment and housing) for the chosen rural environment. (5)
+c) Role of different groups of people (national and local government, IGOs, NGOs and local communities) in managing the social, economic and environmental challenges within the chosen rural environment.
+
+Topic 6: Urban environments
+6.1 A growing percentage of the world's population lives in urban areas
+a) Contrasting trends in urbanisation over the last 50 years in different parts of the world, including the processes of suburbanisation and counter-urbanisation. (1)
+b) Factors affecting the rate of urbanisation and the emergence of megacities.
+c) Problems associated with rapid urbanisation: congestion, transport, employment, crime and environmental issues. (2)
+
+6.2 Cities face a range of social and environmental challenges resulting from rapid growth and resource demands
+a) Factors affecting urban land use patterns: locational needs, accessibility, land values. (3)
+b) Urban challenges in a named developed country: food, energy, transport and waste disposal demands, concentrated resource consumption, segregation. (4)
+c) Urban challenges in a named developing country or emerging country: squatter settlements, informal economy, urban pollution, and low quality of life.
+Case studies of urban environments in a developed country and a developing country or an emerging country.
+
+6.3 Different strategies can be used to manage social, economic and environmental challenges in a sustainable manner
+a) Development of the rural-urban fringe: housing estates, retail, business and science parks, industrial estates, and the greenfield versus brownfield debate.
+b) The range of possible strategies aimed at making urban living more sustainable and improving the quality of life (waste disposal, transport, education, health, employment and housing) for the chosen urban environment. (5)
+c) Role of different groups of people (planners, politicians, property developers and industrialists) in managing the social, economic and environmental challenges in the chosen urban area.
+
+Detailed Content - Section C (Global Issues):
+
+Topic 7: Fragile environments and climate change
+7.1 Fragile environments are under threat from desertification, deforestation and global climate change
+a) Distributions and characteristics of the world's fragile environments. (1)
+b) Causes of desertification (drought, population pressure, fuel supply, overgrazing, migration) and deforestation (commercial timber extraction, agriculture, mining, transport; settlement and HEP (hydroelectric power). (2) and (3)
+c) Causes of natural climate change (Milankovitch cycles, solar variation and volcanism) and how human activities (industry, transport, energy, and farming) can cause the enhanced greenhouse effect. (4)
+
+7.2 There are various impacts of desertification, deforestation and climate change on fragile environments
+a) Social, economic and environmental impacts of desertification (reduced agricultural output, malnutrition, famine, migration).
+b) Social, economic and environmental impacts of deforestation (loss of biodiversity, contribution to climate change, economic development and increased soil erosion).
+c) Negative effects that climate change is having on fragile environments and people (rising sea levels, more hazards, ecosystem changes, reduced employment opportunities, changing settlement patterns, health and wellbeing challenges, including food supply). (5)
+
+7.3 The responses to desertification, deforestation and climate change vary depending on a country's level of development
+a) How technology can resolve water-resource shortages in fragile environments under threat from desertification.
+b) Different approaches to the sustainable use and management of a rainforest in a named region to limit the extent of deforestation.
+c) Different responses to global warming and climate change from individuals, organisations and governments in a named developed and a named emerging or developing country.
+
+Topic 8: Globalisation and migration
+8.1 Globalisation is creating a more connected world, with increased movements of goods (trade) and people (migration and tourism) worldwide
+a) Rise of the global economy (growth of production and commodity chains) and the factors encouraging it (trade, foreign investment, aid, labour, modern transport and information technologies). (1)
+b) Role of global institutions, including the World Trade Organization (WTO), the International Monetary Fund (IMF) and TNCs in creating a more globalised economy.
+c) Push and pull factors (social, economic and political) that have influenced rates of different types of migration over the last 50 years, including medical, sport, tourism and economic. (2)
+
+8.2 The impacts of globalisation vary on a global scale
+a) Impacts of globalisation on different groups of people, including the benefits and costs to countries hosting TNCs. (3)
+b) Impacts of migration (voluntary, forced, national, international, and rural-urban) on different groups of people. (4)
+c) Positive and negative impacts of the growth of global tourism, including mass tourism, on the environment, economy and people of destination areas. (5)
+
+8.3 The responses to increased migration and tourism vary depending on a country's level of development
+a) How geopolitical relationships between countries are important in managing trade, migration and tourism.
+b) Different approaches to the management of long-term migration in a named country.
+c) Different approaches to make tourism more sustainable from individuals, organisations and governments in a named developed and a named emerging or developing country.
+
+Topic 9: Development and human welfare
+9.1 Definitions of development and human welfare vary, as do attempts to measure it
+a) The different ways of defining development, using economic criteria and broader social and political measures.
+b) Different factors contribute to the development and human welfare of a country: economic, social, technological, cultural, as well as food and water security.
+c) Development is measured in different ways: GDP per capita, the Human Development Index, measures of inequality and indices of political corruption. (1) and (2)
+
+9.2 The level of development and human welfare varies globally and has had a range of consequences
+a) Global pattern of the uneven development between and within countries and the factors (social, historic and economic) that have led to these spatial variations.
+b) Impact of uneven development on welfare and quality of life within one named country: poverty, unemployment, inadequate housing and physical infrastructure. (3)
+c) How countries at different levels of development have differences in their demographic data (fertility rates, death rates, natural increase, population structures, maternal and infant mortality rates). (4) and (5)
+
+9.3 A range of sustainable strategies is required to address uneven levels of development and human welfare
+a) The range of international strategies (international aid and intergovernmental agreements) that attempt to reduce uneven development.
+b) Different views held by individuals, organisations and governments on tackling the development gap.
+c) Advantages and disadvantages of top-down and bottom-up development projects used to promote development in a named developed and a named emerging or developing country.
+`;

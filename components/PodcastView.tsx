@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthUser } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
 import { generatePodcastScript, generatePodcastAudio } from '../services/geminiService';
 import HubLayout from './HubLayout';
 import { ChevronDown, ChevronUp, Play, Download, Mic } from 'lucide-react';
@@ -90,8 +90,13 @@ const PodcastView: React.FC<PodcastViewProps> = ({ user, onBack }) => {
     const [statusMessage, setStatusMessage] = useState('');
     
     // Determine units and subtopics based on user level
-    const units = user.level === 'GCSE' ? GCSE_UNITS.filter(u => u !== 'All Units') : ALEVEL_UNITS.filter(u => u !== 'All Units');
-    const specMap = user.level === 'GCSE' ? GCSE_SPEC_TOPICS : ALEVEL_SPEC_TOPICS;
+    let units = GCSE_UNITS.filter(u => u !== 'All Units');
+    if (user.level === 'A-Level') units = ALEVEL_UNITS.filter(u => u !== 'All Units');
+    if (user.level === 'IGCSE') units = IGCSE_UNITS.filter(u => u !== 'All Units');
+
+    let specMap = GCSE_SPEC_TOPICS;
+    if (user.level === 'A-Level') specMap = ALEVEL_SPEC_TOPICS;
+    if (user.level === 'IGCSE') specMap = IGCSE_SPEC_TOPICS;
 
     const handleGenerate = async () => {
         if (!selectedTopic) return;

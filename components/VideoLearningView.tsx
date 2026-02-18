@@ -39,7 +39,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
     const filteredVideos = useMemo(() => {
         return VIDEO_LIBRARY.filter(v => 
             v.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (v.level === user.level || !v.level) && // Filter by level or show if no level specified
+            (v.level === user.level || (!v.level && user.level === 'A-Level')) && // Filter by level, legacy videos (no level) default to A-Level
             (selectedPaper === 'All' || v.paper === selectedPaper) &&
             (selectedTopic === 'All' || v.topic === selectedTopic)
         );
@@ -113,8 +113,8 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
                         </button>
 
                         <div className="p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50 space-y-3 pt-8">
-                            {/* Paper Filters (Only for GCSE) */}
-                            {user.level === 'GCSE' && (
+                            {/* Paper Filters (Only for GCSE/IGCSE) */}
+                            {(user.level === 'GCSE' || user.level === 'IGCSE') && (
                                 <div className="flex gap-2 pb-2">
                                     {['All', 'Paper 1', 'Paper 2'].map(paper => (
                                         <button

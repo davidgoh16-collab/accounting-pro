@@ -1,7 +1,7 @@
 
 import { User } from 'firebase/auth';
 
-export type UserLevel = 'GCSE' | 'A-Level';
+export type UserLevel = 'GCSE' | 'A-Level' | 'IGCSE';
 
 export type Page = 
     | 'dashboard' 

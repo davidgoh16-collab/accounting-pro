@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Page, FlashcardItem, AuthUser } from '../types';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { KEY_TERMS } from '../knowledge-database';
+import { IGCSE_SPEC_TOPICS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
 import HubLayout from './HubLayout';
 import HubCard from './HubCard';
 
@@ -27,7 +28,17 @@ const SelectionModal: React.FC<{
         const level = user.level || 'A-Level';
         const caseTopics = new Set(CASE_STUDY_LOCATIONS.filter(c => c.levels.includes(level)).map(cs => cs.topic));
         const termTopics = new Set(KEY_TERMS.filter(k => k.levels.includes(level)).map(kt => kt.topic));
-        return ['All Topics', ...Array.from(new Set([...caseTopics, ...termTopics]))].sort();
+        const allTopics = new Set([...caseTopics, ...termTopics]);
+
+        // Explicitly add topics from specification
+        let specTopics = {};
+        if (level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
+        else if (level === 'GCSE') specTopics = GCSE_SPEC_TOPICS;
+        else specTopics = ALEVEL_SPEC_TOPICS;
+
+        Object.keys(specTopics).forEach(t => allTopics.add(t));
+
+        return ['All Topics', ...Array.from(allTopics)].sort();
     }, [user.level]);
 
     if (!isOpen) return null;

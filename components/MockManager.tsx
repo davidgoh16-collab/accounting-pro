@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MockConfig, MockExam, UserLevel } from '../types';
 import { getMocks, saveMock, deleteMock, migrateFeb2026 } from '../services/mockService';
 import { parseTimetableFile } from '../services/geminiService';
-import { COURSE_LESSONS } from '../constants';
+import { COURSE_LESSONS, IGCSE_SPEC_TOPICS } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
 
 // --- Topic & Paper Mappings ---
@@ -42,6 +42,22 @@ const ALEVEL_PAPER_MAP: Record<string, string[]> = {
     ]
 };
 
+const IGCSE_PAPER_MAP: Record<string, string[]> = {
+    'Paper 1': [
+        'River environments',
+        'Coastal environments',
+        'Hazardous environments'
+    ],
+    'Paper 2': [
+        'Economic activity and energy',
+        'Rural environments',
+        'Urban environments',
+        'Fragile environments and climate change',
+        'Globalisation and migration',
+        'Development and human welfare'
+    ]
+};
+
 const MockManager: React.FC = () => {
     const [mocks, setMocks] = useState<MockConfig[]>([]);
     const [selectedMock, setSelectedMock] = useState<MockConfig | null>(null);
@@ -65,6 +81,11 @@ const MockManager: React.FC = () => {
 
     // Filter available topics whenever Level changes
     useEffect(() => {
+        if (level === 'IGCSE') {
+            setAvailableTopics(Object.keys(IGCSE_SPEC_TOPICS).sort());
+            return;
+        }
+
         let relevantLessons = COURSE_LESSONS;
         if (level === 'GCSE') {
             relevantLessons = COURSE_LESSONS.filter(l => l.id.startsWith('G-'));
@@ -279,6 +300,8 @@ const MockManager: React.FC = () => {
 
         if (level === 'GCSE') {
             paperTopics = GCSE_PAPER_MAP[examPaper] || [];
+        } else if (level === 'IGCSE') {
+            paperTopics = IGCSE_PAPER_MAP[examPaper] || [];
         } else {
             paperTopics = ALEVEL_PAPER_MAP[examPaper] || [];
         }
@@ -354,6 +377,7 @@ const MockManager: React.FC = () => {
                                     >
                                         <option value="GCSE">GCSE</option>
                                         <option value="A-Level">A-Level</option>
+                                        <option value="IGCSE">IGCSE</option>
                                     </select>
                                 </div>
                                 <div className="flex items-center gap-2">
