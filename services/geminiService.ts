@@ -349,7 +349,7 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     Format as JSON object: { "examYear": 2024, "questionNumber": "01.X", "unit": "${params.unit}", "title": "string", "prompt": "string", "marks": number, "figureDescription": "string", "ao": { "ao1": number, "ao2": number, "ao3": number, "ao4": number }, "caseStudy": { "title": "string", "content": "string" }, "markScheme": { "title": "string", "content": "string" } }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: fullPrompt,
         config: {
             responseMimeType: 'application/json',
@@ -487,7 +487,7 @@ export const getHint = async (question: Question): Promise<string> => {
     await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: `Hint for: ${question.prompt}`,
         config: { safetySettings: SAFETY_SETTINGS }
     });
@@ -500,7 +500,7 @@ export const getMotivationalMessage = async (): Promise<string> => {
     await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: `Motivational msg for student.`,
         config: { safetySettings: SAFETY_SETTINGS }
     });
@@ -511,7 +511,7 @@ export const generateModelAnswer = async (question: Question): Promise<MarkedMod
     await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: `Model answer for ${question.prompt}`,
         config: {
             responseMimeType: 'application/json',
@@ -528,7 +528,7 @@ export const streamTutorResponse = async (question: Question, history: ChatMessa
     const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
     const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents,
         config: {
             systemInstruction,
@@ -542,7 +542,7 @@ export const generateCaseStudyApplication = async (question: Question, caseStudy
     await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: `Apply ${caseStudyName} to ${question.prompt}`,
         config: {
             responseMimeType: 'application/json',
@@ -589,7 +589,7 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
     `;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -604,7 +604,7 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: `Summarize session.`,
         config: { safetySettings: SAFETY_SETTINGS }
     });
@@ -1191,7 +1191,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
     }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config: {
             responseMimeType: 'application/json',
@@ -1213,6 +1213,49 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         throw new Error("Failed to generate valid lesson content.");
     }
 });
+
+export const validateLessonAnswer = async (question: string, userAnswer: string, correctAnswer: string, keywords?: string[]): Promise<boolean> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+
+    const prompt = `You are an automated grading assistant for a Geography lesson.
+
+    Question: "${question}"
+    Correct Answer/Key Concept: "${correctAnswer}"
+    Required Keywords: ${keywords ? JSON.stringify(keywords) : "None"}
+
+    Student Answer: "${userAnswer}"
+
+    Task: Determine if the student's answer is factually correct and demonstrates understanding of the key concept.
+
+    Rules:
+    1. It does NOT need to match the wording of the correct answer exactly.
+    2. It MUST contain the core meaning.
+    3. If 'Required Keywords' are provided, the student answer MUST contain the essence of these keywords (fuzzy match is okay).
+    4. Be lenient with spelling errors.
+
+    Return strictly JSON: { "isCorrect": boolean }
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-pro-preview',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+                safetySettings: SAFETY_SETTINGS
+            }
+        });
+        const result = JSON.parse(cleanJson(response.text || '{}'));
+        return result.isCorrect === true;
+    } catch (e) {
+        console.error("Lesson validation failed", e);
+        // Fallback to basic fuzzy match if AI fails
+        const normUser = userAnswer.toLowerCase();
+        const normCorrect = correctAnswer.toLowerCase();
+        return normUser.includes(normCorrect) || normCorrect.includes(normUser);
+    }
+};
 
 export const generateVideoQuestions = async (videoTitle: string, level: string): Promise<VideoQuizContent> => handleApiCall(async () => {
     const ai = getAiClient();
