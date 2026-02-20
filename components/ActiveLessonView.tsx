@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CourseLesson, LessonContent, AuthUser, LessonBlock, KeyTerm, LessonProgress } from '../types';
-import { generateLessonContent, generateSlideImage } from '../services/geminiService';
+import { generateLessonContent, generateSlideImage, validateLessonAnswer } from '../services/geminiService';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { KEY_TERMS } from '../knowledge-database';
@@ -122,6 +122,7 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
     
     const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
+    const [isValidating, setIsValidating] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     
     const [score, setScore] = useState(initialProgress?.rawScore || 0);
@@ -312,37 +313,43 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
         }
     };
 
-    const checkAnswer = () => {
+    const checkAnswer = async () => {
         if (!content) return;
         const block = content.blocks[currentBlockIndex];
         let correct = false;
 
-        if (block.type === 'sorting' && block.items) {
+        if (block.type === 'text_input') {
+            setIsValidating(true);
+            try {
+                // Use AI for intelligent validation
+                correct = await validateLessonAnswer(
+                    block.question,
+                    userAnswer,
+                    block.correctAnswer || '',
+                    block.keywords
+                );
+            } catch (e) {
+                console.error("Validation error", e);
+                // Fallback to fuzzy logic if AI fails
+                const userText = userAnswer.trim();
+                const correctText = block.correctAnswer?.trim() || "";
+                if (block.keywords && block.keywords.length > 0) {
+                    const matchingCount = block.keywords.filter(keyword => isFuzzyMatch(userText, keyword)).length;
+                    correct = matchingCount >= Math.ceil(block.keywords.length / 2);
+                    if (!correct && correctText) correct = isFuzzyMatch(userText, correctText);
+                } else {
+                    correct = isFuzzyMatch(userText, correctText);
+                }
+            }
+            setIsValidating(false);
+        } else if (block.type === 'sorting' && block.items) {
             correct = block.items.every((val, index) => val === sortedItems[index]);
         } else if (block.type === 'fill_in_blank' && block.correctBlanks) {
             correct = block.correctBlanks.every((val, index) => 
-                // Use fuzzy match for blanks too
                 isFuzzyMatch(fillBlanksAnswers[index] || '', val)
             );
         } else if (block.type === 'diagram_match' && block.items) {
             correct = block.items.every((item, index) => matchedLabels[index + 1] === item);
-        } else if (block.type === 'text_input') {
-            const userText = userAnswer.trim();
-            const correctText = block.correctAnswer?.trim() || "";
-
-            if (block.keywords && block.keywords.length > 0) {
-                // If keywords are present, check if user answer contains most of them
-                const matchingCount = block.keywords.filter(keyword => isFuzzyMatch(userText, keyword)).length;
-                // Require 50% of keywords, or if only 1, require it.
-                correct = matchingCount >= Math.ceil(block.keywords.length / 2);
-
-                // Also do a direct fuzzy match against the "correctAnswer" if provided, just in case keywords fail but intent is right
-                if (!correct && correctText) {
-                    correct = isFuzzyMatch(userText, correctText);
-                }
-            } else {
-                correct = isFuzzyMatch(userText, correctText);
-            }
         } else {
             correct = userAnswer === block.correctAnswer;
         }
@@ -558,13 +565,21 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
                         <button 
                             onClick={checkAnswer} 
                             disabled={
+                                isValidating ||
                                 (currentBlock.type === 'text_input' && !userAnswer) || 
                                 (currentBlock.type === 'fill_in_blank' && fillBlanksAnswers.some(a => !a)) ||
                                 (currentBlock.type === 'diagram_match' && Object.keys(matchedLabels).length !== (currentBlock.items?.length || 0))
                             } 
-                            className="w-full py-4 bg-stone-800 dark:bg-stone-700 hover:bg-stone-900 dark:hover:bg-stone-600 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                            className="w-full py-4 bg-stone-800 dark:bg-stone-700 hover:bg-stone-900 dark:hover:bg-stone-600 text-white font-bold rounded-2xl shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-lg flex items-center justify-center gap-2"
                         >
-                            Check Answer
+                            {isValidating ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
+                                    <span>Checking...</span>
+                                </>
+                            ) : (
+                                'Check Answer'
+                            )}
                         </button>
                     ) : (
                         <button onClick={handleNext} className={`w-full py-4 font-bold rounded-2xl shadow-lg transition-transform active:scale-95 text-lg text-white ${isCorrect ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30'}`}>
