@@ -786,6 +786,48 @@ export const STRUCTURE_GUIDES: StructureGuide[] = [
             }
         ],
         levels: ['GCSE', 'A-Level', 'IGCSE']
+    },
+    {
+        title: '8-MARK QUESTION (IGCSE)',
+        aoWeighting: 'AO3 (Analysis) & AO4 (Skills) or AO1/AO2.',
+        structureComponents: [
+            {
+                title: 'Introduction (Optional)',
+                details: 'Briefly define the key term or state your main argument/judgement.'
+            },
+            {
+                title: 'Paragraph 1',
+                details: 'Point 1: State a factor/reason. Evidence: Use specific case study facts or figure data. Explain: Develop the point fully (chain of reasoning).'
+            },
+            {
+                title: 'Paragraph 2',
+                details: 'Point 2: State a contrasting factor or a second reason. Evidence: Support with data/facts. Explain: Further development.'
+            },
+            {
+                title: 'Conclusion',
+                details: 'Provide a clear conclusion or judgement if the command word is "Assess", "Evaluate" or "To what extent". Weigh up the factors.'
+            }
+        ],
+        levels: ['IGCSE']
+    },
+    {
+        title: '12-MARK ESSAY (IGCSE)',
+        aoWeighting: 'AO1 (Knowledge), AO2 (Understanding), AO3 (Judgement).',
+        structureComponents: [
+            {
+                title: 'Introduction',
+                details: 'Define key terms. Outline your line of argument (what is your view?).'
+            },
+            {
+                title: 'Main Body (3 Paragraphs)',
+                details: 'Each paragraph should follow PEEL (Point, Evidence, Explain, Link). Cover a range of factors (social, economic, environmental) or scales (local, national, global). Ensure you have a balanced argument.'
+            },
+            {
+                title: 'Conclusion',
+                details: 'Summarise your main points. Provide a final justified conclusion that directly answers the question.'
+            }
+        ],
+        levels: ['IGCSE']
     }
 ];
 
