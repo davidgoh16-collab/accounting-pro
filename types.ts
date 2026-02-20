@@ -39,6 +39,7 @@ export interface AuthUser {
     photoURL: string | null;
     level?: UserLevel;
     role?: 'student' | 'admin';
+    hasSeenTour?: boolean;
 }
 
 export interface CommandWord {

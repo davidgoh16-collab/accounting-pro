@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Page, CompletedSession, CaseStudyLocation, AuthUser, FlashcardItem, DraftSession, UserLevel, MockConfig, TeacherAssessment } from './types';
-import { onAuthChange, signOutUser, db, logUserActivity } from './firebase';
+import { onAuthChange, signOutUser, db, logUserActivity, updateUserTourStatus } from './firebase';
 import { User } from 'firebase/auth';
 import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc, updateDoc, onSnapshot, where } from 'firebase/firestore';
 import { getMocks } from './services/mockService';
@@ -134,6 +134,7 @@ import HubCard from './components/HubCard';
 import LevelSelector from './components/LevelSelector';
 import FullChatView from './components/FullChatView';
 import { AssessmentHubView } from './components/AssessmentHubView';
+import TourOverlay from './components/TourOverlay';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -265,6 +266,7 @@ const App: React.FC = () => {
     const [draftToResume, setDraftToResume] = useState<DraftSession | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [showLevelSelector, setShowLevelSelector] = useState(false);
+    const [showTour, setShowTour] = useState(false);
 
     // Mocks State
     const [activeMocks, setActiveMocks] = useState<MockConfig[]>([]);
@@ -379,7 +381,8 @@ const App: React.FC = () => {
                     displayName: firebaseUser.displayName,
                     email: firebaseUser.email,
                     photoURL: firebaseUser.photoURL,
-                    level: userLevel
+                    level: userLevel,
+                    hasSeenTour: userSnap.data()?.hasSeenTour
                 };
                 setUser(authUser);
                 logUserActivity(authUser.uid, 'login', { timestamp: new Date().toISOString() });
@@ -412,6 +415,24 @@ const App: React.FC = () => {
             setUser({ ...user, level });
             setShowLevelSelector(false);
         }
+    };
+
+    useEffect(() => {
+        if (user && user.level && !user.hasSeenTour && !showLevelSelector) {
+            setShowTour(true);
+        }
+    }, [user, showLevelSelector]);
+
+    const handleTourComplete = async () => {
+        if (user) {
+            await updateUserTourStatus(user.uid, true);
+            setUser(prev => prev ? ({ ...prev, hasSeenTour: true }) : null);
+            setShowTour(false);
+        }
+    };
+
+    const handleReplayTour = () => {
+        setShowTour(true);
     };
 
     const handleNavigate = (newPage: Page, param?: any) => {
@@ -455,7 +476,7 @@ const App: React.FC = () => {
         const level = user?.level || 'A-Level';
         if (level === 'GCSE') {
             return {
-                bgClass: "bg-slate-50 dark:bg-slate-950", 
+                bgClass: "bg-emerald-50 dark:bg-emerald-950",
                 bgPattern: "bg-[url('/grid.svg')]",
                 hubGradient: "bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600",
                 subtitle: "Your GCSE Geography Hub (AQA 8035)"
@@ -470,7 +491,7 @@ const App: React.FC = () => {
             };
         }
         return {
-            bgClass: "bg-stone-100 dark:bg-stone-950", 
+            bgClass: "bg-blue-50 dark:bg-blue-950",
             bgPattern: "bg-[url('/grid.svg')]",
             hubGradient: "bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400",
             subtitle: "Your A-Level Geography Hub"
@@ -487,6 +508,7 @@ const App: React.FC = () => {
 
     return (
         <div className={`min-h-screen ${theme.bgPattern} bg-fixed ${theme.bgClass} transition-colors duration-300`}>
+            {showTour && <TourOverlay onComplete={handleTourComplete} />}
             {showLevelSelector && <LevelSelector onSelect={handleLevelSelect} />}
             
             <Header user={user} onNavigate={handleNavigate} isAdmin={isAdmin} onSwitchLevel={() => setShowLevelSelector(true)} />
@@ -496,6 +518,7 @@ const App: React.FC = () => {
                     title={`Welcome back, ${user.displayName?.split(' ')[0] || 'Geographer'}`} 
                     subtitle={theme.subtitle} 
                     gradient={theme.hubGradient}
+                    onReplayTutorial={handleReplayTour}
                 >
                     <CountdownWidget mocks={activeMocks} userLevel={user.level} userYearGroup={userYearGroup} />
 
