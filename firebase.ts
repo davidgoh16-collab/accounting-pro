@@ -5,6 +5,9 @@ import {
     signInWithPopup, 
     signOut, 
     OAuthProvider,
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
     User
 } from "firebase/auth";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove, query, where, writeBatch, deleteDoc } from "firebase/firestore";
@@ -27,9 +30,22 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 const microsoftProvider = new OAuthProvider('microsoft.com');
+const googleProvider = new GoogleAuthProvider();
 
 export const signInWithMicrosoft = () => {
     return signInWithPopup(auth, microsoftProvider);
+};
+
+export const signInWithGoogle = () => {
+    return signInWithPopup(auth, googleProvider);
+};
+
+export const signInWithEmail = (email: string, pass: string) => {
+    return signInWithEmailAndPassword(auth, email, pass);
+};
+
+export const signUpWithEmail = (email: string, pass: string) => {
+    return createUserWithEmailAndPassword(auth, email, pass);
 };
 
 export const signOutUser = () => {
@@ -60,6 +76,11 @@ export const getAllUsers = async (): Promise<AuthUser[]> => {
 export const updateUserRole = async (uid: string, role: string) => {
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, { role });
+};
+
+export const updateUserTourStatus = async (uid: string, hasSeenTour: boolean) => {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { hasSeenTour });
 };
 
 export const getClasses = async (): Promise<ClassGroup[]> => {
