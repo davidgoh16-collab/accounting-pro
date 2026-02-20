@@ -139,6 +139,21 @@ const StructuredPlanView: React.FC<{
                 { key: 'point2', label: 'Point 2', placeholder: 'Make your second simple point.' },
                 { key: 'develop2', label: 'Development', placeholder: 'Develop your second point with more detail or an example.' },
             ];
+    } else if (marks === 12) {
+            planStructure = [
+                { key: 'intro', label: 'Introduction', placeholder: 'Define key terms and outline your argument.' },
+                { key: 'p1', label: 'Paragraph 1', placeholder: 'Point, Evidence, Explain, Link.' },
+                { key: 'p2', label: 'Paragraph 2', placeholder: 'Point, Evidence, Explain, Link.' },
+                { key: 'p3', label: 'Paragraph 3', placeholder: 'Point, Evidence, Explain, Link.' },
+                { key: 'conclusion', label: 'Conclusion', placeholder: 'Summarise arguments and give a final judgement.' },
+            ];
+    } else if (marks === 8) {
+            planStructure = [
+                { key: 'intro', label: 'Introduction (Optional)', placeholder: 'Briefly state your main point.' },
+                { key: 'factor1', label: 'Factor/Reason 1', placeholder: 'State point, provide evidence/data, explain fully.' },
+                { key: 'factor2', label: 'Factor/Reason 2', placeholder: 'State contrasting point or second reason, provide evidence, explain.' },
+                { key: 'conclusion', label: 'Conclusion', placeholder: 'Weigh up the factors and conclude.' },
+            ];
     } else {
             return <textarea
                 value={planData.generic || ''}
@@ -1055,7 +1070,9 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                     <select value={marksFilter} onChange={e => setMarksFilter(parseInt(e.target.value, 10))} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="4">4 Marks</option>
                         <option value="6">6 Marks (AO3/Data)</option>
-                        <option value="9">9 Marks</option>
+                        {user.level !== 'IGCSE' && <option value="9">9 Marks</option>}
+                        {user.level === 'IGCSE' && <option value="8">8 Marks</option>}
+                        {user.level === 'IGCSE' && <option value="12">12 Marks</option>}
                         {user.level === 'A-Level' && <option value="20">20 Marks (Essay)</option>}
                     </select>
 

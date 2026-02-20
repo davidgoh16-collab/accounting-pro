@@ -154,5 +154,66 @@ export const KEY_TERMS: KeyTerm[] = [
     { name: 'Food Miles', topic: 'The Challenge of Resource Management', details: 'Distance covered by food from growing to plate.', citation: 'Concept: Sustainability', type: 'term', levels: ['GCSE'] },
     { name: 'Fracking', topic: 'The Challenge of Resource Management', details: 'Hydraulic fracturing to release gas inside rock.', citation: 'Process: Energy', type: 'term', levels: ['GCSE'] },
     { name: 'Water Stress', topic: 'The Challenge of Resource Management', details: 'When demand for water exceeds the available amount during a certain period.', citation: 'Concept: Water', type: 'term', levels: ['GCSE'] },
-    { name: 'Agribusiness', topic: 'The Challenge of Resource Management', details: 'Agriculture conducted on commercial principles, using advanced technology.', citation: 'Concept: Food', type: 'term', levels: ['GCSE'] }
+    { name: 'Agribusiness', topic: 'The Challenge of Resource Management', details: 'Agriculture conducted on commercial principles, using advanced technology.', citation: 'Concept: Food', type: 'term', levels: ['GCSE'] },
+
+    // --- IGCSE: RIVER ENVIRONMENTS ---
+    { name: 'Drainage Basin', topic: 'River environments', details: 'The area of land drained by a river and its tributaries.', citation: 'Concept: Hydrology', type: 'term', levels: ['IGCSE'] },
+    { name: 'Watershed', topic: 'River environments', details: 'The boundary separating two drainage basins.', citation: 'Concept: Hydrology', type: 'term', levels: ['IGCSE'] },
+    { name: 'Confluence', topic: 'River environments', details: 'The point where two rivers meet.', citation: 'Concept: Hydrology', type: 'term', levels: ['IGCSE'] },
+    { name: 'Hydrograph', topic: 'River environments', details: 'A graph showing river discharge over a period of time.', citation: 'Skill: Graph', type: 'term', levels: ['IGCSE'] },
+    { name: 'Lag Time', topic: 'River environments', details: 'The time difference between peak rainfall and peak discharge.', citation: 'Concept: Flooding', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: COASTAL ENVIRONMENTS ---
+    { name: 'Swash', topic: 'Coastal environments', details: 'The movement of water up the beach after a wave breaks.', citation: 'Process: Coastal', type: 'term', levels: ['IGCSE'] },
+    { name: 'Backwash', topic: 'Coastal environments', details: 'The backward movement of water down a beach when a wave has broken.', citation: 'Process: Coastal', type: 'term', levels: ['IGCSE'] },
+    { name: 'Fetch', topic: 'Coastal environments', details: 'The distance of open water over which the wind blows.', citation: 'Factor: Waves', type: 'term', levels: ['IGCSE'] },
+    { name: 'Coral Reef', topic: 'Coastal environments', details: 'A marine ridge or mound comprising primarily of coral and calcium carbonate.', citation: 'Ecosystem', type: 'term', levels: ['IGCSE'] },
+    { name: 'Mangrove', topic: 'Coastal environments', details: 'Shrub or tree that grows in coastal saline or brackish water.', citation: 'Ecosystem', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: HAZARDOUS ENVIRONMENTS ---
+    { name: 'Epicentre', topic: 'Hazardous environments', details: 'The point on the Earth\'s surface directly above the focus of an earthquake.', citation: 'Hazard: Seismic', type: 'term', levels: ['IGCSE'] },
+    { name: 'Focus', topic: 'Hazardous environments', details: 'The point inside the crust where the pressure is released in an earthquake.', citation: 'Hazard: Seismic', type: 'term', levels: ['IGCSE'] },
+    { name: 'Tropical Cyclone', topic: 'Hazardous environments', details: 'A rapidly rotating storm system characterized by a low-pressure center (Hurricane/Typhoon).', citation: 'Hazard: Atmospheric', type: 'term', levels: ['IGCSE'] },
+    { name: 'Richter Scale', topic: 'Hazardous environments', details: 'A logarithmic scale used to measure the magnitude of an earthquake.', citation: 'Measure: Hazard', type: 'term', levels: ['IGCSE'] },
+    { name: 'Volcanic Hotspot', topic: 'Hazardous environments', details: 'An area in the mantle from which heat rises as a thermal plume from deep in the Earth.', citation: 'Hazard: Tectonic', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: ECONOMIC ACTIVITY & ENERGY ---
+    { name: 'Primary Sector', topic: 'Economic activity and energy', details: 'The extraction of raw materials from the land or sea (e.g. farming, fishing, mining).', citation: 'Concept: Economy', type: 'term', levels: ['IGCSE'] },
+    { name: 'Secondary Sector', topic: 'Economic activity and energy', details: 'Manufacturing and processing of materials (e.g. factories).', citation: 'Concept: Economy', type: 'term', levels: ['IGCSE'] },
+    { name: 'Tertiary Sector', topic: 'Economic activity and energy', details: 'The provision of services (e.g. education, health, retail).', citation: 'Concept: Economy', type: 'term', levels: ['IGCSE'] },
+    { name: 'Sectoral Shift', topic: 'Economic activity and energy', details: 'The change in the importance of economic sectors as a country develops (Clark Fisher Model).', citation: 'Model: Economy', type: 'term', levels: ['IGCSE'] },
+    { name: 'Renewable Energy', topic: 'Economic activity and energy', details: 'Energy from a source that is not depleted when used (e.g. wind, solar).', citation: 'Concept: Energy', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: URBAN ENVIRONMENTS ---
+    { name: 'Urbanisation', topic: 'Urban environments', details: 'An increase in the proportion of people living in urban areas.', citation: 'Concept: Urban', type: 'term', levels: ['IGCSE'] },
+    { name: 'Megacity', topic: 'Urban environments', details: 'A city with a population of over 10 million people.', citation: 'Concept: Urban', type: 'term', levels: ['IGCSE'] },
+    { name: 'Informal Economy', topic: 'Urban environments', details: 'Economic activity that is neither taxed nor monitored by a government.', citation: 'Concept: Development', type: 'term', levels: ['IGCSE'] },
+    { name: 'Squatter Settlement', topic: 'Urban environments', details: 'An area of poor-quality housing, lacking in amenities such as water supply, sewerage and electricity.', citation: 'Concept: Urban', type: 'term', levels: ['IGCSE'] },
+    { name: 'Brownfield Site', topic: 'Urban environments', details: 'Disused and derelict land in an urban area that is available for redevelopment.', citation: 'Concept: Planning', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: RURAL ENVIRONMENTS ---
+    { name: 'Counter-urbanisation', topic: 'Rural environments', details: 'The movement of people and employment from major cities to smaller towns and rural areas.', citation: 'Process: Migration', type: 'term', levels: ['IGCSE'] },
+    { name: 'Farm Diversification', topic: 'Rural environments', details: 'When a farm branches out from traditional farming activities to generate new income (e.g. tourism).', citation: 'Strategy: Rural', type: 'term', levels: ['IGCSE'] },
+    { name: 'Green Belt', topic: 'Rural environments', details: 'An area of open land around a city, on which building is restricted.', citation: 'Concept: Planning', type: 'term', levels: ['IGCSE'] },
+    { name: 'Suburbanisation', topic: 'Rural environments', details: 'The outward growth of urban development which may engulf surrounding villages and towns.', citation: 'Process: Urban', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: FRAGILE ENVIRONMENTS ---
+    { name: 'Desertification', topic: 'Fragile environments and climate change', details: 'The process by which fertile land becomes desert, typically as a result of drought, deforestation, or inappropriate agriculture.', citation: 'Process: Environmental', type: 'term', levels: ['IGCSE'] },
+    { name: 'Deforestation', topic: 'Fragile environments and climate change', details: 'The action of clearing a wide area of trees.', citation: 'Process: Environmental', type: 'term', levels: ['IGCSE'] },
+    { name: 'Global Warming', topic: 'Fragile environments and climate change', details: 'A gradual increase in the overall temperature of the earth\'s atmosphere generally attributed to the greenhouse effect.', citation: 'Concept: Climate', type: 'term', levels: ['IGCSE'] },
+    { name: 'Sustainability', topic: 'Fragile environments and climate change', details: 'Meeting the needs of the present without compromising the ability of future generations to meet their own needs.', citation: 'Concept: Management', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: GLOBALISATION ---
+    { name: 'Globalisation', topic: 'Globalisation and migration', details: 'The process by which the world is becoming increasingly interconnected.', citation: 'Concept: Global', type: 'term', levels: ['IGCSE'] },
+    { name: 'TNC', topic: 'Globalisation and migration', details: 'Transnational Corporation: A large company that operates in several countries.', citation: 'Concept: Global', type: 'term', levels: ['IGCSE'] },
+    { name: 'Push Factor', topic: 'Globalisation and migration', details: 'Negative factors that force people to migrate from a place.', citation: 'Concept: Migration', type: 'term', levels: ['IGCSE'] },
+    { name: 'Pull Factor', topic: 'Globalisation and migration', details: 'Positive factors that attract people to migrate to a place.', citation: 'Concept: Migration', type: 'term', levels: ['IGCSE'] },
+    { name: 'Mass Tourism', topic: 'Globalisation and migration', details: 'Large numbers of tourists visiting the same place at the same time.', citation: 'Concept: Tourism', type: 'term', levels: ['IGCSE'] },
+
+    // --- IGCSE: DEVELOPMENT ---
+    { name: 'Development Gap', topic: 'Development and human welfare', details: 'The difference in standards of living and wellbeing between the world\'s richest and poorest countries.', citation: 'Concept: Inequality', type: 'term', levels: ['IGCSE'] },
+    { name: 'HDI', topic: 'Development and human welfare', details: 'Human Development Index: A composite statistic of life expectancy, education, and per capita income indicators.', citation: 'Measure: Development', type: 'term', levels: ['IGCSE'] },
+    { name: 'Top-down Development', topic: 'Development and human welfare', details: 'Large-scale, government-led development projects.', citation: 'Strategy: Development', type: 'term', levels: ['IGCSE'] },
+    { name: 'Bottom-up Development', topic: 'Development and human welfare', details: 'Small-scale, community-led development schemes.', citation: 'Strategy: Development', type: 'term', levels: ['IGCSE'] },
+    { name: 'GDP per capita', topic: 'Development and human welfare', details: 'Gross Domestic Product divided by the total population.', citation: 'Measure: Economics', type: 'term', levels: ['IGCSE'] }
 ];
