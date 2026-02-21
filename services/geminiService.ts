@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession } from "../types";
+import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession, AuthUser, ClassGroup } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
@@ -761,6 +761,72 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
         return [];
     }
 });
+
+export const streamAdminChat = async (history: ChatMessage[], message: string, contextData: { users: AuthUser[], classes: ClassGroup[] }, onChunk: (chunk: string) => void): Promise<void> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+
+    // Prepare Data Summary
+    // We strip unnecessary fields to save tokens
+    const userSummary = contextData.users.map(u => ({
+        id: u.uid,
+        name: u.displayName,
+        email: u.email,
+        level: u.level,
+        role: u.role
+    }));
+
+    const classSummary = contextData.classes.map(c => ({
+        id: c.id,
+        name: c.name,
+        size: c.studentIds.length,
+        year: c.yearGroup
+    }));
+
+    const systemInstruction = `You are an expert Educational Data Analyst and Assistant for the Admin of a Geography learning platform.
+
+    Your goal is to help the admin understand student engagement, performance, and platform usage.
+
+    Current Data Context:
+    - Users: ${JSON.stringify(userSummary)}
+    - Classes: ${JSON.stringify(classSummary)}
+
+    Capabilities:
+    1. Answer questions about the user base (e.g. "How many GCSE students?", "List all admins").
+    2. Analyze class sizes and distributions.
+    3. **Generate Charts**: If a question is best answered with a visualization (e.g. "Show me the distribution of levels", "Graph class sizes"), you MUST generate a chart definition.
+
+    Chart Generation Rules:
+    - To generate a chart, output a JSON object wrapped in a specific code block: \`\`\`json-chart ... \`\`\`
+    - Supported chart types: 'bar', 'pie', 'line', 'area'.
+    - JSON Structure:
+      {
+        "type": "bar" | "pie" | "line" | "area",
+        "title": "Chart Title",
+        "data": [ { "name": "Label A", "value": 10 }, { "name": "Label B", "value": 20 } ],
+        "xKey": "name" (key for x-axis/labels),
+        "yKey": "value" (key for data values),
+        "fill": "#8884d8" (optional hex color)
+      }
+    - You can provide text explanation BEFORE or AFTER the chart block.
+
+    Tone: Professional, helpful, data-driven.
+    `;
+
+    const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
+    contents.push({ role: 'user', parts: [{ text: message }] });
+
+    const responseStream = await ai.models.generateContentStream({
+        model: 'gemini-3-flash-preview',
+        contents,
+        config: {
+            systemInstruction,
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
+};
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
     await checkDailyLimit();
