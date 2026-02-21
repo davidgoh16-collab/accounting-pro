@@ -895,10 +895,16 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
     return (
         <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent">
             <button 
-                onClick={onBack}
+                onClick={() => {
+                    if (viewMode === 'assistant') {
+                        setViewMode('students');
+                    } else {
+                        onBack();
+                    }
+                }}
                 className="fixed top-24 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-white dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
             >
-                <span>&larr;</span> Back
+                <span>&larr;</span> {viewMode === 'assistant' ? 'Admin Dashboard' : 'Back'}
             </button>
 
             <div className="max-w-[95vw] mx-auto mt-12">

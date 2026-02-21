@@ -2,6 +2,7 @@
 import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { AuthUser, CompletedSession, LessonProgress } from '../types';
+import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS } from '../constants';
 
 export interface StudentPerformanceData {
     uid: string;
@@ -19,18 +20,13 @@ export const fetchStudentPerformance = async (uid: string): Promise<StudentPerfo
         const sessions = sessionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as CompletedSession));
 
         // 2. Learning Progress (Assignments)
-        // This is stored in subcollections by chapter, so we iterate known chapters or just fetch a summary if available.
-        // For now, let's fetch a few key chapters or iterate a predefined list.
-        // Actually, `learning_progress` is usually a subcollection. We can't query across all subcollections easily client-side without a Collection Group Query.
-        // Let's assume we fetch major topics.
         const learningProgress: Record<string, LessonProgress> = {};
-        const topics = ['Coasts', 'Rivers', 'Hazards', 'Economic World', 'Urban Issues', 'Resource Management'];
+
+        // Dynamically fetch topics based on all possible units to ensure coverage
+        const allPossibleTopics = Array.from(new Set([...ALEVEL_UNITS, ...GCSE_UNITS, ...IGCSE_UNITS]));
+        const topics = allPossibleTopics.filter(t => t !== 'All Units');
 
         await Promise.all(topics.map(async (topic) => {
-             const topicRef = collection(db, 'users', uid, 'learning_progress', topic, 'lessons'); // Check structure?
-             // Actually structure is `users/{uid}/learning_progress/{topic}` doc which contains map of lessons?
-             // Reading `LearningProgressViewer`: `doc(db, 'users', user.uid, 'learning_progress', topic)`
-
              const docRef = doc(db, 'users', uid, 'learning_progress', topic);
              const docSnap = await getDoc(docRef);
              if (docSnap.exists()) {

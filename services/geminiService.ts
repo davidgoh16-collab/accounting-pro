@@ -872,7 +872,15 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
                     // 1. Time on Task (Estimate based on log timestamps)
                     // We look for 'login' or 'session_start' events and calculate gaps, or just count active days.
                     // For simplicity and reliability without complex session tracking, we count distinct days active and total actions.
-                    const activeDays = new Set(data.activityLogs.map(l => l.timestamp.split('T')[0])).size;
+                    const activeDays = new Set(data.activityLogs.map(l => {
+                        // Handle Firestore Timestamp or ISO string
+                        if (l.timestamp && typeof l.timestamp.toDate === 'function') {
+                            return l.timestamp.toDate().toISOString().split('T')[0];
+                        } else if (typeof l.timestamp === 'string') {
+                            return l.timestamp.split('T')[0];
+                        }
+                        return 'unknown';
+                    })).size;
 
                     // 2. Topic Performance
                     const topicStats: Record<string, { total: number, count: number }> = {};
