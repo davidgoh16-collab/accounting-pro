@@ -11,6 +11,7 @@ import MockManager from './MockManager';
 import ActivityLogViewer from './ActivityLogViewer';
 import MockProgressViewer from './MockProgressViewer';
 import SafeguardingViewer from './SafeguardingViewer';
+import AdminAssistant from './AdminAssistant';
 import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
@@ -839,7 +840,7 @@ const ChatLogViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 };
 
 const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
-    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks' | 'safeguarding'>('students');
+    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks' | 'safeguarding' | 'assistant'>('students');
     const [users, setUsers] = useState<AuthUser[]>([]);
     const [classes, setClasses] = useState<ClassGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -932,6 +933,12 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                             Safeguarding
                         </button>
                         <button
+                            onClick={() => setViewMode('assistant')}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'assistant' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
+                        >
+                            AI Analyst
+                        </button>
+                        <button
                             onClick={() => setViewMode('settings')}
                             className={`px-4 py-2 rounded-lg font-bold transition-all ${viewMode === 'settings' ? 'bg-indigo-500 text-white shadow-md' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'}`}
                         >
@@ -946,6 +953,10 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                     <MockManager />
                 ) : viewMode === 'safeguarding' ? (
                     <SafeguardingViewer />
+                ) : viewMode === 'assistant' ? (
+                    <div className="h-[85vh]">
+                        <AdminAssistant users={users} classes={classes} />
+                    </div>
                 ) : viewMode === 'classes' ? (
                     <ClassManager classes={classes} allUsers={users} onRefreshClasses={fetchClasses} />
                 ) : (
@@ -1063,6 +1074,11 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                 )}
             </div>
              <style>{`.animate-fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }`}</style>
+
+             {/* Floating AI Assistant (Visible when NOT in full AI mode) */}
+             {viewMode !== 'assistant' && (
+                 <AdminAssistant users={users} classes={classes} isFloating={true} />
+             )}
         </div>
     );
 };
