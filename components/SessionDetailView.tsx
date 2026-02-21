@@ -61,6 +61,14 @@ const SessionDetailView: React.FC<SessionDetailViewProps> = ({ session, onBack }
         return `(${parts.join(', ')} marks)`;
     };
 
+    const formatTimeTaken = (seconds?: number) => {
+        if (!seconds) return null;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        if (mins > 0) return `${mins}m ${secs}s`;
+        return `${secs}s`;
+    };
+
     return (
         <div className="p-4 sm:p-6 md:p-8 bg-transparent animate-fade-in">
             <div className="max-w-4xl mx-auto">
@@ -74,9 +82,17 @@ const SessionDetailView: React.FC<SessionDetailViewProps> = ({ session, onBack }
                 )}
 
                 <div ref={sessionReportRef} className="space-y-6">
-                    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg" role="alert">
-                        <p className="font-bold">Session Review</p>
-                        <p>Completed on {new Date(session.completedAt).toLocaleString()}.</p>
+                    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg flex justify-between items-center" role="alert">
+                        <div>
+                            <p className="font-bold">Session Review</p>
+                            <p>Completed on {new Date(session.completedAt).toLocaleString()}.</p>
+                        </div>
+                        {session.timeTaken && (
+                            <div className="text-right">
+                                <p className="text-xs uppercase font-bold opacity-80">Time Taken</p>
+                                <p className="text-xl font-bold">{formatTimeTaken(session.timeTaken)}</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl p-6 sm:p-8">

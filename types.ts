@@ -143,6 +143,7 @@ export interface CompletedSession {
     aiSummary: string;
     level: UserLevel;
     practiceMode?: PracticeMode;
+    timeTaken?: number; // In seconds
 }
 
 export type PracticeMode = 'standard' | 'teacher_led' | 'tutor' | 'timed' | 'lesson_practice';
