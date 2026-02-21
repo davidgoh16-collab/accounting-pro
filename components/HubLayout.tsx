@@ -8,9 +8,12 @@ interface HubLayoutProps {
     children: React.ReactNode;
     onBack?: () => void;
     onReplayTutorial?: () => void;
+    isLessonMode?: boolean;
+    onToggleLessonMode?: (enabled: boolean) => void;
+    forceLessonMode?: boolean;
 }
 
-const HubLayout: React.FC<HubLayoutProps> = ({ title, subtitle, gradient, children, onBack, onReplayTutorial }) => {
+const HubLayout: React.FC<HubLayoutProps> = ({ title, subtitle, gradient, children, onBack, onReplayTutorial, isLessonMode, onToggleLessonMode, forceLessonMode }) => {
     return (
         <div className="p-4 sm:p-6 md:p-8 min-h-screen bg-transparent flex flex-col items-center justify-center selection:bg-green-200 dark:selection:bg-green-900 relative">
             {onBack && (
@@ -31,11 +34,27 @@ const HubLayout: React.FC<HubLayoutProps> = ({ title, subtitle, gradient, childr
                 </button>
             )}
 
-            <header className="text-center mb-12 mt-12 sm:mt-0">
+            <header className="text-center mb-12 mt-12 sm:mt-0 flex flex-col items-center">
                 <h1 className={`text-5xl font-extrabold text-stone-800 dark:text-stone-100 bg-clip-text text-transparent ${gradient}`}>
                     {title}
                 </h1>
                 <p className="text-lg text-stone-600 dark:text-stone-300 mt-4 max-w-2xl font-medium">{subtitle}</p>
+
+                {/* Lesson Mode Toggle */}
+                {onToggleLessonMode && (
+                    <div className="mt-6 flex items-center gap-3 bg-white/50 dark:bg-stone-800/50 p-2 rounded-full border border-stone-200 dark:border-stone-700 backdrop-blur-sm">
+                        <span className={`text-sm font-bold ${!isLessonMode ? 'text-indigo-600 dark:text-indigo-400' : 'text-stone-500'}`}>Revision Mode</span>
+                        <button
+                            onClick={() => !forceLessonMode && onToggleLessonMode(!isLessonMode)}
+                            disabled={forceLessonMode}
+                            className={`w-14 h-8 rounded-full p-1 transition-colors relative ${isLessonMode ? 'bg-indigo-600' : 'bg-stone-300 dark:bg-stone-600'} ${forceLessonMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            <div className={`w-6 h-6 bg-white rounded-full shadow-sm transition-transform ${isLessonMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
+                        <span className={`text-sm font-bold ${isLessonMode ? 'text-indigo-600 dark:text-indigo-400' : 'text-stone-500'}`}>Lesson Mode</span>
+                        {forceLessonMode && <span className="ml-2 text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">Enforced by Admin</span>}
+                    </div>
+                )}
             </header>
             {children}
         </div>

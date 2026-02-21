@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
 import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassDetails, addClassMembers, updateUserRole, deleteClass, deleteUserAccount } from '../firebase';
-import { collection, getDocs, query, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import SessionAnalysisView from './SessionAnalysisView';
 import GameAnalysisView from './GameAnalysisView';
 import SessionDetailView from './SessionDetailView';
@@ -12,6 +12,7 @@ import ActivityLogViewer from './ActivityLogViewer';
 import MockProgressViewer from './MockProgressViewer';
 import SafeguardingViewer from './SafeguardingViewer';
 import AdminAssistant from './AdminAssistant';
+import LessonPracticeView from './LessonPracticeView';
 import { COURSE_LESSONS } from '../constants';
 
 interface AdminViewProps {
@@ -222,6 +223,19 @@ const ClassManager: React.FC<{
         }
     };
 
+    const toggleClassLessonMode = async () => {
+        if (!selectedClass) return;
+        const newStatus = !selectedClass.isLessonMode;
+        try {
+            await updateDoc(doc(db, 'classes', selectedClass.id), { isLessonMode: newStatus });
+            onRefreshClasses();
+            setSelectedClass(prev => prev ? ({ ...prev, isLessonMode: newStatus }) : null);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to toggle lesson mode");
+        }
+    };
+
     const handleDeleteClass = async () => {
         if (!selectedClass) return;
         if (!confirm(`Are you sure you want to delete "${selectedClass.name}"? This cannot be undone.`)) return;
@@ -363,10 +377,20 @@ const ClassManager: React.FC<{
                                     </div>
                                 )}
                                 <p className="text-stone-500 text-sm mt-1">{(selectedClass.studentIds || []).length} Students Enrolled</p>
+
+                                <div className="mt-2 flex items-center gap-2">
+                                    <span className="text-xs font-bold uppercase text-stone-500">Lesson Mode:</span>
+                                    <button
+                                        onClick={toggleClassLessonMode}
+                                        className={`px-3 py-1 text-xs font-bold rounded-full transition-colors ${selectedClass.isLessonMode ? 'bg-amber-100 text-amber-700' : 'bg-stone-100 text-stone-500'}`}
+                                    >
+                                        {selectedClass.isLessonMode ? 'Enforced' : 'Disabled'}
+                                    </button>
+                                </div>
                             </div>
                             <button
                                 onClick={handleDeleteClass}
-                                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition"
+                                className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition self-start"
                             >
                                 Delete Class
                             </button>
@@ -606,7 +630,7 @@ const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
     );
 };
 
-const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) => void, onDeleteUser: (uid: string) => void }> = ({ user, onImpersonate, onDeleteUser }) => {
+const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) => void, onDeleteUser: (uid: string) => void, onUploadWork: (u: AuthUser) => void, onUpdateUser: (updatedUser: AuthUser) => void }> = ({ user, onImpersonate, onDeleteUser, onUploadWork, onUpdateUser }) => {
     const [activeTab, setActiveTab] = useState<Tab>('overview');
     const [viewSession, setViewSession] = useState<CompletedSession | null>(null);
     const [roleLoading, setRoleLoading] = useState(false);
@@ -629,12 +653,24 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
         setRoleLoading(true);
         try {
             await updateUserRole(user.uid, newRole);
-            alert(`User role updated to ${newRole}. Refresh to see changes.`);
+            alert(`User role updated to ${newRole}.`);
+            onUpdateUser({...user, role: newRole});
         } catch (e) {
             console.error(e);
             alert("Failed to update role");
         } finally {
             setRoleLoading(false);
+        }
+    };
+
+    const handleToggleLessonMode = async () => {
+        const newStatus = !user.forcedLessonMode;
+        try {
+            await updateDoc(doc(db, 'users', user.uid), { forcedLessonMode: newStatus });
+            onUpdateUser({ ...user, forcedLessonMode: newStatus });
+        } catch (e) {
+            console.error(e);
+            alert("Failed to toggle lesson mode.");
         }
     };
 
@@ -667,10 +703,23 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                                 <p className="text-xs text-stone-400 dark:text-stone-500 uppercase tracking-wider font-semibold">UID: {user.uid}</p>
                                 {user.level && <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{user.level}</span>}
                                 {user.role === 'admin' && <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Admin</span>}
+                                {user.forcedLessonMode && <span className="text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Lesson Mode</span>}
                             </div>
                         </div>
                     </div>
                     <div className="flex gap-2">
+                        <button
+                            onClick={handleToggleLessonMode}
+                            className={`px-3 py-3 rounded-xl font-bold transition shadow-sm border text-xs ${user.forcedLessonMode ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-stone-100 text-stone-600 border-stone-200'}`}
+                        >
+                            {user.forcedLessonMode ? 'Disable Lesson Mode' : 'Enable Lesson Mode'}
+                        </button>
+                        <button
+                            onClick={() => onUploadWork(user)}
+                            className="px-3 py-3 bg-blue-100 text-blue-700 border border-blue-200 font-bold rounded-xl hover:bg-blue-200 transition shadow-sm text-xs"
+                        >
+                            📤 Upload Work
+                        </button>
                         <button
                             onClick={handleRoleUpdate}
                             disabled={roleLoading}
@@ -682,7 +731,7 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                             onClick={() => onImpersonate(user)}
                             className="px-6 py-3 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition shadow-md flex items-center gap-2"
                         >
-                            <span>👓</span> View as Student
+                            <span>👓</span> View
                         </button>
                         <button
                             onClick={handleDeleteUser}
@@ -840,11 +889,12 @@ const ChatLogViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
 };
 
 const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
-    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks' | 'safeguarding' | 'assistant'>('students');
+    const [viewMode, setViewMode] = useState<'students' | 'settings' | 'classes' | 'mocks' | 'safeguarding' | 'assistant' | 'upload_work'>('students');
     const [users, setUsers] = useState<AuthUser[]>([]);
     const [classes, setClasses] = useState<ClassGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState<AuthUser | null>(null);
+    const [uploadTargetUser, setUploadTargetUser] = useState<AuthUser | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [levelFilter, setLevelFilter] = useState<'All' | 'GCSE' | 'A-Level'>('All');
     const [classFilter, setClassFilter] = useState<string>('All');
@@ -877,6 +927,23 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
         fetchUsers();
         fetchClasses();
     }, []);
+
+    const handleUserUpdate = (updatedUser: AuthUser) => {
+        setUsers(prev => prev.map(u => u.uid === updatedUser.uid ? updatedUser : u));
+        if (selectedUser?.uid === updatedUser.uid) {
+            setSelectedUser(updatedUser);
+        }
+    };
+
+    const handleUploadWork = (user: AuthUser) => {
+        setUploadTargetUser(user);
+        setViewMode('upload_work');
+    };
+
+    if (viewMode === 'upload_work' && uploadTargetUser) {
+        // Pass uploadTargetUser as both so LessonPracticeView behaves as if it's the student
+        return <LessonPracticeView user={uploadTargetUser} targetUser={uploadTargetUser} onBack={() => { setViewMode('students'); setUploadTargetUser(null); }} />;
+    }
 
     const filteredUsers = users.filter(u => {
         const matchesSearch = (u.displayName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -1068,6 +1135,8 @@ const AdminView: React.FC<AdminViewProps> = ({ onImpersonate, onBack }) => {
                                         setUsers(prev => prev.filter(u => u.uid !== uid));
                                         setSelectedUser(null);
                                     }}
+                                    onUploadWork={handleUploadWork}
+                                    onUpdateUser={handleUserUpdate}
                                 />
                              ) : (
                                 <div className="flex-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">

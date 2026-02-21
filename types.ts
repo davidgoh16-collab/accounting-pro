@@ -8,6 +8,7 @@ export type Page =
     | 'learning_hub' 
     | 'question_practice_hub' 
     | 'question_practice' 
+    | 'lesson_practice_view'
     | 'session_analysis' 
     | 'games_hub' 
     | 'flappy_geo' 
@@ -40,6 +41,7 @@ export interface AuthUser {
     level?: UserLevel;
     role?: 'student' | 'admin';
     hasSeenTour?: boolean;
+    forcedLessonMode?: boolean;
 }
 
 export interface CommandWord {
@@ -140,9 +142,11 @@ export interface CompletedSession {
     completedAt: string;
     aiSummary: string;
     level: UserLevel;
+    practiceMode?: PracticeMode;
+    timeTaken?: number; // In seconds
 }
 
-export type PracticeMode = 'standard' | 'teacher_led' | 'tutor' | 'timed';
+export type PracticeMode = 'standard' | 'teacher_led' | 'tutor' | 'timed' | 'lesson_practice';
 
 export interface DraftSession {
     id: string;
@@ -370,6 +374,7 @@ export interface ClassGroup {
     name: string;
     studentIds: string[];
     yearGroup?: string; // '10', '11', '12', '13'
+    isLessonMode?: boolean;
 }
 
 export interface TopicTrackerItem {

@@ -589,9 +589,21 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
     Ensure "annotatedAnswer" reconstructs the student's answer with feedback interleaved or attached to segments.
     `;
 
+    const parts: any[] = [{ text: prompt }];
+
+    if (attachment) {
+        const base64Data = attachment.data.includes(',') ? attachment.data.split(',')[1] : attachment.data;
+        parts.push({
+            inlineData: {
+                mimeType: attachment.mimeType,
+                data: base64Data
+            }
+        });
+    }
+
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-pro-preview',
-        contents: prompt,
+        contents: [{ role: 'user', parts: parts }],
         config: {
             responseMimeType: 'application/json',
             safetySettings: SAFETY_SETTINGS
@@ -1685,3 +1697,48 @@ export const generateFlashcards = async (topic: string, subTopic: string, level:
         return [];
     }
 });
+
+export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLevel): Promise<{ score: number, totalMarks: number, feedback: string, studentAnswer: string, questionTitle?: string, unit?: string, timeTaken?: string }> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+    const base64Data = imageBase64.split(',')[1] || imageBase64;
+
+    const prompt = `Analyze this image of a marked ${level} Geography exam answer.
+
+    Extract the following details:
+    1. The student's handwritten answer (transcribe it).
+    2. The mark/score awarded (e.g., 4/6).
+    3. The total marks available.
+    4. The teacher's feedback or comments (if visible).
+    5. The likely question title or topic based on the content.
+    6. Any indication of "Time Taken" or duration written on the page (e.g. "15 mins", "Time: 20m").
+
+    Return a JSON object with this structure:
+    {
+        "studentAnswer": "string",
+        "score": number,
+        "totalMarks": number,
+        "feedback": "string",
+        "questionTitle": "string",
+        "unit": "string",
+        "timeTaken": "string"
+    }
+
+    If score/feedback is not visible, estimate or leave blank/0. Use "unit" for broad topics like "Coasts", "Hazards". If no time is found, leave "timeTaken" empty.`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-pro',
+        contents: [
+            { role: 'user', parts: [
+                { text: prompt },
+                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+            ]}
+        ],
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    return JSON.parse(cleanJson(response.text || '{}'));
+};
