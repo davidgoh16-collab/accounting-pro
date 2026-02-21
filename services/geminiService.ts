@@ -1,12 +1,13 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession } from "../types";
+import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession, AuthUser, ClassGroup } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
 import { auth, db, getCourseFiles, downloadFileAsBase64 } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
+import { fetchStudentPerformance, fetchTopicPerformance } from './adminService';
 import { AQA_ALEVEL_SPEC, AQA_GCSE_SPEC, EDEXCEL_IGCSE_SPEC } from '../data/specifications';
 
 // --- MODEL CONFIGURATION ---
@@ -761,6 +762,195 @@ export const generateBatchQuizQuestions = async (items: FlashcardItem[]): Promis
         return [];
     }
 });
+
+export const streamAdminChat = async (history: ChatMessage[], message: string, contextData: { users: AuthUser[], classes: ClassGroup[] }, onChunk: (chunk: string) => void): Promise<void> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+
+    // Prepare Data Summary
+    const userSummary = contextData.users.map(u => ({
+        id: u.uid,
+        name: u.displayName,
+        email: u.email,
+        level: u.level,
+        role: u.role
+    }));
+
+    const classSummary = contextData.classes.map(c => ({
+        id: c.id,
+        name: c.name,
+        size: c.studentIds.length,
+        year: c.yearGroup
+    }));
+
+    const tools = [
+        {
+            functionDeclarations: [
+                {
+                    name: "fetchStudentPerformance",
+                    description: "Fetches detailed performance data for a specific student using their User ID (uid) or Email. Use this when asked about a student's progress, grades, assignments, or time spent.",
+                    parameters: {
+                        type: "OBJECT",
+                        properties: {
+                            identifier: { type: "STRING", description: "The User UID or Email address" }
+                        },
+                        required: ["identifier"]
+                    }
+                },
+                {
+                    name: "fetchTopicPerformance",
+                    description: "Fetches aggregated global statistics for a specific geography topic (e.g., 'Coasts', 'Tectonics'). Use this to compare class performance.",
+                    parameters: {
+                        type: "OBJECT",
+                        properties: {
+                            topic: { type: "STRING", description: "The name of the topic" }
+                        },
+                        required: ["topic"]
+                    }
+                }
+            ]
+        }
+    ];
+
+    const systemInstruction = `You are an expert Educational Data Analyst and Assistant for the Admin of a Geography learning platform.
+
+    Current Data Context (Summary):
+    - Users: ${JSON.stringify(userSummary)}
+    - Classes: ${JSON.stringify(classSummary)}
+
+    Capabilities:
+    1. Answer questions about the user base (metadata).
+    2. **DEEP ANALYSIS**: If asked about a *specific student* or *topic*, YOU MUST USE THE PROVIDED TOOLS to fetch real data. Do not guess.
+    3. **Generate Charts**: If a question is best answered with a visualization, output a JSON object wrapped in \`\`\`json-chart ... \`\`\`.
+
+    Chart Rules:
+    - Supported types: 'bar', 'pie', 'line', 'area'.
+    - Structure: { "type": "...", "title": "...", "data": [...], "xKey": "...", "yKey": "..." }
+
+    Tone: Professional, helpful, data-driven.
+    `;
+
+    const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
+    contents.push({ role: 'user', parts: [{ text: message }] });
+
+    // Initial Request with Tools
+    const result = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents,
+        config: {
+            systemInstruction,
+            tools: tools,
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    const candidates = result.candidates || [];
+    const firstCandidate = candidates[0];
+    const parts = firstCandidate?.content?.parts || [];
+
+    let toolResponseText = "";
+
+    // Check for Function Calls
+    for (const part of parts) {
+        if (part.functionCall) {
+            const fnName = part.functionCall.name;
+            const args = part.functionCall.args as any;
+
+            onChunk(`\n\n*Analyzing data for ${args.identifier || args.topic}...*\n\n`);
+
+            let toolResultStr = "{}";
+            try {
+                if (fnName === 'fetchStudentPerformance') {
+                    // Resolve Email to UID if needed
+                    let uid = args.identifier;
+                    const foundUser = contextData.users.find(u => u.email === args.identifier || u.uid === args.identifier || u.displayName === args.identifier);
+                    if (foundUser) uid = foundUser.uid;
+
+                    const data = await fetchStudentPerformance(uid);
+
+                    // -- Aggregation Logic --
+                    // 1. Time on Task (Estimate based on log timestamps)
+                    // We look for 'login' or 'session_start' events and calculate gaps, or just count active days.
+                    // For simplicity and reliability without complex session tracking, we count distinct days active and total actions.
+                    const activeDays = new Set(data.activityLogs.map(l => l.timestamp.split('T')[0])).size;
+
+                    // 2. Topic Performance
+                    const topicStats: Record<string, { total: number, count: number }> = {};
+                    data.sessions.forEach(s => {
+                        const topic = s.question.unit || 'Unknown';
+                        if (!topicStats[topic]) topicStats[topic] = { total: 0, count: 0 };
+                        topicStats[topic].total += (s.aiFeedback.score / s.aiFeedback.totalMarks) * 100;
+                        topicStats[topic].count++;
+                    });
+
+                    const topicPerformance = Object.entries(topicStats).map(([topic, stats]) =>
+                        `${topic}: ${(stats.total / stats.count).toFixed(0)}% (${stats.count} quizzes)`
+                    );
+
+                    // Summarize data to save context window
+                    const summary = {
+                        student: foundUser?.displayName,
+                        engagement: {
+                            totalSessions: data.sessions.length,
+                            completedLessons: Object.keys(data.learningProgress).length,
+                            activeDays: activeDays,
+                            totalActionsLogged: data.activityLogs.length
+                        },
+                        performance: {
+                            overallAvg: data.sessions.length > 0 ? (data.sessions.reduce((a, b) => a + (b.aiFeedback.score/b.aiFeedback.totalMarks), 0) / data.sessions.length * 100).toFixed(1) + '%' : 'N/A',
+                            topicBreakdown: topicPerformance
+                        },
+                        recentActivity: data.sessions.slice(0, 5).map(s => `${s.question.unit} (${new Date(s.completedAt).toLocaleDateString()}): ${s.aiFeedback.score}/${s.aiFeedback.totalMarks}`)
+                    };
+                    toolResultStr = JSON.stringify(summary);
+                } else if (fnName === 'fetchTopicPerformance') {
+                    const data = await fetchTopicPerformance(args.topic);
+                    toolResultStr = JSON.stringify(data);
+                }
+            } catch (e: any) {
+                toolResultStr = JSON.stringify({ error: e.message });
+            }
+
+            // Send Tool Response back to Model
+            // Construct the next turn
+            // Note: SDK structure for FunctionResponse might vary slightly in v1.x
+            // We need to simulate the turn: [User Msg, Model Call, Function Response]
+
+            const functionResponseParts = [{
+                functionResponse: {
+                    name: fnName,
+                    response: { result: toolResultStr }
+                }
+            }];
+
+            const toolContents = [
+                ...contents,
+                { role: 'model', parts: parts }, // The model's call
+                { role: 'user', parts: functionResponseParts } // The tool output
+            ];
+
+            // Stream the final answer based on the tool output
+            const secondStream = await ai.models.generateContentStream({
+                model: 'gemini-3-flash-preview',
+                contents: toolContents,
+                config: {
+                    systemInstruction,
+                    safetySettings: SAFETY_SETTINGS
+                }
+            });
+
+            for await (const chunk of secondStream) {
+                onChunk(chunk.text || '');
+            }
+            return; // Done
+        }
+    }
+
+    // No tool call, just stream the text
+    if (result.text) {
+        onChunk(result.text);
+    }
+};
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
     await checkDailyLimit();
