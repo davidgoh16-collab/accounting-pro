@@ -56,8 +56,8 @@ const QuestionPracticeHubView: React.FC<QuestionPracticeHubViewProps> = ({ onNav
             gradient="bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-500"
             onBack={() => onNavigate('dashboard')}
         >
-            <main className="w-full max-w-5xl mx-auto space-y-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <main className="w-full max-w-6xl mx-auto space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <HubCard
                         icon={<span className="text-5xl">✏️</span>}
                         title="Start New Session"
@@ -65,6 +65,14 @@ const QuestionPracticeHubView: React.FC<QuestionPracticeHubViewProps> = ({ onNav
                         onClick={() => onNavigate('question_practice')}
                         shadowColor="shadow-blue-500/20"
                         accentColor="text-blue-600 hover:text-blue-700"
+                    />
+                    <HubCard
+                        icon={<span className="text-5xl">📸</span>}
+                        title="Lesson Practice"
+                        description="Upload a photo of your handwritten work. Get instant AI marking or digitize your teacher's feedback for your records."
+                        onClick={() => onNavigate('lesson_practice_view')}
+                        shadowColor="shadow-indigo-500/20"
+                        accentColor="text-indigo-600 hover:text-indigo-700"
                     />
                     <HubCard
                         icon={<span className="text-5xl">🎓</span>}
