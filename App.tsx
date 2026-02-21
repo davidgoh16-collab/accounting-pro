@@ -113,6 +113,7 @@ import GamesHubView from './components/GamesHubView';
 import GameAnalysisView from './components/GameAnalysisView';
 import SessionAnalysisView from './components/SessionAnalysisView';
 import QuestionPracticeHubView from './components/QuestionPracticeHubView';
+import LessonPracticeView from './components/LessonPracticeView';
 import Chatbot from './components/Chatbot';
 import CaseStudyExplorerView from './components/CaseStudyExplorerView';
 import FlashcardQuizHubView from './components/FlashcardQuizHubView';
@@ -268,6 +269,10 @@ const App: React.FC = () => {
     const [showLevelSelector, setShowLevelSelector] = useState(false);
     const [showTour, setShowTour] = useState(false);
 
+    // Lesson Mode State
+    const [isLessonMode, setIsLessonMode] = useState(false);
+    const [forceLessonMode, setForceLessonMode] = useState(false);
+
     // Mocks State
     const [activeMocks, setActiveMocks] = useState<MockConfig[]>([]);
     const [selectedMockId, setSelectedMockId] = useState<string | null>(null);
@@ -321,36 +326,58 @@ const App: React.FC = () => {
         return () => unsubscribe();
     }, []);
 
-    // Fetch Year Group whenever user changes (Login or Impersonation)
+    // Fetch Year Group and Lesson Mode Status whenever user changes (Login or Impersonation)
     useEffect(() => {
-        const fetchYearGroup = async () => {
+        const fetchUserData = async () => {
             if (!user) {
                 setUserYearGroup(null);
+                setForceLessonMode(false);
+                setIsLessonMode(false);
                 return;
+            }
+
+            // 1. Check User Level Force
+            if (user.forcedLessonMode) {
+                setForceLessonMode(true);
+                setIsLessonMode(true);
             }
 
             try {
                 const classesCol = collection(db, 'classes');
                 const q = query(classesCol, where('studentIds', 'array-contains', user.uid));
                 const classSnaps = await getDocs(q);
+
+                let foundYear = null;
+                let classForced = false;
+
                 if (!classSnaps.empty) {
-                    // Try to find a class with a year group defined
-                    const classWithYear = classSnaps.docs.find(doc => doc.data().yearGroup);
-                    if (classWithYear) {
-                        setUserYearGroup(classWithYear.data().yearGroup);
-                        return;
+                    for (const doc of classSnaps.docs) {
+                        const data = doc.data();
+                        if (data.yearGroup) foundYear = data.yearGroup;
+                        if (data.isLessonMode) classForced = true;
                     }
                 }
-                // If no class found or no year group, set to null
-                setUserYearGroup(null);
+
+                setUserYearGroup(foundYear);
+
+                if (classForced) {
+                    setForceLessonMode(true);
+                    setIsLessonMode(true);
+                } else if (!user.forcedLessonMode) {
+                    setForceLessonMode(false);
+                    // Don't auto-disable lesson mode if user manually enabled it, unless we want to reset?
+                    // Let's keep it persistent if user toggled it? No, requirements imply session based or toggle.
+                    // If not forced, let it be.
+                }
+
             } catch (e) {
-                console.error("Failed to fetch user class", e);
+                console.error("Failed to fetch user class data", e);
                 setUserYearGroup(null);
             }
         };
 
-        fetchYearGroup();
-    }, [user?.uid]);
+        fetchUserData();
+    }, [user?.uid, user?.forcedLessonMode]);
 
     useEffect(() => {
         const unsubscribe = onAuthChange(async (firebaseUser) => {
@@ -519,67 +546,72 @@ const App: React.FC = () => {
                     subtitle={theme.subtitle} 
                     gradient={theme.hubGradient}
                     onReplayTutorial={handleReplayTour}
+                    isLessonMode={isLessonMode}
+                    onToggleLessonMode={setIsLessonMode}
+                    forceLessonMode={forceLessonMode}
                 >
                     <CountdownWidget mocks={activeMocks} userLevel={user.level} userYearGroup={userYearGroup} />
 
                     <div className="w-full max-w-7xl mx-auto space-y-12">
                         
-                        <TeacherFeedbackSection userEmail={user.email} />
+                        {!isLessonMode && <TeacherFeedbackSection userEmail={user.email} />}
 
-                        {/* Section 1: Learning & Knowledge */}
-                        <section className="animate-fade-in">
-                            <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
-                                <span className="text-3xl">🧠</span> Learning & Progress
-                            </h2>
+                        {/* Section 1: Learning & Knowledge (Hidden in Lesson Mode) */}
+                        {!isLessonMode && (
+                            <section className="animate-fade-in">
+                                <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
+                                    <span className="text-3xl">🧠</span> Learning & Progress
+                                </h2>
 
-                            <GradeDashboard user={user} />
+                                <GradeDashboard user={user} />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                <HubCard
-                                    icon={<span className="text-4xl">🎓</span>}
-                                    title="Learning Academy"
-                                    description="Complete interactive lessons, master content with AI tutoring, and track your syllabus progress."
-                                    onClick={() => handleNavigate('learning_hub')}
-                                    shadowColor="shadow-indigo-500/20"
-                                    accentColor="text-indigo-600 hover:text-indigo-700"
-                                    actionText="Start Learning"
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">🎬</span>}
-                                    title="Video Learning"
-                                    description="Watch curated A-Level videos with AI-powered interactive quizzes to check understanding."
-                                    onClick={() => handleNavigate('video_learning')}
-                                    shadowColor="shadow-red-500/20"
-                                    accentColor="text-red-600 hover:text-red-700"
-                                    actionText="Watch & Learn"
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">📅</span>}
-                                    title="Revision Planner"
-                                    description="Optimise your memory with spaced repetition scheduling and interactive forgetting curves."
-                                    onClick={() => handleNavigate('revision_planner')}
-                                    shadowColor="shadow-cyan-500/20"
-                                    accentColor="text-cyan-600 hover:text-cyan-700"
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">🗂️</span>}
-                                    title="Flashcards & Quizzes"
-                                    description="Master key terms and case studies with digital flashcards and custom quizzes."
-                                    onClick={() => handleNavigate('flashcard_quiz_hub')}
-                                    shadowColor="shadow-fuchsia-500/20"
-                                    accentColor="text-fuchsia-600 hover:text-fuchsia-700"
-                                    disabled={!featureFlags.practiceQuizzes}
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">📊</span>}
-                                    title="My Assessments"
-                                    description="View all your past assessment marks, teacher feedback, and overall grade profile."
-                                    onClick={() => handleNavigate('assessment_hub')}
-                                    shadowColor="shadow-lime-500/20"
-                                    accentColor="text-lime-600 hover:text-lime-700"
-                                />
-                            </div>
-                        </section>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    <HubCard
+                                        icon={<span className="text-4xl">🎓</span>}
+                                        title="Learning Academy"
+                                        description="Complete interactive lessons, master content with AI tutoring, and track your syllabus progress."
+                                        onClick={() => handleNavigate('learning_hub')}
+                                        shadowColor="shadow-indigo-500/20"
+                                        accentColor="text-indigo-600 hover:text-indigo-700"
+                                        actionText="Start Learning"
+                                    />
+                                    <HubCard
+                                        icon={<span className="text-4xl">🎬</span>}
+                                        title="Video Learning"
+                                        description="Watch curated A-Level videos with AI-powered interactive quizzes to check understanding."
+                                        onClick={() => handleNavigate('video_learning')}
+                                        shadowColor="shadow-red-500/20"
+                                        accentColor="text-red-600 hover:text-red-700"
+                                        actionText="Watch & Learn"
+                                    />
+                                    <HubCard
+                                        icon={<span className="text-4xl">📅</span>}
+                                        title="Revision Planner"
+                                        description="Optimise your memory with spaced repetition scheduling and interactive forgetting curves."
+                                        onClick={() => handleNavigate('revision_planner')}
+                                        shadowColor="shadow-cyan-500/20"
+                                        accentColor="text-cyan-600 hover:text-cyan-700"
+                                    />
+                                    <HubCard
+                                        icon={<span className="text-4xl">🗂️</span>}
+                                        title="Flashcards & Quizzes"
+                                        description="Master key terms and case studies with digital flashcards and custom quizzes."
+                                        onClick={() => handleNavigate('flashcard_quiz_hub')}
+                                        shadowColor="shadow-fuchsia-500/20"
+                                        accentColor="text-fuchsia-600 hover:text-fuchsia-700"
+                                        disabled={!featureFlags.practiceQuizzes}
+                                    />
+                                    <HubCard
+                                        icon={<span className="text-4xl">📊</span>}
+                                        title="My Assessments"
+                                        description="View all your past assessment marks, teacher feedback, and overall grade profile."
+                                        onClick={() => handleNavigate('assessment_hub')}
+                                        shadowColor="shadow-lime-500/20"
+                                        accentColor="text-lime-600 hover:text-lime-700"
+                                    />
+                                </div>
+                            </section>
+                        )}
 
                         {/* Section 2: Exam Training */}
                         <section className="animate-fade-in [animation-delay:0.1s]">
@@ -612,14 +644,16 @@ const App: React.FC = () => {
                                     accentColor="text-orange-600 hover:text-orange-700"
                                     disabled={!featureFlags.ragAssessment}
                                 />
-                                <HubCard
-                                    icon={<span className="text-4xl">🎯</span>}
-                                    title="Exams"
-                                    description="Access targeted revision materials for upcoming exams and mock series."
-                                    onClick={() => handleNavigate('mocks_hub')}
-                                    shadowColor="shadow-rose-500/20"
-                                    accentColor="text-rose-600 hover:text-rose-700"
-                                />
+                                {!isLessonMode && (
+                                    <HubCard
+                                        icon={<span className="text-4xl">🎯</span>}
+                                        title="Exams"
+                                        description="Access targeted revision materials for upcoming exams and mock series."
+                                        onClick={() => handleNavigate('mocks_hub')}
+                                        shadowColor="shadow-rose-500/20"
+                                        accentColor="text-rose-600 hover:text-rose-700"
+                                    />
+                                )}
                             </div>
                         </section>
 
@@ -629,30 +663,34 @@ const App: React.FC = () => {
                                 <span className="text-3xl">🚀</span> Interactive & Future
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                <HubCard
-                                    icon={<span className="text-4xl">🏛️</span>}
-                                    title="Careers & University"
-                                    description="Explore university courses, find local opportunities, and build your CV."
-                                    onClick={() => handleNavigate('careers_university')}
-                                    shadowColor="shadow-amber-500/20"
-                                    accentColor="text-amber-600 hover:text-amber-700"
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">🎙️</span>}
-                                    title="Podcast Studio"
-                                    description="Create custom audio deep-dives on any topic. Hosted by Alex and Sam."
-                                    onClick={() => handleNavigate('podcast_studio')}
-                                    shadowColor="shadow-pink-500/20"
-                                    accentColor="text-pink-600 hover:text-pink-700"
-                                />
-                                <HubCard
-                                    icon={<span className="text-4xl">🎮</span>}
-                                    title="Game Zone"
-                                    description="Test your knowledge with interactive games like Flappy Geo, Block Blast, and Swipe Quiz."
-                                    onClick={() => handleNavigate('games_hub')}
-                                    shadowColor="shadow-teal-500/20"
-                                    accentColor="text-teal-600 hover:text-teal-700"
-                                />
+                                {!isLessonMode && (
+                                    <>
+                                        <HubCard
+                                            icon={<span className="text-4xl">🏛️</span>}
+                                            title="Careers & University"
+                                            description="Explore university courses, find local opportunities, and build your CV."
+                                            onClick={() => handleNavigate('careers_university')}
+                                            shadowColor="shadow-amber-500/20"
+                                            accentColor="text-amber-600 hover:text-amber-700"
+                                        />
+                                        <HubCard
+                                            icon={<span className="text-4xl">🎙️</span>}
+                                            title="Podcast Studio"
+                                            description="Create custom audio deep-dives on any topic. Hosted by Alex and Sam."
+                                            onClick={() => handleNavigate('podcast_studio')}
+                                            shadowColor="shadow-pink-500/20"
+                                            accentColor="text-pink-600 hover:text-pink-700"
+                                        />
+                                        <HubCard
+                                            icon={<span className="text-4xl">🎮</span>}
+                                            title="Game Zone"
+                                            description="Test your knowledge with interactive games like Flappy Geo, Block Blast, and Swipe Quiz."
+                                            onClick={() => handleNavigate('games_hub')}
+                                            shadowColor="shadow-teal-500/20"
+                                            accentColor="text-teal-600 hover:text-teal-700"
+                                        />
+                                    </>
+                                )}
                                 <HubCard
                                     icon={<span className="text-4xl">🗺️</span>}
                                     title="Case Study Explorer"
@@ -687,6 +725,7 @@ const App: React.FC = () => {
 
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
+            {page === 'lesson_practice_view' && <LessonPracticeView user={user} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
             
             {page === 'games_hub' && <GamesHubView onNavigate={handleNavigate} onStartGame={handleStartGame} user={user} featureFlags={featureFlags} />}
