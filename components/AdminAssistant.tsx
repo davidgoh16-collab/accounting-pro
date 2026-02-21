@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { AuthUser, ChatMessage, ClassGroup } from '../types';
 import { streamAdminChat } from '../services/geminiService';
 import { v4 as uuidv4 } from 'uuid';
-import { Send, Minimize2, Maximize2, X, MessageSquare, Loader2 } from 'lucide-react';
+import { Send, Minimize2, Maximize2, X, MessageSquare, Loader2, Sparkles } from 'lucide-react';
 
 interface ChartData {
     type: 'bar' | 'pie' | 'line' | 'area';
@@ -125,19 +125,20 @@ const AdminAssistant: React.FC<AdminAssistantProps> = ({ users, classes, isFloat
     ]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
-    const [isOpen, setIsOpen] = useState(!isFloating); // If not floating, always open initially (or controlled by parent)
+    const [isOpen, setIsOpen] = useState(!isFloating);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages, isOpen]);
+    }, [messages, isOpen, isStreaming]);
 
-    const handleSend = async () => {
-        if (!input.trim() || isStreaming) return;
+    const handleSend = async (overrideInput?: string) => {
+        const textToSend = overrideInput || input;
+        if (!textToSend.trim() || isStreaming) return;
 
-        const userMsg: ChatMessage = { id: uuidv4(), role: 'user', text: input };
+        const userMsg: ChatMessage = { id: uuidv4(), role: 'user', text: textToSend };
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setIsStreaming(true);
@@ -163,6 +164,13 @@ const AdminAssistant: React.FC<AdminAssistantProps> = ({ users, classes, isFloat
             setIsStreaming(false);
         }
     };
+
+    const suggestions = [
+        "How many GCSE students?",
+        "Show me a chart of user levels",
+        "Which class is the largest?",
+        "List all admin users"
+    ];
 
     if (isFloating) {
         if (!isOpen) {
@@ -199,7 +207,7 @@ const AdminAssistant: React.FC<AdminAssistantProps> = ({ users, classes, isFloat
                 {/* Chat Area */}
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-stone-50 dark:bg-stone-900" ref={scrollRef}>
                     {messages.map(msg => <MessageBubble key={msg.id} message={msg} />)}
-                    {isStreaming && <div className="text-xs text-stone-400 animate-pulse ml-2">Thinking...</div>}
+                    {isStreaming && <div className="text-xs text-stone-400 animate-pulse ml-2 flex items-center gap-2"><Loader2 size={12} className="animate-spin"/> Thinking...</div>}
                 </div>
 
                 {/* Input Area */}
@@ -215,7 +223,7 @@ const AdminAssistant: React.FC<AdminAssistantProps> = ({ users, classes, isFloat
                             disabled={isStreaming}
                         />
                         <button
-                            onClick={handleSend}
+                            onClick={() => handleSend()}
                             disabled={!input.trim() || isStreaming}
                             className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-stone-300 text-white rounded-xl transition-colors"
                         >
@@ -253,34 +261,48 @@ const AdminAssistant: React.FC<AdminAssistantProps> = ({ users, classes, isFloat
                     <div className="flex justify-start">
                         <div className="bg-white dark:bg-stone-800 px-4 py-3 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-2">
                             <Loader2 size={16} className="animate-spin text-indigo-500" />
-                            <span className="text-sm text-stone-500">Analyzing data...</span>
+                            <span className="text-sm text-stone-500">Fetching data & analyzing...</span>
                         </div>
                     </div>
                 )}
             </div>
 
             <div className="p-4 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 shrink-0">
+                {messages.length < 3 && (
+                    <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                        {suggestions.map(s => (
+                            <button
+                                key={s}
+                                onClick={() => handleSend(s)}
+                                className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded-full text-xs text-stone-600 dark:text-stone-300 whitespace-nowrap transition-colors border border-stone-200 dark:border-stone-600"
+                            >
+                                {s}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
                 <div className="max-w-4xl mx-auto flex gap-3">
                     <input
                         type="text"
                         value={input}
                         onChange={e => setInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleSend()}
-                        placeholder="Ask a question like 'How many Year 11 students are there?' or 'Show me the distribution of user levels'..."
+                        placeholder="Ask 'How is John Doe doing in Coasts?' or 'Compare Year 11 class performance'..."
                         className="flex-1 px-5 py-3 bg-stone-100 dark:bg-stone-700 border-transparent focus:bg-white dark:focus:bg-stone-600 border focus:border-indigo-500 rounded-xl text-base outline-none transition-all shadow-inner"
                         disabled={isStreaming}
                         autoFocus
                     />
                     <button
-                        onClick={handleSend}
+                        onClick={() => handleSend()}
                         disabled={!input.trim() || isStreaming}
                         className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-stone-300 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
                     >
                         {isStreaming ? 'Thinking...' : <><span>Send</span> <Send size={18} /></>}
                     </button>
                 </div>
-                <p className="text-center text-xs text-stone-400 mt-2">
-                    AI can make mistakes. Verify important data.
+                <p className="text-center text-xs text-stone-400 mt-2 flex items-center justify-center gap-1">
+                    <Sparkles size={10} /> AI tools can fetch detailed student data on demand.
                 </p>
             </div>
         </div>
