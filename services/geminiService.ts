@@ -311,7 +311,7 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
     }
 };
 
-export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
+export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; questionType?: string; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
     let levelContext = "AQA GCSE Geography (Specification 8035)";
     if (params.level === 'A-Level') levelContext = "AQA A-Level Geography";
@@ -323,6 +323,10 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
         : "Do NOT generate a figure or resource. The question should be answerable without a stimulus.";
 
     let promptExtraInstructions = "";
+    if (params.questionType) {
+        promptExtraInstructions += `Question Type: "${params.questionType}". Ensure the question style matches this description. `;
+    }
+
     if (params.level === 'A-Level' && params.marks === 6) {
         promptExtraInstructions += `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Require TESLA model in mark scheme. `;
     }
@@ -1698,7 +1702,7 @@ export const generateFlashcards = async (topic: string, subTopic: string, level:
     }
 });
 
-export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLevel): Promise<{ score: number, totalMarks: number, feedback: string, studentAnswer: string, questionTitle?: string, unit?: string }> => {
+export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLevel): Promise<{ score: number, totalMarks: number, feedback: string, studentAnswer: string, questionTitle?: string, unit?: string, timeTaken?: string }> => {
     await checkDailyLimit();
     const ai = getAiClient();
     const base64Data = imageBase64.split(',')[1] || imageBase64;
@@ -1711,6 +1715,7 @@ export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLe
     3. The total marks available.
     4. The teacher's feedback or comments (if visible).
     5. The likely question title or topic based on the content.
+    6. Any indication of "Time Taken" or duration written on the page (e.g. "15 mins", "Time: 20m").
 
     Return a JSON object with this structure:
     {
@@ -1719,10 +1724,11 @@ export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLe
         "totalMarks": number,
         "feedback": "string",
         "questionTitle": "string",
-        "unit": "string"
+        "unit": "string",
+        "timeTaken": "string"
     }
 
-    If score/feedback is not visible, estimate or leave blank/0. Use "unit" for broad topics like "Coasts", "Hazards".`;
+    If score/feedback is not visible, estimate or leave blank/0. Use "unit" for broad topics like "Coasts", "Hazards". If no time is found, leave "timeTaken" empty.`;
 
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',

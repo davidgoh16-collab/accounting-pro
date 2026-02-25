@@ -812,7 +812,8 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                 aiFeedback: feedback,
                 completedAt: new Date().toISOString(),
                 aiSummary: summary,
-                level: user.level || 'A-Level'
+                level: user.level || 'A-Level',
+                timeTaken: (practiceMode === 'timed' || practiceMode === 'teacher_led') ? time : undefined
             };
 
             const sessionsRef = collection(db, 'users', user.uid, 'sessions');

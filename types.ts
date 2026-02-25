@@ -31,7 +31,8 @@ export type Page =
     | 'admin'
     | 'full_chat'
     | 'mock_detail'
-    | 'assessment_hub';
+    | 'assessment_hub'
+    | 'walking_talking_mock';
 
 export interface AuthUser {
     uid: string;
@@ -143,6 +144,7 @@ export interface CompletedSession {
     aiSummary: string;
     level: UserLevel;
     practiceMode?: PracticeMode;
+    timeTaken?: number; // In seconds
 }
 
 export type PracticeMode = 'standard' | 'teacher_led' | 'tutor' | 'timed' | 'lesson_practice';
@@ -437,4 +439,22 @@ export interface GradeProfile {
     nea: string;
     overall: string;
     target: string;
+}
+
+export interface WalkingTalkingSession {
+    id: string;
+    userId: string;
+    structureId: string; // "GCSE-Paper1"
+    startTime: string;
+    currentQuestionIndex: number;
+    questions: {
+        id: string;
+        sectionTitle: string;
+        question: Question;
+        status: 'pending' | 'active' | 'completed';
+        studentAnswer?: string;
+        feedback?: AIFeedback;
+        timeTaken?: number;
+    }[];
+    isComplete: boolean;
 }

@@ -35,6 +35,7 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
     const [digitizedTotal, setDigitizedTotal] = useState<number>(0);
     const [digitizedFeedback, setDigitizedFeedback] = useState('');
     const [digitizedAnswer, setDigitizedAnswer] = useState('');
+    const [timeTaken, setTimeTaken] = useState<number>(0); // In minutes for input convenience
 
     const availableUnits = useMemo(() => {
         if (student.level === 'IGCSE') return IGCSE_UNITS;
@@ -100,6 +101,15 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                 // But markStudentAnswer prompt says: ${attachment ? ... }.
                 // Let's pass "See attached image" as text.
                 const feedback = await markStudentAnswer(tempQuestion, "See attached image", attachment);
+
+                // Try to parse detected time (e.g. "15 mins")
+                if (feedback.detectedTimeTaken) {
+                    const match = feedback.detectedTimeTaken.match(/(\d+)/);
+                    if (match) setTimeTaken(parseInt(match[1]));
+                } else {
+                    setTimeTaken(0);
+                }
+
                 setResult({ feedback, question: tempQuestion });
 
             } else {
@@ -112,6 +122,14 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                 setDigitizedFeedback(data.feedback || "No feedback detected.");
                 setDigitizedAnswer(data.studentAnswer || "");
                 if (data.questionTitle && !questionTitle) setQuestionTitle(data.questionTitle); // Auto-fill if empty
+
+                // Parse Time
+                if (data.timeTaken) {
+                    const match = data.timeTaken.match(/(\d+)/);
+                    if (match) setTimeTaken(parseInt(match[1]));
+                } else {
+                    setTimeTaken(0);
+                }
 
                 setResult({ digitized: true }); // Flag to show review UI
             }
@@ -145,7 +163,8 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                     completedAt: timestamp,
                     aiSummary: summary,
                     level: student.level || 'A-Level',
-                    practiceMode: 'lesson_practice'
+                    practiceMode: 'lesson_practice',
+                    timeTaken: timeTaken > 0 ? timeTaken * 60 : undefined // Convert mins to seconds
                 };
 
                 await addDoc(collection(db, 'users', student.uid, 'sessions'), newSession);
@@ -188,7 +207,8 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                     completedAt: timestamp,
                     aiSummary: `Uploaded work for ${unit}: ${digitizedScore}/${digitizedTotal}`,
                     level: student.level || 'A-Level',
-                    practiceMode: 'lesson_practice'
+                    practiceMode: 'lesson_practice',
+                    timeTaken: timeTaken > 0 ? timeTaken * 60 : undefined
                 };
 
                 await addDoc(collection(db, 'users', student.uid, 'sessions'), newSession);
@@ -339,6 +359,18 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                                         </div>
                                         <p className="text-stone-600 dark:text-stone-400 italic">"{result.feedback.overallComment}"</p>
                                     </div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h4 className="font-bold text-stone-700 dark:text-stone-300">Time Taken (Estimated)</h4>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                value={timeTaken}
+                                                onChange={e => setTimeTaken(parseInt(e.target.value))}
+                                                className="w-20 p-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold text-center"
+                                            />
+                                            <span className="text-sm font-bold text-stone-500">Mins</span>
+                                        </div>
+                                    </div>
                                     <AnnotatedAnswerDisplay title="Detailed Feedback" segments={result.feedback.annotatedAnswer} />
                                 </>
                             ) : (
@@ -351,6 +383,10 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                                         <div className="flex-1">
                                             <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Total</label>
                                             <input type="number" value={digitizedTotal} onChange={e => setDigitizedTotal(parseInt(e.target.value))} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Time (Mins)</label>
+                                            <input type="number" value={timeTaken} onChange={e => setTimeTaken(parseInt(e.target.value))} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold" />
                                         </div>
                                     </div>
                                     <div>
