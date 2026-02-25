@@ -53,6 +53,23 @@ const MocksHubView: React.FC<MocksHubViewProps> = ({ user, yearGroup, onNavigate
             <div className="w-full max-w-7xl mx-auto space-y-12">
                 <section className="animate-fade-in">
                     <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
+                        <span className="text-3xl">🎧</span> Exam Simulation
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <HubCard
+                            icon={<span className="text-4xl">🎧</span>}
+                            title="Walking Talking Mocks"
+                            description="Practice with a realistic, AI-guided exam paper. Includes audio briefings and instant marking."
+                            onClick={() => onNavigate('walking_talking_mock')}
+                            shadowColor="shadow-indigo-500/20"
+                            accentColor="text-indigo-600 hover:text-indigo-700"
+                            actionText="Start Simulation"
+                        />
+                    </div>
+                </section>
+
+                <section className="animate-fade-in">
+                    <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3">
                         <span className="text-3xl">📅</span> Upcoming Assessment Windows
                     </h2>
 

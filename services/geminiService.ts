@@ -311,7 +311,7 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
     }
 };
 
-export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
+export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; questionType?: string; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
     let levelContext = "AQA GCSE Geography (Specification 8035)";
     if (params.level === 'A-Level') levelContext = "AQA A-Level Geography";
@@ -323,6 +323,10 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
         : "Do NOT generate a figure or resource. The question should be answerable without a stimulus.";
 
     let promptExtraInstructions = "";
+    if (params.questionType) {
+        promptExtraInstructions += `Question Type: "${params.questionType}". Ensure the question style matches this description. `;
+    }
+
     if (params.level === 'A-Level' && params.marks === 6) {
         promptExtraInstructions += `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Require TESLA model in mark scheme. `;
     }
