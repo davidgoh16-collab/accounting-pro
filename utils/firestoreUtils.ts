@@ -20,10 +20,19 @@ export const sanitizeForFirestore = (obj: any): any => {
         });
     }
 
-    // Preserve special Firestore types (Date, Timestamp, GeoPoint, DocumentReference, etc.)
-    // These usually have a constructor name that is not 'Object'.
-    if (obj.constructor && obj.constructor.name !== 'Object') {
-        return obj;
+    // Preserve special Firestore types (Date, Timestamp, GeoPoint, DocumentReference)
+    // We whitelist these to avoid sanitizing them into plain objects (which might lose their type).
+    // However, we MUST sanitize everything else (custom classes, etc.) to ensure no invalid data slips through.
+    if (obj.constructor) {
+        const name = obj.constructor.name;
+        // Check for standard Date
+        if (name === 'Date' || obj instanceof Date) return obj;
+        // Check for Firestore Timestamp (often has toDate)
+        if (name === 'Timestamp' || (typeof obj.toDate === 'function' && typeof obj.toMillis === 'function')) return obj;
+        // Check for GeoPoint
+        if (name === 'GeoPoint') return obj;
+        // Check for DocumentReference
+        if (name === 'DocumentReference') return obj;
     }
 
     const newObj: any = {};
