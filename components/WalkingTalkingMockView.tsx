@@ -267,6 +267,7 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
             }
 
             setSession(newSession);
+            setLoadingMessage('');
             setStep('briefing');
 
             // Trigger Briefing Speech
