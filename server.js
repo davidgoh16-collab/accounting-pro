@@ -120,6 +120,12 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(port, '0.0.0.0', () => {
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Server listening on port ${port}`);
 });
+
+// Increase timeouts to handle long-running AI generations (5 minutes)
+server.keepAliveTimeout = 300000;
+server.headersTimeout = 305000;
+server.requestTimeout = 300000;
+server.timeout = 300000;
