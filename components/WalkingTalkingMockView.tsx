@@ -250,19 +250,28 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
                         level: user.level || 'GCSE'
                     },
                     status: idx === 0 ? 'active' : 'pending',
-                    // Store the config to generate later
-                    _config: item.qConfig
+                    // Store the config to generate later as a JSON string to avoid nested object issues in Firestore
+                    _config: JSON.stringify(item.qConfig)
                 } as any)),
                 isComplete: false
             };
 
             // Save initial state (sanitize to remove undefined and fix nested arrays)
             const cleanSession = sanitizeForFirestore(newSession);
+
+            // Verify payload structure before save
+            if (!cleanSession.questions || !Array.isArray(cleanSession.questions)) {
+                console.error("Sanitization produced invalid structure:", cleanSession);
+                throw new Error("Failed to generate valid session structure");
+            }
+
             try {
                 await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', newSession.id), cleanSession);
             } catch (e) {
                 console.error("Critical Firestore Save Error (Initial):", e);
-                console.log("Failed Payload:", cleanSession);
+                // Log detailed structure to help debug if it happens again
+                console.log("Failed Payload Keys:", Object.keys(cleanSession));
+                console.log("First Question:", cleanSession.questions[0]);
                 throw e;
             }
 
@@ -284,9 +293,17 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
     const generateNextQuestion = async (index: number) => {
         if (!session || !user) return null;
         const targetQ = session.questions[index];
-        const config = (targetQ as any)._config; // hidden config
+        const configRaw = (targetQ as any)._config; // hidden config
 
-        if (!config) return targetQ.question; // Already generated?
+        if (!configRaw) return targetQ.question; // Already generated?
+
+        let config: any;
+        try {
+            config = typeof configRaw === 'string' ? JSON.parse(configRaw) : configRaw;
+        } catch (e) {
+            console.error("Failed to parse question config", e);
+            return null;
+        }
 
         try {
             const qData = await generateQuestion({
