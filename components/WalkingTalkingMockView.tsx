@@ -256,9 +256,15 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
                 isComplete: false
             };
 
-            // Save initial state (sanitize to remove undefined)
+            // Save initial state (sanitize to remove undefined and fix nested arrays)
             const cleanSession = sanitizeForFirestore(newSession);
-            await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', newSession.id), cleanSession);
+            try {
+                await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', newSession.id), cleanSession);
+            } catch (e) {
+                console.error("Critical Firestore Save Error (Initial):", e);
+                console.log("Failed Payload:", cleanSession);
+                throw e;
+            }
 
             setSession(newSession);
             setStep('briefing');
@@ -381,7 +387,8 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
             const dataToSave = sanitizeForFirestore({ ...session, questions: updatedQuestions });
             await setDoc(sessionRef, dataToSave);
         } catch (e) {
-            console.error("Failed to save session", e);
+            console.error("Failed to save session (Background Update):", e);
+            // Non-critical, but good to log
         }
     };
 
@@ -402,7 +409,7 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
             const cleanUpdatedSession = sanitizeForFirestore(updatedSession);
             await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', session.id), cleanUpdatedSession);
         } catch (e) {
-            console.error("Save failed", e);
+            console.error("Save failed (Next Question):", e);
         }
 
         if (nextIndex >= session.questions.length) {
