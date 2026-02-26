@@ -6,6 +6,7 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, limit 
 import { db } from '../firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { FigureDisplay } from './SharedQuestionComponents';
+import { sanitizeForFirestore } from '../utils/firestoreUtils';
 
 interface WalkingTalkingMockViewProps {
     user: AuthUser;
@@ -43,15 +44,20 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
     useEffect(() => {
         const checkResume = async () => {
             try {
+                // Removed 'where' clause to avoid composite index error
                 const q = query(
                     collection(db, 'users', user.uid, 'walking_talking_sessions'),
-                    where('isComplete', '==', false),
                     orderBy('startTime', 'desc'),
-                    limit(1)
+                    limit(10)
                 );
                 const snapshot = await getDocs(q);
-                if (!snapshot.empty) {
-                    const found = snapshot.docs[0].data() as WalkingTalkingSession;
+
+                // Find first incomplete session in recent results
+                const found = snapshot.docs
+                    .map(d => d.data() as WalkingTalkingSession)
+                    .find(s => !s.isComplete);
+
+                if (found) {
                     setResumeSessionData(found);
                 }
             } catch (e) {
@@ -250,8 +256,9 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
                 isComplete: false
             };
 
-            // Save initial state
-            await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', newSession.id), newSession);
+            // Save initial state (sanitize to remove undefined)
+            const cleanSession = sanitizeForFirestore(newSession);
+            await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', newSession.id), cleanSession);
 
             setSession(newSession);
             setStep('briefing');
@@ -371,7 +378,8 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
         // Save to Firestore (Background)
         try {
             const sessionRef = doc(db, 'users', user.uid, 'walking_talking_sessions', session.id);
-            await setDoc(sessionRef, { ...session, questions: updatedQuestions });
+            const dataToSave = sanitizeForFirestore({ ...session, questions: updatedQuestions });
+            await setDoc(sessionRef, dataToSave);
         } catch (e) {
             console.error("Failed to save session", e);
         }
@@ -391,7 +399,8 @@ const WalkingTalkingMockView: React.FC<WalkingTalkingMockViewProps> = ({ user, o
         }
 
         try {
-            await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', session.id), updatedSession);
+            const cleanUpdatedSession = sanitizeForFirestore(updatedSession);
+            await setDoc(doc(db, 'users', user.uid, 'walking_talking_sessions', session.id), cleanUpdatedSession);
         } catch (e) {
             console.error("Save failed", e);
         }
