@@ -311,7 +311,7 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
     }
 };
 
-export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
+export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; questionType?: string; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
     let levelContext = "AQA GCSE Geography (Specification 8035)";
     if (params.level === 'A-Level') levelContext = "AQA A-Level Geography";
@@ -323,6 +323,10 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
         : "Do NOT generate a figure or resource. The question should be answerable without a stimulus.";
 
     let promptExtraInstructions = "";
+    if (params.questionType) {
+        promptExtraInstructions += `Question Type: "${params.questionType}". Ensure the question style matches this description. `;
+    }
+
     if (params.level === 'A-Level' && params.marks === 6) {
         promptExtraInstructions += `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Require TESLA model in mark scheme. `;
     }
@@ -349,7 +353,7 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
 
     Format as JSON object: { "examYear": 2024, "questionNumber": "01.X", "unit": "${params.unit}", "title": "string", "prompt": "string", "marks": number, "figureDescription": "string", "ao": { "ao1": number, "ao2": number, "ao3": number, "ao4": number }, "caseStudy": { "title": "string", "content": "string" }, "markScheme": { "title": "string", "content": "string" } }`;
 
-    const response = await ai.models.generateContent({
+    const stream = await ai.models.generateContentStream({
         model: 'gemini-3.1-pro-preview',
         contents: fullPrompt,
         config: {
@@ -357,7 +361,13 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
             safetySettings: SAFETY_SETTINGS
         }
     });
-    return JSON.parse(cleanJson(response.text || '{}')) as GeneratedQuestionData;
+
+    let fullText = '';
+    for await (const chunk of stream) {
+        fullText += (chunk.text || '');
+    }
+
+    return JSON.parse(cleanJson(fullText || '{}')) as GeneratedQuestionData;
 });
 
 export const generateFigure = async (description: string): Promise<string> => {
@@ -511,7 +521,7 @@ export const getMotivationalMessage = async (): Promise<string> => {
 export const generateModelAnswer = async (question: Question): Promise<MarkedModelAnswer> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({
+    const stream = await ai.models.generateContentStream({
         model: 'gemini-3.1-pro-preview',
         contents: `Model answer for ${question.prompt}`,
         config: {
@@ -519,7 +529,13 @@ export const generateModelAnswer = async (question: Question): Promise<MarkedMod
             safetySettings: SAFETY_SETTINGS
         }
     });
-    return JSON.parse(cleanJson(response.text || '{}'));
+
+    let fullText = '';
+    for await (const chunk of stream) {
+        fullText += (chunk.text || '');
+    }
+
+    return JSON.parse(cleanJson(fullText || '{}'));
 };
 
 export const streamTutorResponse = async (question: Question, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
@@ -601,7 +617,7 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
         });
     }
 
-    const response = await ai.models.generateContent({
+    const stream = await ai.models.generateContentStream({
         model: 'gemini-3.1-pro-preview',
         contents: [{ role: 'user', parts: parts }],
         config: {
@@ -609,7 +625,13 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
             safetySettings: SAFETY_SETTINGS
         }
     });
-    return JSON.parse(cleanJson(response.text || '{}'));
+
+    let fullText = '';
+    for await (const chunk of stream) {
+        fullText += (chunk.text || '');
+    }
+
+    return JSON.parse(cleanJson(fullText || '{}'));
 };
 
 export const generateSessionSummary = async (question: Question, feedback: AIFeedback): Promise<string> => {
@@ -1400,7 +1422,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
       ]
     }`;
 
-    const response = await ai.models.generateContent({
+    const stream = await ai.models.generateContentStream({
         model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config: {
@@ -1409,7 +1431,12 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         }
     });
 
-    const jsonText = cleanJson(response.text || '{}');
+    let fullText = '';
+    for await (const chunk of stream) {
+        fullText += (chunk.text || '');
+    }
+
+    const jsonText = cleanJson(fullText || '{}');
     try {
         const parsed = JSON.parse(jsonText);
         // Basic validation
@@ -1419,7 +1446,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         return parsed;
     } catch (e) {
         console.error("Failed to parse lesson JSON", e);
-        console.log("Raw text:", response.text);
+        console.log("Raw text:", fullText);
         throw new Error("Failed to generate valid lesson content.");
     }
 });

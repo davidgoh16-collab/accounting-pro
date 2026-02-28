@@ -136,6 +136,7 @@ import LevelSelector from './components/LevelSelector';
 import FullChatView from './components/FullChatView';
 import { AssessmentHubView } from './components/AssessmentHubView';
 import TourOverlay from './components/TourOverlay';
+import WalkingTalkingMockView from './components/WalkingTalkingMockView';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -628,6 +629,14 @@ const App: React.FC = () => {
                                     accentColor="text-blue-600 hover:text-blue-700"
                                 />
                                 <HubCard
+                                    icon={<span className="text-4xl">🎧</span>}
+                                    title="Walking Talking Mocks"
+                                    description="Experience a realistic exam simulation with step-by-step audio guidance and instant marking."
+                                    onClick={() => handleNavigate('walking_talking_mock')}
+                                    shadowColor="shadow-indigo-500/20"
+                                    accentColor="text-indigo-600 hover:text-indigo-700"
+                                />
+                                <HubCard
                                     icon={<span className="text-4xl">🛠️</span>}
                                     title="Skills & Structure"
                                     description="Master command words, essay structures, and essential maths skills."
@@ -722,6 +731,8 @@ const App: React.FC = () => {
             )}
 
             {page === 'assessment_hub' && <AssessmentHubView user={user} onBack={() => handleNavigate('dashboard')} />}
+
+            {page === 'walking_talking_mock' && <WalkingTalkingMockView user={user} onBack={() => handleNavigate('dashboard')} />}
 
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
             {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
