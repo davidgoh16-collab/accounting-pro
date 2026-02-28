@@ -22,9 +22,11 @@ if (fs.existsSync(distPath)) {
         replaceKeyInDirectory(filePath);
       } else if (filePath.endsWith('.js') || filePath.endsWith('.html')) {
         let content = fs.readFileSync(filePath, 'utf8');
-        if (content.includes('REPLACE_ME_GEMINI_API_KEY')) {
+        // We only want to replace the literal string "GEMINI_API_KEY" if it was used as a placeholder
+        // which Vite define will output as "GEMINI_API_KEY"
+        if (content.includes('"GEMINI_API_KEY"')) {
           const actualKey = process.env.GEMINI_API_KEY || '';
-          content = content.replace(/REPLACE_ME_GEMINI_API_KEY/g, actualKey);
+          content = content.replace(/"GEMINI_API_KEY"/g, `"${actualKey}"`);
           fs.writeFileSync(filePath, content, 'utf8');
           console.log(`Replaced API key placeholder in ${file}`);
         }
