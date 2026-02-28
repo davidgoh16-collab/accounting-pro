@@ -6,8 +6,40 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import fs from 'fs';
+
 const app = express();
 const port = process.env.PORT || 8080;
+
+// Replace placeholder API key in built files before serving if running in production
+const distPath = path.join(__dirname, 'dist');
+if (fs.existsSync(distPath)) {
+  const replaceKeyInDirectory = (dir) => {
+    fs.readdirSync(dir).forEach(file => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+        replaceKeyInDirectory(filePath);
+      } else if (filePath.endsWith('.js') || filePath.endsWith('.html')) {
+        let content = fs.readFileSync(filePath, 'utf8');
+        // We only want to replace the literal string "GEMINI_API_KEY" if it was used as a placeholder
+        // which Vite define will output as "GEMINI_API_KEY"
+        if (content.includes('"GEMINI_API_KEY"')) {
+          const actualKey = process.env.GEMINI_API_KEY || '';
+          content = content.replace(/"GEMINI_API_KEY"/g, `"${actualKey}"`);
+          fs.writeFileSync(filePath, content, 'utf8');
+          console.log(`Replaced API key placeholder in ${file}`);
+        }
+      }
+    });
+  };
+
+  try {
+    replaceKeyInDirectory(distPath);
+  } catch (err) {
+    console.error("Error replacing API key placeholder:", err);
+  }
+}
 
 // Security Headers
 app.disable('x-powered-by');
