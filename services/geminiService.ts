@@ -735,12 +735,25 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     // Summary is generated automatically after marking. It should count as part of the flow.
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: `Summarize session.`,
-        config: { safetySettings: SAFETY_SETTINGS }
-    });
-    return response.text?.trim() || 'Session complete.';
+    const prompt = `You are a geography teacher writing a concise, one-sentence summary for a student's practice session.
+
+    Question Title: ${question.title || question.prompt}
+    Student Score: ${feedback.score}/${feedback.totalMarks}
+    Teacher Feedback: ${feedback.overallComment}
+
+    Write a short summary (maximum 15 words) of how the student performed on this specific topic. Do NOT ask for more details. Just write the summary sentence based on the provided information. Example format: "Scored 4/4 on tectonic hazards with excellent explanation of plate margins." or "Struggled with longshore drift, scoring 2/6. Needs to review coastal processes."`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-pro-preview',
+            contents: prompt,
+            config: { safetySettings: SAFETY_SETTINGS }
+        });
+        return response.text?.trim() || 'Session complete.';
+    } catch (e) {
+        console.error("Error generating session summary", e);
+        return 'Session complete.';
+    }
 };
 
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {

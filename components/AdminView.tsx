@@ -786,7 +786,7 @@ const StudentInspector: React.FC<{ user: AuthUser, onImpersonate: (u: AuthUser) 
                 {activeTab === 'sessions' && (
                     viewSession ? 
                     <SessionDetailView session={viewSession} onBack={() => setViewSession(null)} /> :
-                    <SessionAnalysisView onViewSession={setViewSession} user={user} onBack={() => setActiveTab('overview')} />
+                    <SessionAnalysisView onViewSession={setViewSession} user={user} onBack={() => setActiveTab('overview')} isAdmin={true} />
                 )}
                 {activeTab === 'games' && <GameAnalysisView user={user} onBack={() => setActiveTab('overview')} />}
                 {activeTab === 'chats' && <ChatLogViewer user={user} />}

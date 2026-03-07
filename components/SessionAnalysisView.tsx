@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { CompletedSession, AuthUser } from '../types';
 import { db } from '../firebase';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import HubLayout from './HubLayout';
 
 interface PerformanceStat {
@@ -22,6 +22,7 @@ interface SessionAnalysisViewProps {
     onViewSession: (session: CompletedSession) => void;
     user: AuthUser;
     onBack: () => void;
+    isAdmin?: boolean;
 }
 
 const StatCard: React.FC<{ title: string; value: string; }> = ({ title, value }) => (
@@ -47,9 +48,22 @@ const PerformanceBar: React.FC<{ label: string; percentage: number; valueText: s
 };
 
 
-const SessionAnalysisView: React.FC<SessionAnalysisViewProps> = ({ onViewSession, user, onBack }) => {
+const SessionAnalysisView: React.FC<SessionAnalysisViewProps> = ({ onViewSession, user, onBack, isAdmin }) => {
     const [sessions, setSessions] = useState<CompletedSession[]>([]);
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+    const handleDeleteSession = async (session: CompletedSession, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (window.confirm(`Are you sure you want to delete this session? This action cannot be undone.`)) {
+            try {
+                await deleteDoc(doc(db, `users/${user.uid}/completed_sessions`, session.id));
+                setSessions(prev => prev.filter(s => s.id !== session.id));
+            } catch (error) {
+                console.error("Error deleting session:", error);
+                alert("Failed to delete the session. Please try again.");
+            }
+        }
+    };
 
     useEffect(() => {
         if (!user) return;
@@ -173,18 +187,29 @@ const SessionAnalysisView: React.FC<SessionAnalysisViewProps> = ({ onViewSession
     };
 
     const SessionCard = ({ session }: { session: CompletedSession }) => (
-        <button key={session.id} onClick={() => onViewSession(session)} className="w-full text-left p-4 bg-stone-50/50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-white dark:hover:bg-stone-800 hover:shadow-md transition-all duration-300">
+        <div key={session.id} className="relative w-full text-left p-4 bg-stone-50/50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-white dark:hover:bg-stone-800 hover:shadow-md transition-all duration-300 group cursor-pointer" onClick={() => onViewSession(session)}>
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-grow">
                     <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full inline-block mb-2">{session.question.unit}</p>
-                    <p className="font-semibold text-stone-700 dark:text-stone-200">{session.aiSummary}</p>
+                    <p className="font-semibold text-stone-700 dark:text-stone-200 pr-8">{session.aiSummary}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                     <p className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">Score: {session.aiFeedback.score}/{session.aiFeedback.totalMarks}</p>
                     <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{new Date(session.completedAt).toLocaleDateString()}</p>
                 </div>
             </div>
-        </button>
+            {isAdmin && (
+                <button
+                    onClick={(e) => handleDeleteSession(session, e)}
+                    className="absolute top-4 right-4 p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                    title="Delete Session"
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            )}
+        </div>
     );
 
     return (
