@@ -1,11 +1,10 @@
 
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { AuthUser, CompletedSession, Question, AIFeedback, UserLevel, TeacherAssessment } from '../types';
+import { AuthUser, CompletedSession, Question, AIFeedback, UserLevel } from '../types';
 import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS } from '../constants';
-import { markStudentAnswer, digitizeHandwrittenWork, generateSessionSummary, getImageLimitStatus } from '../services/geminiService';
+import { generateSessionSummary, processMultipleQuestionsFromWork } from '../services/geminiService';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { AnnotatedAnswerDisplay } from './SharedQuestionComponents';
 
 interface LessonPracticeViewProps {
     user: AuthUser; // The currently logged in user
@@ -13,29 +12,44 @@ interface LessonPracticeViewProps {
     onBack: () => void;
 }
 
+interface QueuedQuestion {
+    id: string;
+    mode: 'mark_my_work' | 'record_existing';
+    unit: string;
+    questionTitle: string;
+    maxMarks: number;
+
+    // Processing results
+    status: 'processed' | 'error' | 'saved';
+    result?: any;
+
+    // Manual overrides
+    digitizedScore?: number;
+    digitizedTotal?: number;
+    digitizedFeedback?: string;
+    digitizedAnswer?: string;
+    timeTaken?: number;
+}
+
+
 const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUser, onBack }) => {
     const student = targetUser || user;
-    const [mode, setMode] = useState<'mark_my_work' | 'record_existing'>('mark_my_work');
 
-    // Form State
+    // Session State
+    const [sessionName, setSessionName] = useState('');
+
+    // Queue State
+    const [queue, setQueue] = useState<QueuedQuestion[]>([]);
+
+    // Form State for new upload
+    const [mode, setMode] = useState<'mark_my_work' | 'record_existing'>('mark_my_work');
     const [unit, setUnit] = useState<string>('');
-    const [questionTitle, setQuestionTitle] = useState('');
-    const [maxMarks, setMaxMarks] = useState<number>(4);
     const [attachment, setAttachment] = useState<{ data: string; mimeType: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Processing State
     const [isProcessing, setIsProcessing] = useState(false);
-    const [statusMessage, setStatusMessage] = useState('');
-    const [result, setResult] = useState<any>(null); // To store intermediate result before saving
-    const [isSaved, setIsSaved] = useState(false);
-
-    // "Record Existing" specific state (for manual adjustment after digitization)
-    const [digitizedScore, setDigitizedScore] = useState<number>(0);
-    const [digitizedTotal, setDigitizedTotal] = useState<number>(0);
-    const [digitizedFeedback, setDigitizedFeedback] = useState('');
-    const [digitizedAnswer, setDigitizedAnswer] = useState('');
-    const [timeTaken, setTimeTaken] = useState<number>(0); // In minutes for input convenience
+    const [isSavingAll, setIsSavingAll] = useState(false);
 
     const availableUnits = useMemo(() => {
         if (student.level === 'IGCSE') return IGCSE_UNITS;
@@ -66,124 +80,23 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
         }
     };
 
-    const removeAttachment = () => {
-        setAttachment(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        setResult(null);
-        setIsSaved(false);
-    };
-
-    const handleProcess = async () => {
-        if (!attachment || !questionTitle.trim()) return;
+    const handleProcessUpload = async () => {
+        if (!attachment) return;
         setIsProcessing(true);
-        setStatusMessage(mode === 'mark_my_work' ? 'AI is marking your work...' : 'Digitizing your marked paper...');
-        setResult(null);
 
         try {
-            if (mode === 'mark_my_work') {
-                // Construct a temporary Question object for the AI context
+            const results = await processMultipleQuestionsFromWork(attachment, student.level || 'A-Level', mode);
+
+            const newQueuedItems = results.map((res, index) => {
+
                 const tempQuestion: Question = {
-                    id: `lesson-${Date.now()}`,
+                    id: `lesson-${Date.now()}-${index}`,
                     examYear: new Date().getFullYear(),
                     questionNumber: 'Lesson',
                     unit: unit,
-                    title: questionTitle,
-                    prompt: questionTitle, // Assuming title is the prompt for lesson practice
-                    marks: maxMarks,
-                    ao: { ao1: 0, ao2: 0, ao3: 0 }, // Generic
-                    caseStudy: { title: 'N/A', content: 'N/A' },
-                    markScheme: { title: 'N/A', content: 'Use expert judgment.' },
-                    level: student.level || 'A-Level'
-                };
-
-                // Use 'Lesson Answer' as text if only image is provided (the AI will OCR it internally in markStudentAnswer?)
-                // Actually markStudentAnswer takes studentAnswer string. If blank, it relies on attachment.
-                // But markStudentAnswer prompt says: ${attachment ? ... }.
-                // Let's pass "See attached image" as text.
-                const feedback = await markStudentAnswer(tempQuestion, "See attached image", attachment);
-
-                // Try to parse detected time (e.g. "15 mins")
-                if (feedback.detectedTimeTaken) {
-                    const match = feedback.detectedTimeTaken.match(/(\d+)/);
-                    if (match) setTimeTaken(parseInt(match[1]));
-                } else {
-                    setTimeTaken(0);
-                }
-
-                setResult({ feedback, question: tempQuestion });
-
-            } else {
-                // Record Existing
-                const data = await digitizeHandwrittenWork(`data:${attachment.mimeType};base64,${attachment.data}`, student.level || 'A-Level');
-
-                // Set state for manual review
-                setDigitizedScore(data.score || 0);
-                setDigitizedTotal(data.totalMarks || maxMarks); // Fallback to user input if not found
-                setDigitizedFeedback(data.feedback || "No feedback detected.");
-                setDigitizedAnswer(data.studentAnswer || "");
-                if (data.questionTitle && !questionTitle) setQuestionTitle(data.questionTitle); // Auto-fill if empty
-
-                // Parse Time
-                if (data.timeTaken) {
-                    const match = data.timeTaken.match(/(\d+)/);
-                    if (match) setTimeTaken(parseInt(match[1]));
-                } else {
-                    setTimeTaken(0);
-                }
-
-                setResult({ digitized: true }); // Flag to show review UI
-            }
-        } catch (error) {
-            console.error("Processing failed", error);
-            alert("Failed to process the image. Please try again.");
-        } finally {
-            setIsProcessing(false);
-            setStatusMessage('');
-        }
-    };
-
-    const handleSave = async () => {
-        if (!result) return;
-        setIsProcessing(true);
-        setStatusMessage('Saving to your profile...');
-
-        try {
-            const timestamp = new Date().toISOString();
-
-            if (mode === 'mark_my_work') {
-                // Save as CompletedSession
-                const { feedback, question } = result;
-                const summary = await generateSessionSummary(question, feedback);
-
-                const newSession: CompletedSession = {
-                    id: `lesson-session-${Date.now()}`,
-                    question: question,
-                    studentAnswer: "Handwritten work uploaded.",
-                    aiFeedback: feedback,
-                    completedAt: timestamp,
-                    aiSummary: summary,
-                    level: student.level || 'A-Level',
-                    practiceMode: 'lesson_practice',
-                    timeTaken: timeTaken > 0 ? timeTaken * 60 : undefined // Convert mins to seconds
-                };
-
-                await addDoc(collection(db, 'users', student.uid, 'sessions'), newSession);
-
-            } else {
-                // Save as TeacherAssessment (or CompletedSession?)
-                // The prompt says "feeds into the session analysis".
-                // Session Analysis reads from 'sessions' collection (CompletedSession).
-                // TeacherFeedbackSection reads from 'student_performance_records' (TeacherAssessment).
-                // If we want it in Session Analysis, it MUST be a CompletedSession.
-
-                const tempQuestion: Question = {
-                    id: `lesson-scan-${Date.now()}`,
-                    examYear: new Date().getFullYear(),
-                    questionNumber: 'Scanned',
-                    unit: unit,
-                    title: questionTitle,
-                    prompt: questionTitle,
-                    marks: digitizedTotal,
+                    title: res.questionTitle || 'Unknown Question',
+                    prompt: res.questionTitle || 'Unknown Question',
+                    marks: res.maxMarks || 4,
                     ao: { ao1: 0, ao2: 0, ao3: 0 },
                     caseStudy: { title: 'N/A', content: 'N/A' },
                     markScheme: { title: 'N/A', content: 'N/A' },
@@ -191,131 +104,186 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                 };
 
                 const feedbackObj: AIFeedback = {
-                    score: digitizedScore,
-                    totalMarks: digitizedTotal,
-                    overallComment: digitizedFeedback,
+                    score: res.score || 0,
+                    totalMarks: res.maxMarks || 4,
+                    overallComment: res.overallComment || "No comments.",
                     strengths: [],
                     improvements: [],
-                    annotatedAnswer: [{ text: digitizedAnswer, ao: 'Generic', feedback: digitizedFeedback }]
+                    annotatedAnswer: res.annotatedAnswer || [{ text: res.studentAnswer || "No transcript", ao: 'Generic', feedback: res.overallComment || "" }]
                 };
 
-                const newSession: CompletedSession = {
-                    id: `lesson-scan-${Date.now()}`,
-                    question: tempQuestion,
-                    studentAnswer: digitizedAnswer, // The transcribed text
-                    aiFeedback: feedbackObj,
-                    completedAt: timestamp,
-                    aiSummary: `Uploaded work for ${unit}: ${digitizedScore}/${digitizedTotal}`,
-                    level: student.level || 'A-Level',
-                    practiceMode: 'lesson_practice',
-                    timeTaken: timeTaken > 0 ? timeTaken * 60 : undefined
+                return {
+                    id: `${Date.now()}-${index}`,
+                    mode,
+                    unit,
+                    questionTitle: res.questionTitle || `Extracted Question ${index + 1}`,
+                    maxMarks: res.maxMarks || 4,
+                    status: 'processed' as const,
+                    result: { feedback: feedbackObj, question: tempQuestion },
+                    digitizedScore: res.score || 0,
+                    digitizedTotal: res.maxMarks || 4,
+                    digitizedFeedback: res.overallComment || "",
+                    digitizedAnswer: res.studentAnswer || "",
+                    timeTaken: res.timeTaken || 0
                 };
+            });
 
-                await addDoc(collection(db, 'users', student.uid, 'sessions'), newSession);
-            }
-
-            setIsSaved(true);
-            setStatusMessage('Saved successfully!');
-            setTimeout(() => {
-                if (targetUser) {
-                    // If admin, maybe stay or show success?
-                    alert("Uploaded successfully for " + student.displayName);
-                    onBack();
-                } else {
-                    onBack();
-                }
-            }, 1000);
+            setQueue([...queue, ...newQueuedItems]);
+            setAttachment(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
 
         } catch (error) {
-            console.error("Save failed", error);
-            alert("Failed to save.");
+            console.error("Error processing work", error);
+            alert("Failed to process the document. It might be too blurry or not contain clear questions.");
         } finally {
             setIsProcessing(false);
         }
     };
 
+    const handleRemoveFromQueue = (id: string) => {
+        setQueue(queue.filter(q => q.id !== id));
+    };
+
+
+    const handleSaveAll = async () => {
+        if (!sessionName.trim()) {
+            alert("Please provide a session name.");
+            return;
+        }
+
+        setIsSavingAll(true);
+        const timestamp = new Date().toISOString();
+        let currentQueue = [...queue];
+
+        for (let i = 0; i < currentQueue.length; i++) {
+            const item = currentQueue[i];
+            if (item.status === 'processed') {
+                try {
+                    const { feedback, question } = item.result;
+
+                    // Always try to generate summary from AI if 'mark_my_work' or use teacher feedback
+                    let summary = "Scanned Feedback";
+                    if (item.mode === 'mark_my_work') {
+                         summary = await generateSessionSummary(question, feedback);
+                    } else {
+                         summary = item.digitizedFeedback || "Teacher Feedback";
+                    }
+
+                    // Update question attributes with any manual overrides before saving
+                    question.title = item.questionTitle;
+                    question.prompt = item.questionTitle;
+                    question.marks = item.digitizedTotal || item.maxMarks;
+
+                    feedback.score = item.digitizedScore || 0;
+                    feedback.totalMarks = item.digitizedTotal || item.maxMarks;
+                    feedback.overallComment = item.digitizedFeedback || feedback.overallComment;
+
+
+                    const newSession: CompletedSession = {
+                        id: `lesson-session-${Date.now()}-${i}`,
+                        question: question,
+                        studentAnswer: item.digitizedAnswer || "Handwritten work uploaded.",
+                        aiFeedback: feedback,
+                        completedAt: timestamp,
+                        aiSummary: summary,
+                        level: student.level || 'A-Level',
+                        practiceMode: 'lesson_practice',
+                        timeTaken: item.timeTaken ? item.timeTaken * 60 : undefined,
+                        sessionName: sessionName.trim()
+                    };
+
+                    await addDoc(collection(db, 'users', student.uid, 'sessions'), newSession);
+                    currentQueue[i] = { ...item, status: 'saved' };
+
+                } catch (error) {
+                    console.error("Error saving item", item.id, error);
+                    currentQueue[i] = { ...item, status: 'error' };
+                }
+            }
+        }
+
+        setQueue([...currentQueue]);
+        setIsSavingAll(false);
+
+        if (currentQueue.every(q => q.status === 'saved')) {
+            alert("All items saved successfully!");
+            onBack();
+        }
+    };
+
+    // Updates an item in the queue (used for manual overrides)
+    const updateQueueItem = (id: string, updates: Partial<QueuedQuestion>) => {
+        setQueue(queue.map(q => q.id === id ? { ...q, ...updates } : q));
+    };
+
     return (
-        <div className="min-h-screen bg-stone-50 dark:bg-stone-950 p-4 md:p-8 animate-fade-in">
-            <button
-                onClick={onBack}
-                className="mb-6 flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full shadow-sm hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold transition-all"
-            >
-                <span>&larr;</span> Back
-            </button>
+        <div className="min-h-screen bg-stone-100 dark:bg-stone-900 p-4 md:p-8">
+            <div className="max-w-4xl mx-auto space-y-6">
 
-            <div className="max-w-3xl mx-auto">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-3">
-                        <span className="text-4xl">📝</span> Lesson Practice
-                    </h1>
-                    <p className="text-stone-600 dark:text-stone-400 mt-2">
-                        Upload your handwritten work {targetUser ? `for ${targetUser.displayName}` : ''}. The AI can mark it for you, or you can record a mark you've already received.
-                    </p>
-                </header>
+                {/* Header */}
+                <div className="flex items-center gap-4 mb-8">
+                    <button onClick={onBack} className="p-2 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-full transition">
+                        <svg className="w-6 h-6 text-stone-600 dark:text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </button>
+                    <div>
+                        <h1 className="text-3xl font-black text-stone-800 dark:text-stone-100">📝 Lesson Practice Upload</h1>
+                        <p className="text-stone-500">Upload handwritten responses (with multiple questions per page). The AI will extract and process them automatically.</p>
+                    </div>
+                </div>
 
-                <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-800 p-6 md:p-8 space-y-8">
+                {/* Session Configuration */}
+                <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6">
+                    <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Session Name</label>
+                    <input
+                        type="text"
+                        value={sessionName}
+                        onChange={e => setSessionName(e.target.value)}
+                        placeholder="e.g., Hazards session 1"
+                        className="w-full p-3 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-stone-100 focus:ring-2 focus:ring-indigo-500 text-lg font-bold"
+                    />
+                </div>
 
-                    {/* Mode Toggle */}
-                    <div className="flex bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
+                {/* File Upload Section */}
+                <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6">
+                    <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Upload Work</h2>
+
+                    <div className="flex gap-2 p-1 bg-stone-100 dark:bg-stone-800 rounded-xl mb-6">
                         <button
-                            onClick={() => { setMode('mark_my_work'); setResult(null); }}
-                            className={`flex-1 py-3 rounded-lg font-bold text-sm transition-all ${mode === 'mark_my_work' ? 'bg-white dark:bg-stone-700 shadow text-indigo-600 dark:text-indigo-400' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800'}`}
+                            onClick={() => setMode('mark_my_work')}
+                            className={`flex-1 py-2 rounded-lg font-bold text-sm transition ${mode === 'mark_my_work' ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
                         >
                             🤖 AI Mark My Work
                         </button>
                         <button
-                            onClick={() => { setMode('record_existing'); setResult(null); }}
-                            className={`flex-1 py-3 rounded-lg font-bold text-sm transition-all ${mode === 'record_existing' ? 'bg-white dark:bg-stone-700 shadow text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800'}`}
+                            onClick={() => setMode('record_existing')}
+                            className={`flex-1 py-2 rounded-lg font-bold text-sm transition ${mode === 'record_existing' ? 'bg-white dark:bg-stone-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'}`}
                         >
                             📸 Record Existing Mark
                         </button>
                     </div>
 
-                    {/* Form Inputs */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Unit / Topic</label>
-                            <select
-                                value={unit}
-                                onChange={e => setUnit(e.target.value)}
-                                className="w-full p-3 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-stone-100 focus:ring-2 focus:ring-indigo-500"
-                            >
-                                <option value="" disabled>Select Unit</option>
-                                {availableUnits.map(u => <option key={u} value={u}>{u}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Max Marks</label>
-                            <select
-                                value={maxMarks}
-                                onChange={e => setMaxMarks(parseInt(e.target.value))}
-                                className="w-full p-3 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-stone-100 focus:ring-2 focus:ring-indigo-500"
-                            >
-                                {[4, 6, 8, 9, 12, 20].map(m => <option key={m} value={m}>{m} Marks</option>)}
-                            </select>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Question Title / Prompt</label>
-                            <input
-                                type="text"
-                                value={questionTitle}
-                                onChange={e => setQuestionTitle(e.target.value)}
-                                placeholder="E.g. Explain the formation of a spit..."
-                                className="w-full p-3 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-stone-100 focus:ring-2 focus:ring-indigo-500"
-                            />
-                        </div>
+                    <div className="mb-6">
+                        <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Unit / Topic for these questions</label>
+                        <select
+                            value={unit}
+                            onChange={e => setUnit(e.target.value)}
+                            className="w-full p-3 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-stone-100 focus:ring-2 focus:ring-indigo-500"
+                        >
+                            {availableUnits.map(u => <option key={u} value={u}>{u}</option>)}
+                        </select>
                     </div>
 
-                    {/* File Upload */}
-                    <div className="border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-xl p-6 bg-stone-50 dark:bg-stone-800/50 text-center">
+                    <div className="border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-xl p-6 bg-stone-50 dark:bg-stone-800/50 text-center mb-6">
                         {!attachment ? (
                             <>
                                 <span className="text-4xl block mb-2">📷</span>
-                                <p className="font-bold text-stone-700 dark:text-stone-300">Upload Photo of Work</p>
-                                <p className="text-sm text-stone-500 mb-4">Ensure handwriting is clear and legible.</p>
+                                <p className="font-bold text-stone-700 dark:text-stone-300">Upload Photo/PDF</p>
+                                <p className="text-sm text-stone-500 mb-4">Contains multiple questions? We'll extract them all.</p>
                                 <label className="inline-block px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg cursor-pointer transition">
-                                    Select Image
-                                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+                                    Select File
+                                    <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileSelect} />
                                 </label>
                             </>
                         ) : (
@@ -323,94 +291,89 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">🖼️</span>
                                     <div className="text-left">
-                                        <p className="font-bold text-sm text-stone-800 dark:text-stone-200">Image Attached</p>
+                                        <p className="font-bold text-sm text-stone-800 dark:text-stone-200">File Attached</p>
                                         <p className="text-xs text-stone-500">{attachment.mimeType}</p>
                                     </div>
                                 </div>
-                                <button onClick={removeAttachment} className="text-red-500 hover:bg-red-50 p-2 rounded-lg font-bold text-sm">Remove</button>
+                                <button onClick={() => { setAttachment(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-red-500 hover:bg-red-50 p-2 rounded-lg font-bold text-sm">Remove</button>
                             </div>
                         )}
                     </div>
 
-                    {/* Process Button */}
-                    {!result && (
-                        <button
-                            onClick={handleProcess}
-                            disabled={isProcessing || !attachment || !questionTitle.trim()}
-                            className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:transform-none"
-                        >
-                            {isProcessing ? statusMessage : 'Process & Analyze'}
-                        </button>
-                    )}
+                    <button
+                        onClick={handleProcessUpload}
+                        disabled={!attachment || isProcessing}
+                        className="w-full py-4 bg-stone-800 dark:bg-stone-100 text-white dark:text-stone-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:bg-stone-900 dark:hover:bg-white transition disabled:opacity-50"
+                    >
+                        {isProcessing ? '🤖 Scanning and Extracting Questions...' : 'Process Uploaded Work'}
+                    </button>
+                </div>
 
-                    {/* Results Area */}
-                    {result && (
-                        <div className="animate-fade-in border-t border-stone-200 dark:border-stone-800 pt-8">
-                            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4">
-                                {mode === 'mark_my_work' ? 'AI Assessment' : 'Confirm Details'}
-                            </h3>
+                {/* Queue Display & Processing */}
+                {queue.length > 0 && (
+                    <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6">
+                        <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Review Extracted Questions ({queue.length})</h2>
 
-                            {mode === 'mark_my_work' ? (
-                                <>
-                                    <div className="bg-stone-50 dark:bg-stone-800 rounded-xl p-4 mb-6">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="font-bold text-stone-700 dark:text-stone-300">Score Awarded</span>
-                                            <span className="text-2xl font-black text-emerald-600">{result.feedback.score} / {result.feedback.totalMarks}</span>
-                                        </div>
-                                        <p className="text-stone-600 dark:text-stone-400 italic">"{result.feedback.overallComment}"</p>
-                                    </div>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h4 className="font-bold text-stone-700 dark:text-stone-300">Time Taken (Estimated)</h4>
-                                        <div className="flex items-center gap-2">
+                        <div className="space-y-6">
+                            {queue.map((item, index) => (
+                                <div key={item.id} className="border border-stone-200 dark:border-stone-700 rounded-xl p-4 bg-stone-50 dark:bg-stone-800/30">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-full pr-4">
+                                            <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Question {index + 1} Prompt</label>
                                             <input
-                                                type="number"
-                                                value={timeTaken}
-                                                onChange={e => setTimeTaken(parseInt(e.target.value))}
-                                                className="w-20 p-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold text-center"
+                                                type="text"
+                                                value={item.questionTitle}
+                                                onChange={e => updateQueueItem(item.id, { questionTitle: e.target.value })}
+                                                className="w-full p-2 mb-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 font-bold"
                                             />
-                                            <span className="text-sm font-bold text-stone-500">Mins</span>
+                                            <p className="text-sm text-stone-500">{item.unit} • {item.mode === 'mark_my_work' ? 'AI Marked' : 'Digitized Record'}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                            {item.status === 'saved' && <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-bold rounded-full">Saved</span>}
+                                            {item.status !== 'saved' && (
+                                                <button onClick={() => handleRemoveFromQueue(item.id)} className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1 rounded">
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
-                                    <AnnotatedAnswerDisplay title="Detailed Feedback" segments={result.feedback.annotatedAnswer} />
-                                </>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="flex gap-4">
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Score</label>
-                                            <input type="number" value={digitizedScore} onChange={e => setDigitizedScore(parseInt(e.target.value))} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold" />
+
+                                    {/* Review Area for Processed Items */}
+                                    <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Score</label>
+                                                <input type="number" value={item.digitizedScore || 0} onChange={e => updateQueueItem(item.id, { digitizedScore: parseInt(e.target.value) || 0 })} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-bold text-emerald-600" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Max Marks</label>
+                                                <input type="number" value={item.digitizedTotal || 4} onChange={e => updateQueueItem(item.id, { digitizedTotal: parseInt(e.target.value) || 4, maxMarks: parseInt(e.target.value) || 4 })} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Time (Mins)</label>
+                                                <input type="number" value={item.timeTaken || 0} onChange={e => updateQueueItem(item.id, { timeTaken: parseInt(e.target.value) || 0 })} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm" />
+                                            </div>
+                                            <div className="md:col-span-3">
+                                                <label className="block text-xs font-bold uppercase text-stone-500 mb-1">{item.mode === 'mark_my_work' ? 'AI Assessment / Comments' : 'Teacher Feedback'}</label>
+                                                <textarea value={item.digitizedFeedback || ''} onChange={e => updateQueueItem(item.id, { digitizedFeedback: e.target.value })} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm h-24 italic" />
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Total</label>
-                                            <input type="number" value={digitizedTotal} onChange={e => setDigitizedTotal(parseInt(e.target.value))} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Time (Mins)</label>
-                                            <input type="number" value={timeTaken} onChange={e => setTimeTaken(parseInt(e.target.value))} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Teacher Feedback</label>
-                                        <textarea value={digitizedFeedback} onChange={e => setDigitizedFeedback(e.target.value)} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-sm h-24" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Digitized Answer Text</label>
-                                        <textarea value={digitizedAnswer} onChange={e => setDigitizedAnswer(e.target.value)} className="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-sm h-32" />
                                     </div>
                                 </div>
-                            )}
-
-                            <div className="flex gap-4 mt-8">
-                                <button onClick={() => setResult(null)} className="flex-1 py-3 border border-stone-300 dark:border-stone-700 rounded-xl font-bold text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition">
-                                    Try Again / Edit
-                                </button>
-                                <button onClick={handleSave} disabled={isSaved || isProcessing} className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition disabled:opacity-50">
-                                    {isSaved ? 'Saved!' : 'Save Result'}
-                                </button>
-                            </div>
+                            ))}
                         </div>
-                    )}
-                </div>
+
+                        {queue.some(q => q.status === 'processed') && (
+                            <button
+                                onClick={handleSaveAll}
+                                disabled={isSavingAll || isProcessing}
+                                className="w-full mt-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition disabled:opacity-50"
+                            >
+                                {isSavingAll ? 'Saving Session...' : `Save All Questions to "${sessionName || 'Session'}"`}
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
