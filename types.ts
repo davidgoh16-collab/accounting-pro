@@ -145,6 +145,7 @@ export interface CompletedSession {
     level: UserLevel;
     practiceMode?: PracticeMode;
     timeTaken?: number; // In seconds
+    sessionName?: string;
 }
 
 export type PracticeMode = 'standard' | 'teacher_led' | 'tutor' | 'timed' | 'lesson_practice';
