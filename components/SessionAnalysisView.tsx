@@ -186,12 +186,32 @@ const SessionAnalysisView: React.FC<SessionAnalysisViewProps> = ({ onViewSession
         );
     };
 
+    const getDisplaySummary = (session: CompletedSession) => {
+        const summary = session.aiSummary || "";
+        // Check for old, broken AI responses requesting context or being too generic
+        const brokenPhrases = [
+            "please provide me with",
+            "absolutely! to summarize a session",
+            "to summarize a session for you",
+            "i need the ***content*** of that session",
+            "i need to know things like",
+            "what kind of session was it"
+        ];
+
+        const isBroken = brokenPhrases.some(phrase => summary.toLowerCase().includes(phrase));
+
+        if (isBroken || summary.length > 200 || summary.trim() === "Session complete.") {
+            return session.question.title || session.question.prompt || "Practice Session";
+        }
+        return summary;
+    };
+
     const SessionCard = ({ session }: { session: CompletedSession }) => (
         <div key={session.id} className="relative w-full text-left p-4 bg-stone-50/50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-white dark:hover:bg-stone-800 hover:shadow-md transition-all duration-300 group cursor-pointer" onClick={() => onViewSession(session)}>
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-grow">
                     <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full inline-block mb-2">{session.question.unit}</p>
-                    <p className="font-semibold text-stone-700 dark:text-stone-200 pr-8">{session.aiSummary}</p>
+                    <p className="font-semibold text-stone-700 dark:text-stone-200 pr-8 line-clamp-2">{getDisplaySummary(session)}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                     <p className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">Score: {session.aiFeedback.score}/{session.aiFeedback.totalMarks}</p>
