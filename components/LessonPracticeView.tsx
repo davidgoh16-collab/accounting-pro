@@ -97,7 +97,7 @@ const LessonPracticeView: React.FC<LessonPracticeViewProps> = ({ user, targetUse
                     title: res.questionTitle || 'Unknown Question',
                     prompt: res.questionTitle || 'Unknown Question',
                     marks: res.maxMarks || 4,
-                    ao: { ao1: 0, ao2: 0, ao3: 0 },
+                    ao: res.aoBreakdown || { ao1: res.maxMarks || 4, ao2: 0, ao3: 0 },
                     caseStudy: { title: 'N/A', content: 'N/A' },
                     markScheme: { title: 'N/A', content: 'N/A' },
                     level: student.level || 'A-Level'
