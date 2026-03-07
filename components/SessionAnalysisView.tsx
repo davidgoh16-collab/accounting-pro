@@ -41,7 +41,7 @@ const PerformanceBar: React.FC<{ label: string; percentage: number; valueText: s
                 <p className="text-sm font-semibold text-stone-600 dark:text-stone-400">{valueText}</p>
             </div>
             <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2.5">
-                <div className={`${color} h-2.5 rounded-full transition-all duration-500`} style={{ width: `${percentage}%` }}></div>
+                <div className="${color} h-2.5 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }}></div>
             </div>
         </div>
     );
