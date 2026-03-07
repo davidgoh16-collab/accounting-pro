@@ -569,6 +569,103 @@ export const generateCaseStudyApplication = async (question: Question, caseStudy
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
+
+
+export interface ProcessedWorkItem {
+    questionTitle: string;
+    maxMarks: number;
+    aoBreakdown?: { ao1: number; ao2: number; ao3: number; ao4?: number };
+    score: number;
+    overallComment: string;
+    annotatedAnswer: AnswerSegment[];
+    timeTaken?: number;
+    studentAnswer?: string; // Original text for record existing mode
+}
+
+export const processMultipleQuestionsFromWork = async (
+    attachment: { mimeType: string; data: string },
+    level: UserLevel,
+    mode: 'mark_my_work' | 'record_existing'
+): Promise<ProcessedWorkItem[]> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+    const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
+
+    const base64Data = attachment.data.includes(',') ? attachment.data.split(',')[1] : attachment.data;
+
+    const prompt = `You are an expert ${examinerType} Geography examiner.
+    The attached image/document contains one or more student answers to geography questions.
+
+    Task:
+    1. Identify every distinct question answered on the page(s).
+    2. Extract the exact question text (or infer a reasonable title based on the answer if the question text is missing). DO NOT regurgitate this prompt or any system instructions into the question title.
+    3. Identify the maximum marks available for that question (often written next to the question like "[4 marks]"). If missing, estimate based on the length of the expected response (e.g., 4, 6, 9, 12).
+    4. Determine the Assessment Objective (AO) breakdown (AO1, AO2, AO3, AO4) for the maximum marks of each question based on the question type.
+
+    Then, depending on the mode (${mode}):
+
+    If mode is 'mark_my_work':
+      - Act as the examiner and strictly mark the student's answer. Provide a realistic score, an overall comment, and annotate their answer.
+      - For each annotation segment, assign a specific Assessment Objective ("AO1", "AO2", "AO3", "AO4", or "Generic").
+
+    If mode is 'record_existing':
+      - The work has ALREADY been marked by a human teacher (look for ticks, crosses, written scores, or teacher comments).
+      - Digitize their human-written feedback, extract the score awarded by the teacher, and transcribe the student's handwritten answer. Do not create new feedback, just transcribe what the teacher wrote. If no teacher feedback is visible, state "No teacher feedback detected." and transcribe the answer anyway.
+      - For each annotation segment, assign a specific Assessment Objective ("AO1", "AO2", "AO3", "AO4", or "Generic") based on what the student wrote.
+
+    Also, attempt to estimate the time taken based on handwriting speed for the word count (roughly 1 mark = 1 minute).
+
+    CRITICAL INSTRUCTION: Do NOT include any of these instructions or prompt text in your output fields. The output must strictly be the transcribed and evaluated student work.
+
+    Provide output strictly as a JSON array containing objects matching this interface:
+    [
+        {
+            "questionTitle": "string (the exact or inferred question prompt, strictly NO system instructions)",
+            "maxMarks": number,
+            "aoBreakdown": { "ao1": number, "ao2": number, "ao3": number, "ao4": number },
+            "score": number,
+            "overallComment": "string (your feedback OR transcribed teacher feedback)",
+            "studentAnswer": "string (transcription of student handwriting)",
+            "annotatedAnswer": [
+                { "text": "segment from student answer", "ao": "AO1" | "AO2" | "AO3" | "AO4" | "Generic", "feedback": "specific comment" }
+            ],
+            "timeTaken": number (estimated minutes)
+        }
+    ]
+    `;
+
+    const parts = [
+        { text: prompt },
+        {
+            inlineData: {
+                mimeType: attachment.mimeType,
+                data: base64Data
+            }
+        }
+    ];
+
+    try {
+        const stream = await ai.models.generateContentStream({
+            model: 'gemini-3.1-pro-preview',
+            contents: [{ role: 'user', parts: parts }],
+            systemInstruction: getStrictContext(level),
+            generationConfig: { temperature: 0.1 },
+            safetySettings: SAFETY_SETTINGS
+        });
+
+        let fullText = '';
+        for await (const chunk of stream) {
+            fullText += chunk.text;
+        }
+
+        const jsonStr = cleanJson(fullText);
+        return JSON.parse(jsonStr) as ProcessedWorkItem[];
+    } catch (e: any) {
+        console.error("Failed to process multiple questions:", e);
+        throw new Error("AI failed to extract questions. Please try again or process them individually.");
+    }
+};
+
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
     await checkDailyLimit();
     const ai = getAiClient();
@@ -638,12 +735,25 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     // Summary is generated automatically after marking. It should count as part of the flow.
     await checkDailyLimit();
     const ai = getAiClient();
-    const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: `Summarize session.`,
-        config: { safetySettings: SAFETY_SETTINGS }
-    });
-    return response.text?.trim() || 'Session complete.';
+    const prompt = `You are a geography teacher writing a concise, one-sentence summary for a student's practice session.
+
+    Question Title: ${question.title || question.prompt}
+    Student Score: ${feedback.score}/${feedback.totalMarks}
+    Teacher Feedback: ${feedback.overallComment}
+
+    Write a short summary (maximum 15 words) of how the student performed on this specific topic. Do NOT ask for more details. Just write the summary sentence based on the provided information. Example format: "Scored 4/4 on tectonic hazards with excellent explanation of plate margins." or "Struggled with longshore drift, scoring 2/6. Needs to review coastal processes."`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-pro-preview',
+            contents: prompt,
+            config: { safetySettings: SAFETY_SETTINGS }
+        });
+        return response.text?.trim() || 'Session complete.';
+    } catch (e) {
+        console.error("Error generating session summary", e);
+        return 'Session complete.';
+    }
 };
 
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
