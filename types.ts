@@ -32,7 +32,9 @@ export type Page =
     | 'full_chat'
     | 'mock_detail'
     | 'assessment_hub'
-    | 'walking_talking_mock';
+    | 'walking_talking_mock'
+    | 'simulations_hub'
+    | 'simulation_view';
 
 export interface AuthUser {
     uid: string;
