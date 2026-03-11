@@ -137,6 +137,8 @@ import FullChatView from './components/FullChatView';
 import { AssessmentHubView } from './components/AssessmentHubView';
 import TourOverlay from './components/TourOverlay';
 import WalkingTalkingMockView from './components/WalkingTalkingMockView';
+import SimulationsHubView from './components/SimulationsHubView';
+import SimulationView from './components/SimulationView';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -277,6 +279,7 @@ const App: React.FC = () => {
     // Mocks State
     const [activeMocks, setActiveMocks] = useState<MockConfig[]>([]);
     const [selectedMockId, setSelectedMockId] = useState<string | null>(null);
+    const [selectedSimulationId, setSelectedSimulationId] = useState<string>('ecosystem_balance');
 
     const [featureFlags, setFeatureFlags] = useState({
         birdGame: true,
@@ -470,6 +473,10 @@ const App: React.FC = () => {
 
         if (newPage === 'mock_detail' && param) {
             setSelectedMockId(param);
+        }
+
+        if (newPage === 'simulation_view' && param) {
+            setSelectedSimulationId(param);
         }
     };
 
@@ -698,6 +705,14 @@ const App: React.FC = () => {
                                             shadowColor="shadow-teal-500/20"
                                             accentColor="text-teal-600 hover:text-teal-700"
                                         />
+                                        <HubCard
+                                            icon={<span className="text-4xl">🔬</span>}
+                                            title="Simulations"
+                                            description="Explore interactive simulations to deepen your understanding of complex geographical systems."
+                                            onClick={() => handleNavigate('simulations_hub')}
+                                            shadowColor="shadow-emerald-500/20"
+                                            accentColor="text-emerald-600 hover:text-emerald-700"
+                                        />
                                     </>
                                 )}
                                 <HubCard
@@ -759,6 +774,9 @@ const App: React.FC = () => {
             
             {page === 'admin' && isAdmin && <AdminView onImpersonate={handleImpersonate} onBack={() => handleNavigate('dashboard')} />}
             {page === 'full_chat' && <FullChatView user={user} onBack={() => handleNavigate('dashboard')} />}
+
+            {page === 'simulations_hub' && <SimulationsHubView user={user} onNavigate={handleNavigate} />}
+            {page === 'simulation_view' && <SimulationView user={user} onBack={() => handleNavigate('simulations_hub')} simulationId={selectedSimulationId} />}
 
             {featureFlags.aiTutor && user && <Chatbot user={user} onNavigate={handleNavigate} />}
         </div>

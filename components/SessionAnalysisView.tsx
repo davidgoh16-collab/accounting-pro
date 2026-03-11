@@ -58,7 +58,7 @@ const SessionAnalysisView: React.FC<SessionAnalysisViewProps> = ({ onViewSession
         e.stopPropagation();
         if (window.confirm(`Are you sure you want to delete this session? This action cannot be undone.`)) {
             try {
-                await deleteDoc(doc(db, `users/${user.uid}/completed_sessions`, session.id));
+                await deleteDoc(doc(db, `users/${user.uid}/sessions`, session.id));
                 setSessions(prev => prev.filter(s => s.id !== session.id));
             } catch (error) {
                 console.error("Error deleting session:", error);
@@ -75,7 +75,7 @@ const SessionAnalysisView: React.FC<SessionAnalysisViewProps> = ({ onViewSession
                 const sessionsRef = collection(db, 'users', user.uid, 'sessions');
                 const q = query(sessionsRef, orderBy('completedAt', 'desc'));
                 const querySnapshot = await getDocs(q);
-                const loadedSessions = querySnapshot.docs.map(doc => doc.data() as CompletedSession);
+                const loadedSessions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CompletedSession));
                 setSessions(loadedSessions);
             } catch (error) {
                 console.error("Error loading session data from Firestore:", error);
