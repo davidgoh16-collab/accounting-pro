@@ -2,44 +2,14 @@ import express from 'express';
 import { GoogleGenAI } from '@google/genai';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Readable } from 'stream';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import fs from 'fs';
-
 const app = express();
 const port = process.env.PORT || 8080;
-
-// Replace placeholder API key in built files before serving if running in production
-const distPath = path.join(__dirname, 'dist');
-if (fs.existsSync(distPath)) {
-  const replaceKeyInDirectory = (dir) => {
-    fs.readdirSync(dir).forEach(file => {
-      const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
-      if (stat.isDirectory()) {
-        replaceKeyInDirectory(filePath);
-      } else if (filePath.endsWith('.js') || filePath.endsWith('.html')) {
-        let content = fs.readFileSync(filePath, 'utf8');
-        // We only want to replace the literal string "GEMINI_API_KEY" if it was used as a placeholder
-        // which Vite define will output as "GEMINI_API_KEY"
-        if (content.includes('"GEMINI_API_KEY"')) {
-          const actualKey = process.env.GEMINI_API_KEY || '';
-          content = content.replace(/"GEMINI_API_KEY"/g, `"${actualKey}"`);
-          fs.writeFileSync(filePath, content, 'utf8');
-          console.log(`Replaced API key placeholder in ${file}`);
-        }
-      }
-    });
-  };
-
-  try {
-    replaceKeyInDirectory(distPath);
-  } catch (err) {
-    console.error("Error replacing API key placeholder:", err);
-  }
-}
 
 // Security Headers
 app.disable('x-powered-by');
@@ -87,6 +57,66 @@ app.post('/api/generate-content', async (req, res) => {
   } catch (error) {
     console.error("Error in /api/generate-content:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Secure proxy for fetching case study videos to avoid exposing API key
+app.get('/api/proxy-video', async (req, res) => {
+  try {
+    const videoUrlStr = req.query.url;
+    if (!videoUrlStr || typeof videoUrlStr !== 'string') {
+      return res.status(400).send('Missing url parameter');
+    }
+
+    // Basic SSRF protection - ensure it's a valid URL and uses HTTPS
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(videoUrlStr);
+    } catch (err) {
+      return res.status(400).send('Invalid URL format');
+    }
+
+    if (parsedUrl.protocol !== 'https:') {
+      return res.status(400).send('Only HTTPS URLs are allowed');
+    }
+
+    // Strict SSRF protection - only allow requests to Google APIs
+    const ALLOWED_HOSTS = ['generativelanguage.googleapis.com'];
+    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname)) {
+       return res.status(403).send('Forbidden: Target host not allowed');
+    }
+
+    // Append API Key securely
+    const API_KEY = process.env.GEMINI_API_KEY;
+    if (!API_KEY) {
+      return res.status(500).send('API Key not configured on server');
+    }
+    parsedUrl.searchParams.append('key', API_KEY);
+
+    const response = await fetch(parsedUrl.toString());
+
+    if (!response.ok) {
+       console.error(`Proxy request failed with status ${response.status}`);
+       return res.status(response.status).send(`Upstream request failed: ${response.statusText}`);
+    }
+
+    if (!response.body) {
+      return res.status(500).send('No body in upstream response');
+    }
+
+    // Forward headers from the upstream response
+    const contentType = response.headers.get('content-type');
+    if (contentType) res.setHeader('Content-Type', contentType);
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) res.setHeader('Content-Length', contentLength);
+
+    // Pipe stream directly to client using Readable.fromWeb
+    // Note: Node 18+ global fetch Response.body is a web stream, not a Node stream
+    Readable.fromWeb(response.body).pipe(res);
+
+  } catch (error) {
+    console.error("Error in /api/proxy-video:", error);
+    res.status(500).send(error.message || 'Failed to proxy video');
   }
 });
 
