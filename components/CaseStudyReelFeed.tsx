@@ -40,7 +40,11 @@ const ReelItem: React.FC<{
                 setReelState({ status: 'loading-video', summary, progressMessage: 'Generating your video...' });
 
                 const videoUri = await generateCaseStudyVideo(study, summary);
-                const response = await fetch(`${videoUri}&key=${process.env.API_KEY}`);
+                // Fetch the video through the secure proxy to avoid exposing the API key on the client
+                const response = await fetch(`/api/proxy-video?url=${encodeURIComponent(videoUri)}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to load video: ${response.statusText}`);
+                }
                 const blob = await response.blob();
                 const videoUrl = URL.createObjectURL(blob);
                 
