@@ -1879,3 +1879,81 @@ export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLe
 
     return JSON.parse(cleanJson(response.text || '{}'));
 };
+
+export const evaluateMemoryRecallAttempt = async (
+    summaryText: string,
+    studentAttempt: string,
+    level: UserLevel
+): Promise<{ score: number; highlightedSummary: string; encouragement: string }> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+    const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
+
+    const prompt = `You are an expert ${examinerType} Geography tutor helping a student with a "blurting" or "active recall" exercise.
+
+    Original Topic Summary:
+    """
+    ${summaryText}
+    """
+
+    Student's Recall Attempt (from memory):
+    """
+    ${studentAttempt}
+    """
+
+    Task:
+    1. Compare the student's attempt to the original summary.
+    2. Calculate a percentage score (0-100) based on how much of the core information they successfully recalled. Be fair but accurate.
+    3. Generate a "highlightedSummary" by taking the ORIGINAL summary text and wrapping the parts the student MISSED or got wrong in a span with the class "bg-red-200 dark:bg-red-900/50 text-red-800 dark:text-red-200 rounded px-1". Leave the parts they got right as plain text. Use Markdown for basic formatting (bold, italics) but use HTML spans for the highlights.
+    4. Write a short, encouraging message ("encouragement") giving them specific praise and pointing out one or two key things they missed.
+
+    Return strictly JSON:
+    {
+        "score": number,
+        "highlightedSummary": "string (markdown + HTML spans for highlights)",
+        "encouragement": "string"
+    }
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const getMemoryRecallHint = async (
+    summaryText: string,
+    studentAttempt: string
+): Promise<string> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+
+    const prompt = `You are an AI tutor helping a student with a memory recall exercise.
+
+    Original Summary:
+    """
+    ${summaryText}
+    """
+
+    Student's Current Attempt:
+    """
+    ${studentAttempt}
+    """
+
+    Task: Look at what the student has written so far. Identify ONE key concept from the original summary that they have NOT mentioned yet. Provide a short, cryptic hint (maximum 15 words) to jog their memory about that missing concept. Do NOT give them the answer directly.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
+
+    return response.text || "Think about the other main factors.";
+};
