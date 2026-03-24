@@ -139,6 +139,8 @@ import TourOverlay from './components/TourOverlay';
 import WalkingTalkingMockView from './components/WalkingTalkingMockView';
 import SimulationsHubView from './components/SimulationsHubView';
 import SimulationView from './components/SimulationView';
+import MemoryRecallHubView from './components/MemoryRecallHubView';
+import MemoryRecallActiveView from './components/MemoryRecallActiveView';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -280,6 +282,9 @@ const App: React.FC = () => {
     const [activeMocks, setActiveMocks] = useState<MockConfig[]>([]);
     const [selectedMockId, setSelectedMockId] = useState<string | null>(null);
     const [selectedSimulationId, setSelectedSimulationId] = useState<string>('ecosystem_balance');
+
+    // Memory Recall State
+    const [memoryRecallSessionParams, setMemoryRecallSessionParams] = useState<{sessionId: string, topicId: string, subTopicId: string, isResume: boolean} | null>(null);
 
     const [featureFlags, setFeatureFlags] = useState({
         birdGame: true,
@@ -478,6 +483,10 @@ const App: React.FC = () => {
         if (newPage === 'simulation_view' && param) {
             setSelectedSimulationId(param);
         }
+
+        if (newPage === 'memory_recall_active' && param) {
+            setMemoryRecallSessionParams(param);
+        }
     };
 
     const handleStartGame = (gamePage: Page, topic: string) => {
@@ -616,6 +625,14 @@ const App: React.FC = () => {
                                         onClick={() => handleNavigate('assessment_hub')}
                                         shadowColor="shadow-lime-500/20"
                                         accentColor="text-lime-600 hover:text-lime-700"
+                                    />
+                                    <HubCard
+                                        icon={<span className="text-4xl">🧠</span>}
+                                        title="Memory Recall"
+                                        description="Use the 'Blurting' technique to solidify your knowledge and track your progress."
+                                        onClick={() => handleNavigate('memory_recall_hub')}
+                                        shadowColor="shadow-emerald-500/20"
+                                        accentColor="text-emerald-600 hover:text-emerald-700"
                                     />
                                 </div>
                             </section>
@@ -777,6 +794,9 @@ const App: React.FC = () => {
 
             {page === 'simulations_hub' && <SimulationsHubView user={user} onNavigate={handleNavigate} />}
             {page === 'simulation_view' && <SimulationView user={user} onBack={() => handleNavigate('simulations_hub')} simulationId={selectedSimulationId} />}
+
+            {page === 'memory_recall_hub' && <MemoryRecallHubView user={user} onNavigate={handleNavigate} onBack={() => handleNavigate('dashboard')} />}
+            {page === 'memory_recall_active' && memoryRecallSessionParams && <MemoryRecallActiveView user={user} {...memoryRecallSessionParams} onBack={() => handleNavigate('memory_recall_hub')} />}
 
             {featureFlags.aiTutor && user && <Chatbot user={user} onNavigate={handleNavigate} />}
         </div>

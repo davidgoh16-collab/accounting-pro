@@ -34,7 +34,9 @@ export type Page =
     | 'assessment_hub'
     | 'walking_talking_mock'
     | 'simulations_hub'
-    | 'simulation_view';
+    | 'simulation_view'
+    | 'memory_recall_hub'
+    | 'memory_recall_active';
 
 export interface AuthUser {
     uid: string;
@@ -460,4 +462,42 @@ export interface WalkingTalkingSession {
         timeTaken?: number;
     }[];
     isComplete: boolean;
+}
+
+export interface MemoryRecallSummarySection {
+    heading: string;
+    text: string;
+    imageUrl?: string;
+}
+
+export interface MemoryRecallSummary {
+    topicId: string;
+    subTopicId: string;
+    sections: MemoryRecallSummarySection[];
+    level: UserLevel;
+}
+
+export interface MemoryRecallAttempt {
+    text: string;
+    timestamp: string;
+    score: number;
+    highlightedSummary: string; // HTML or Markdown with highlights
+    hintsUsed: number;
+}
+
+export interface MemoryRecallSession {
+    id: string;
+    userId: string;
+    topicId: string;
+    subTopicId: string;
+    level: UserLevel;
+    attempts: MemoryRecallAttempt[];
+    status: 'in_progress' | 'completed';
+    lastAccessed: string;
+}
+
+export interface MemoryRecallAttemptResult {
+    score: number;
+    highlightedSummary: string;
+    encouragement: string;
 }
