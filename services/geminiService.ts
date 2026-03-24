@@ -1927,6 +1927,85 @@ export const evaluateMemoryRecallAttempt = async (
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
+export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTopicId: string, level: UserLevel): Promise<MemoryRecallSummary> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+    const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
+
+    const prompt = `You are an expert ${examinerType} Geography examiner.
+    Generate a detailed summary for a memory recall ("blurting") exercise.
+
+    Topic: ${topicId}
+    Sub-Topic: ${subTopicId}
+    Level: ${level}
+
+    Task:
+    1. Break down the sub-topic into 2 to 4 key logical sections (e.g., Causes, Effects, Management).
+    2. For each section, provide a concise but comprehensive text paragraph (approx 100-150 words) covering the core facts, processes, or case study details relevant to the specification.
+    3. Generate a highly descriptive image prompt ("imagePrompt") for each section that visually represents the concept (for dual coding). Make it vivid and specific (e.g., "A diagram showing constructive plate margins...").
+
+    Return strictly JSON:
+    {
+      "sections": [
+        {
+          "heading": "string",
+          "text": "string",
+          "imagePrompt": "string"
+        }
+      ]
+    }
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    const parsed = JSON.parse(cleanJson(response.text || '{}'));
+
+    // Generate Images
+    const finalSections: any[] = [];
+    for (const sec of (parsed.sections || [])) {
+        let imageUrl = null;
+        try {
+            await checkAndIncrementImageLimit();
+            const imgResponse = await ai.models.generateImages({
+                model: 'imagen-4.0-generate-001',
+                prompt: `Geography diagram: ${sec.imagePrompt}`,
+                config: { numberOfImages: 1, aspectRatio: "16:9" }
+            });
+            if (imgResponse.generatedImages?.length > 0) {
+                imageUrl = `data:image/png;base64,${imgResponse.generatedImages[0].image.imageBytes}`;
+            }
+        } catch (e) {
+            console.error("Failed to generate image for summary section", e);
+        }
+
+        finalSections.push({
+            heading: sec.heading,
+            text: sec.text,
+            imageUrl
+        });
+    }
+
+    const summary: MemoryRecallSummary = {
+        topicId,
+        subTopicId,
+        level,
+        sections: finalSections
+    };
+
+    // Save to Firestore globally (using a composite key for ease)
+    const docId = `${level}_${topicId}_${subTopicId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    await setDoc(doc(db, 'memory_recall_summaries', docId), summary);
+
+    return summary;
+};
+
 export const getMemoryRecallHint = async (
     summaryText: string,
     studentAttempt: string

@@ -4,8 +4,6 @@ import { db } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { evaluateMemoryRecallAttempt, getMemoryRecallHint } from '../services/geminiService';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
-// @ts-ignore
-import mockSummaries from '../data/memory-recall-summaries.json';
 
 interface Props {
     user: AuthUser;
@@ -42,24 +40,17 @@ const MemoryRecallActiveView: React.FC<Props> = ({ user, sessionId, topicId, sub
                     setSession(docSnap.data() as MemoryRecallSession);
                 }
 
-                // Fetch Summary (In real app, fetch from Firestore/API. Here, use mock JSON)
-                const summaries = mockSummaries as MemoryRecallSummary[];
-                const found = summaries.find(s => s.topicId === topicId && s.subTopicId === subTopicId);
+                // Fetch Summary from Firestore
+                const level = user.level || 'GCSE';
+                const summaryDocId = `${level}_${topicId}_${subTopicId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+                const summaryDocRef = doc(db, 'memory_recall_summaries', summaryDocId);
+                const summarySnap = await getDoc(summaryDocRef);
 
-                if (found) {
-                    setSummary(found);
+                if (summarySnap.exists()) {
+                    setSummary(summarySnap.data() as MemoryRecallSummary);
                 } else {
-                    // Fallback generator if pre-generated data doesn't exist for this topic yet
-                    // For the sake of this demo, we'll alert the user.
-                    alert(`No pre-generated summary found for ${subTopicId}. Using a generic placeholder for testing.`);
-                    setSummary({
-                        topicId,
-                        subTopicId,
-                        level: user.level || 'GCSE',
-                        sections: [
-                            { heading: 'Key Concept 1', text: 'This is placeholder text because the pre-generation script has not run for this specific topic yet. The Earth is round and rivers flow downhill.' }
-                        ]
-                    });
+                    alert(`No pre-generated summary found for ${subTopicId}. Please ask your teacher/admin to generate it.`);
+                    onBack(); // Exit if no summary exists
                 }
             } catch (e) {
                 console.error("Failed to load memory recall data", e);
