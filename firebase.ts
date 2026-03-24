@@ -11,7 +11,7 @@ import {
     User
 } from "firebase/auth";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove, query, where, writeBatch, deleteDoc } from "firebase/firestore";
-import { getStorage, ref, listAll, getBytes, getMetadata } from "firebase/storage";
+import { getStorage, ref, listAll, getBytes, getMetadata, uploadString, getDownloadURL } from "firebase/storage";
 import { AuthUser, ClassGroup } from "./types";
 
 const firebaseConfig = {
@@ -240,5 +240,24 @@ export const downloadFileAsBase64 = async (path: string): Promise<{ data: string
     } catch (e) {
         console.error(`Failed to download file ${path}`, e);
         throw e;
+    }
+};
+
+export const uploadBase64Image = async (path: string, base64Data: string): Promise<string> => {
+    try {
+        const storageRef = ref(storage, path);
+
+        // Remove the data URI scheme if present (e.g., 'data:image/png;base64,')
+        const base64Content = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+
+        await uploadString(storageRef, base64Content, 'base64', {
+            contentType: 'image/png' // Assuming we generate PNGs
+        });
+
+        const downloadUrl = await getDownloadURL(storageRef);
+        return downloadUrl;
+    } catch (error) {
+        console.error(`Failed to upload base64 image to ${path}`, error);
+        throw error;
     }
 };

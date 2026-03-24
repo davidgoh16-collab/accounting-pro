@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Recall Test</title>
+    <!-- We will use the main script to render just the component for testing -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React from 'react';
+      import { createRoot } from 'react-dom/client';
+      import MemoryRecallHubView from '../../components/MemoryRecallHubView';
+      import MemoryRecallActiveView from '../../components/MemoryRecallActiveView';
+      import '../../index.css';
+
+      const user = { uid: 'test1', displayName: 'Test', level: 'GCSE' };
+
+      const TestApp = () => {
+        const [view, setView] = React.useState('hub');
+        const [params, setParams] = React.useState({});
+
+        if (view === 'hub') {
+          return React.createElement(MemoryRecallHubView, {
+             user,
+             onNavigate: (page, p) => { setView(page); setParams(p || {}); },
+             onBack: () => console.log('back')
+          });
+        }
+        if (view === 'memory_recall_active') {
+          return React.createElement(MemoryRecallActiveView, {
+             user,
+             ...params,
+             onBack: () => setView('hub')
+          });
+        }
+        return null;
+      };
+
+      const root = createRoot(document.getElementById('root'));
+      root.render(React.createElement(TestApp));
+    </script>
+  </body>
+</html>
