@@ -4,7 +4,7 @@ import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIF
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
-import { auth, db, getCourseFiles, downloadFileAsBase64 } from '../firebase';
+import { auth, db, getCourseFiles, downloadFileAsBase64, uploadBase64Image } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { getSpecContext } from '../utils/contentUtils';
 import { fetchStudentPerformance, fetchTopicPerformance } from './adminService';
@@ -1968,28 +1968,37 @@ export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTop
 
     const parsed = JSON.parse(cleanJson(response.text || '{}'));
 
-    // Generate Images
+    // Generate Images and upload to Firebase Storage
     const finalSections: any[] = [];
-    for (const sec of (parsed.sections || [])) {
-        let imageUrl = null;
+    const docId = `${level}_${topicId}_${subTopicId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    for (let i = 0; i < (parsed.sections || []).length; i++) {
+        const sec = parsed.sections[i];
+        let finalImageUrl = null;
+
         try {
             await checkAndIncrementImageLimit();
             const imgResponse = await ai.models.generateImages({
                 model: 'imagen-4.0-generate-001',
                 prompt: `Geography diagram: ${sec.imagePrompt}`,
-                config: { numberOfImages: 1, aspectRatio: "16:9" }
+                config: { numberOfImages: 1, aspectRatio: "16:9", safetySettings: SAFETY_SETTINGS }
             });
+
             if (imgResponse.generatedImages?.length > 0) {
-                imageUrl = `data:image/png;base64,${imgResponse.generatedImages[0].image.imageBytes}`;
+                const base64Data = imgResponse.generatedImages[0].image.imageBytes;
+
+                // Upload to Firebase Storage
+                const storagePath = `memory_recall_images/${docId}_section_${i}.png`;
+                finalImageUrl = await uploadBase64Image(storagePath, base64Data);
             }
         } catch (e) {
-            console.error("Failed to generate image for summary section", e);
+            console.error(`Failed to generate or upload image for summary section ${i}`, e);
         }
 
         finalSections.push({
             heading: sec.heading || "Untitled Section",
             text: sec.text || "No text provided.",
-            imageUrl: imageUrl || null
+            imageUrl: finalImageUrl
         });
     }
 
@@ -1999,9 +2008,6 @@ export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTop
         level,
         sections: finalSections
     };
-
-    // Save to Firestore globally (using a composite key for ease)
-    const docId = `${level}_${topicId}_${subTopicId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
 
     // Sanitize before saving to prevent "invalid nested entity" errors from undefined fields or weird parsed JSON
     const sanitizedSummary = sanitizeForFirestore(summary);
