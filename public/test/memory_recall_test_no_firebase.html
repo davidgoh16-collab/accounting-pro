@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Recall Test (Mocked)</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React from 'react';
+      import { createRoot } from 'react-dom/client';
+      import MemoryRecallHubView from '../../components/MemoryRecallHubView';
+      import MemoryRecallActiveView from '../../components/MemoryRecallActiveView';
+      import '../../index.css';
+
+      // Mock Firestore calls for testing
+      import * as firestore from 'firebase/firestore';
+      firestore.getDoc = async () => ({
+         exists: () => true,
+         data: () => ({
+             id: 'test-session-123',
+             userId: 'test1',
+             topicId: 'The Living World',
+             subTopicId: 'Tropical Rainforests: Characteristics and adaptations',
+             level: 'GCSE',
+             attempts: [],
+             status: 'in_progress',
+             lastAccessed: new Date().toISOString()
+         })
+      });
+      firestore.setDoc = async () => {};
+      firestore.updateDoc = async () => {};
+      firestore.getDocs = async () => ({ docs: [], empty: true });
+
+      // Mock Gemini AI calls for testing
+      import * as geminiService from '../../services/geminiService';
+      geminiService.evaluateMemoryRecallAttempt = async () => ({
+          score: 85,
+          highlightedSummary: 'The Earth is <span class="bg-red-200 dark:bg-red-900/50 text-red-800 dark:text-red-200 rounded px-1">round</span> and rivers flow downhill.',
+          encouragement: 'Great job!'
+      });
+      geminiService.getMemoryRecallHint = async () => 'Think about the shape of the earth.';
+
+      const user = { uid: 'test1', displayName: 'Test', level: 'GCSE' };
+
+      const TestApp = () => {
+        const [view, setView] = React.useState('hub');
+        const [params, setParams] = React.useState({});
+
+        if (view === 'hub') {
+          return React.createElement(MemoryRecallHubView, {
+             user,
+             onNavigate: (page, p) => { setView(page); setParams(p || {}); },
+             onBack: () => console.log('back')
+          });
+        }
+        if (view === 'memory_recall_active') {
+          return React.createElement(MemoryRecallActiveView, {
+             user,
+             ...params,
+             onBack: () => setView('hub')
+          });
+        }
+        return null;
+      };
+
+      const root = createRoot(document.getElementById('root'));
+      root.render(React.createElement(TestApp));
+    </script>
+  </body>
+</html>
