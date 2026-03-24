@@ -13,7 +13,8 @@ import MockProgressViewer from './MockProgressViewer';
 import SafeguardingViewer from './SafeguardingViewer';
 import AdminAssistant from './AdminAssistant';
 import LessonPracticeView from './LessonPracticeView';
-import { COURSE_LESSONS } from '../constants';
+import { COURSE_LESSONS, IGCSE_UNITS, IGCSE_SPEC_TOPICS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_UNITS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { generateAndSaveMemoryRecallSummary } from '../services/geminiService';
 
 interface AdminViewProps {
     onImpersonate: (user: AuthUser) => void;
@@ -133,6 +134,15 @@ const FeatureSettingsPanel: React.FC = () => {
                     </div>
                 </div>
 
+                {/* Memory Recall Content Generation */}
+                <div className="bg-stone-50 dark:bg-stone-800 p-6 rounded-2xl border border-stone-200 dark:border-stone-700 mt-6">
+                    <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-6">
+                        <span>🧠</span> Memory Recall Content Generator
+                    </h3>
+                    <p className="text-sm text-stone-500 mb-4">Select a specific topic to pre-generate and save the AI summary and dual-coding images to Firestore. This makes them instantly available for students.</p>
+                    <AdminMemoryRecallGenerator />
+                </div>
+
                 {/* Feature Toggles */}
                 <div className="bg-stone-50 dark:bg-stone-800 p-6 rounded-2xl border border-stone-200 dark:border-stone-700">
                     <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-6">
@@ -163,6 +173,76 @@ const FeatureSettingsPanel: React.FC = () => {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+};
+
+const AdminMemoryRecallGenerator: React.FC = () => {
+    const [level, setLevel] = useState<'GCSE' | 'IGCSE' | 'A-Level'>('GCSE');
+    const [topic, setTopic] = useState('');
+    const [subTopic, setSubTopic] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const units = level === 'IGCSE' ? IGCSE_UNITS : level === 'A-Level' ? ALEVEL_UNITS : GCSE_UNITS;
+    const specTopics = level === 'IGCSE' ? IGCSE_SPEC_TOPICS : level === 'A-Level' ? ALEVEL_SPEC_TOPICS : GCSE_SPEC_TOPICS;
+    const availableUnits = units.filter(u => u !== 'All Units' && specTopics[u]);
+
+    const handleGenerate = async () => {
+        if (!topic || !subTopic) return;
+        setIsGenerating(true);
+        try {
+            await generateAndSaveMemoryRecallSummary(topic, subTopic, level);
+            alert(`Successfully generated and saved summary for: ${subTopic}`);
+            setSubTopic(''); // Reset to encourage next one
+        } catch (e) {
+            console.error("Failed to generate memory recall summary", e);
+            alert("Failed to generate summary. Check console.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-4 bg-white dark:bg-stone-700 p-4 rounded-xl border border-stone-200 dark:border-stone-600">
+            <div className="flex flex-wrap gap-4">
+                <select
+                    value={level}
+                    onChange={e => { setLevel(e.target.value as any); setTopic(''); setSubTopic(''); }}
+                    className="p-2 border rounded-md"
+                >
+                    <option value="GCSE">GCSE</option>
+                    <option value="IGCSE">IGCSE</option>
+                    <option value="A-Level">A-Level</option>
+                </select>
+
+                <select
+                    value={topic}
+                    onChange={e => { setTopic(e.target.value); setSubTopic(''); }}
+                    className="p-2 border rounded-md min-w-[200px]"
+                >
+                    <option value="">Select Topic</option>
+                    {availableUnits.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+
+                <select
+                    value={subTopic}
+                    onChange={e => setSubTopic(e.target.value)}
+                    className="p-2 border rounded-md min-w-[250px]"
+                    disabled={!topic}
+                >
+                    <option value="">Select Sub-Topic</option>
+                    {topic && specTopics[topic]?.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                <button
+                    onClick={handleGenerate}
+                    disabled={!topic || !subTopic || isGenerating}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-md disabled:opacity-50 transition-colors ml-auto"
+                >
+                    {isGenerating ? 'Generating...' : 'Generate & Save'}
+                </button>
+            </div>
+            {isGenerating && <p className="text-sm text-emerald-600 font-semibold animate-pulse">This process takes 10-30 seconds. Do not close the window.</p>}
         </div>
     );
 };

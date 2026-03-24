@@ -9,6 +9,7 @@ import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, query, o
 import { getSpecContext } from '../utils/contentUtils';
 import { fetchStudentPerformance, fetchTopicPerformance } from './adminService';
 import { AQA_ALEVEL_SPEC, AQA_GCSE_SPEC, EDEXCEL_IGCSE_SPEC } from '../data/specifications';
+import { sanitizeForFirestore } from '../utils/firestoreUtils';
 
 // --- MODEL CONFIGURATION ---
 // Using stable versions to prevent 400 Bad Request errors.
@@ -1878,4 +1879,165 @@ export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLe
     });
 
     return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const evaluateMemoryRecallAttempt = async (
+    summaryText: string,
+    studentAttempt: string,
+    level: UserLevel
+): Promise<{ score: number; highlightedSummary: string; encouragement: string }> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+    const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
+
+    const prompt = `You are an expert ${examinerType} Geography tutor helping a student with a "blurting" or "active recall" exercise.
+
+    Original Topic Summary:
+    """
+    ${summaryText}
+    """
+
+    Student's Recall Attempt (from memory):
+    """
+    ${studentAttempt}
+    """
+
+    Task:
+    1. Compare the student's attempt to the original summary.
+    2. Calculate a percentage score (0-100) based on how much of the core information they successfully recalled. Be fair but accurate.
+    3. Generate a "highlightedSummary" by taking the ORIGINAL summary text and wrapping the parts the student MISSED or got wrong in a span with the class "bg-red-200 dark:bg-red-900/50 text-red-800 dark:text-red-200 rounded px-1". Leave the parts they got right as plain text. Use Markdown for basic formatting (bold, italics) but use HTML spans for the highlights.
+    4. Write a short, encouraging message ("encouragement") giving them specific praise and pointing out one or two key things they missed.
+
+    Return strictly JSON:
+    {
+        "score": number,
+        "highlightedSummary": "string (markdown + HTML spans for highlights)",
+        "encouragement": "string"
+    }
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTopicId: string, level: UserLevel): Promise<MemoryRecallSummary> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+    const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
+
+    const prompt = `You are an expert ${examinerType} Geography examiner.
+    Generate a detailed summary for a memory recall ("blurting") exercise.
+
+    Topic: ${topicId}
+    Sub-Topic: ${subTopicId}
+    Level: ${level}
+
+    Task:
+    1. Break down the sub-topic into 2 to 4 key logical sections (e.g., Causes, Effects, Management).
+    2. For each section, provide a concise but comprehensive text paragraph (approx 100-150 words) covering the core facts, processes, or case study details relevant to the specification.
+    3. Generate a highly descriptive image prompt ("imagePrompt") for each section that visually represents the concept (for dual coding). Make it vivid and specific (e.g., "A diagram showing constructive plate margins...").
+
+    Return strictly JSON:
+    {
+      "sections": [
+        {
+          "heading": "string",
+          "text": "string",
+          "imagePrompt": "string"
+        }
+      ]
+    }
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json',
+            safetySettings: SAFETY_SETTINGS
+        }
+    });
+
+    const parsed = JSON.parse(cleanJson(response.text || '{}'));
+
+    // Generate Images
+    const finalSections: any[] = [];
+    for (const sec of (parsed.sections || [])) {
+        let imageUrl = null;
+        try {
+            await checkAndIncrementImageLimit();
+            const imgResponse = await ai.models.generateImages({
+                model: 'imagen-4.0-generate-001',
+                prompt: `Geography diagram: ${sec.imagePrompt}`,
+                config: { numberOfImages: 1, aspectRatio: "16:9" }
+            });
+            if (imgResponse.generatedImages?.length > 0) {
+                imageUrl = `data:image/png;base64,${imgResponse.generatedImages[0].image.imageBytes}`;
+            }
+        } catch (e) {
+            console.error("Failed to generate image for summary section", e);
+        }
+
+        finalSections.push({
+            heading: sec.heading || "Untitled Section",
+            text: sec.text || "No text provided.",
+            imageUrl: imageUrl || null
+        });
+    }
+
+    const summary: MemoryRecallSummary = {
+        topicId,
+        subTopicId,
+        level,
+        sections: finalSections
+    };
+
+    // Save to Firestore globally (using a composite key for ease)
+    const docId = `${level}_${topicId}_${subTopicId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    // Sanitize before saving to prevent "invalid nested entity" errors from undefined fields or weird parsed JSON
+    const sanitizedSummary = sanitizeForFirestore(summary);
+
+    await setDoc(doc(db, 'memory_recall_summaries', docId), sanitizedSummary);
+
+    return summary;
+};
+
+export const getMemoryRecallHint = async (
+    summaryText: string,
+    studentAttempt: string
+): Promise<string> => {
+    await checkDailyLimit();
+    const ai = getAiClient();
+
+    const prompt = `You are an AI tutor helping a student with a memory recall exercise.
+
+    Original Summary:
+    """
+    ${summaryText}
+    """
+
+    Student's Current Attempt:
+    """
+    ${studentAttempt}
+    """
+
+    Task: Look at what the student has written so far. Identify ONE key concept from the original summary that they have NOT mentioned yet. Provide a short, cryptic hint (maximum 15 words) to jog their memory about that missing concept. Do NOT give them the answer directly.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-pro-preview',
+        contents: prompt,
+        config: { safetySettings: SAFETY_SETTINGS }
+    });
+
+    return response.text || "Think about the other main factors.";
 };
