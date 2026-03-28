@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { evaluateMemoryRecallAttempt, getMemoryRecallHint } from '../services/geminiService';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import DOMPurify from 'dompurify';
 
 interface Props {
     user: AuthUser;
@@ -280,7 +281,7 @@ const MemoryRecallActiveView: React.FC<Props> = ({ user, sessionId, topicId, sub
                                 <span>🔍</span> What You Missed
                             </h3>
                             <div className="prose dark:prose-invert max-w-none text-stone-700 dark:text-stone-300 leading-relaxed p-6 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 font-medium">
-                                <div dangerouslySetInnerHTML={{ __html: latestAttempt.highlightedSummary }} />
+                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(latestAttempt.highlightedSummary) }} />
                             </div>
                             <div className="mt-6 flex justify-end">
                                 <button
