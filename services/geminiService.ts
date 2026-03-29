@@ -300,6 +300,10 @@ export const detectDistress = async (text: string): Promise<boolean> => {
 
 const logSafeguardingAlert = async (text: string, userId: string) => {
     try {
+        // Fetch user profile to get the display name
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        const userName = userDoc.exists() ? (userDoc.data().displayName || 'Unknown Student') : 'Unknown Student';
+
         await addDoc(collection(db, 'safeguarding_alerts'), {
             uid: userId,
             message: text,
@@ -307,6 +311,22 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
             status: 'unresolved'
         });
         console.warn(`Safeguarding alert logged for user ${userId}`);
+
+        // Power Automate Trigger
+        const powerAutomateUrl = import.meta.env.VITE_POWER_AUTOMATE_URL;
+        if (powerAutomateUrl) {
+            await fetch(powerAutomateUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: userId,
+                    userName: userName,
+                    type: 'Chat Message Distress',
+                    content: text,
+                    context: "Geo Pro"
+                })
+            }).catch(e => console.error("Failed to send webhook to Power Automate:", e));
+        }
     } catch (e) {
         console.error("Failed to log safeguarding alert", e);
     }
