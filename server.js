@@ -172,6 +172,33 @@ app.post('/api/generate-images', async (req, res) => {
   }
 });
 
+app.post('/api/safeguarding-alert', async (req, res) => {
+  try {
+    const powerAutomateUrl = process.env.POWER_AUTOMATE_URL;
+    if (!powerAutomateUrl) {
+      console.warn("POWER_AUTOMATE_URL is not configured.");
+      return res.status(500).json({ error: "Webhook URL not configured" });
+    }
+
+    const payload = req.body;
+
+    const response = await fetch(powerAutomateUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upstream returned ${response.status} ${response.statusText}`);
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error in /api/safeguarding-alert:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
