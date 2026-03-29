@@ -312,21 +312,18 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
         });
         console.warn(`Safeguarding alert logged for user ${userId}`);
 
-        // Power Automate Trigger
-        const powerAutomateUrl = import.meta.env.VITE_POWER_AUTOMATE_URL;
-        if (powerAutomateUrl) {
-            await fetch(powerAutomateUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: userId,
-                    userName: userName,
-                    type: 'Chat Message Distress',
-                    content: text,
-                    context: "Geo Pro"
-                })
-            }).catch(e => console.error("Failed to send webhook to Power Automate:", e));
-        }
+        // Power Automate Trigger via secure backend proxy
+        await fetch('/api/safeguarding-alert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId,
+                userName: userName,
+                type: 'Chat Message Distress',
+                content: text,
+                context: "Geo Pro"
+            })
+        }).catch(e => console.error("Failed to send webhook to Power Automate:", e));
     } catch (e) {
         console.error("Failed to log safeguarding alert", e);
     }
