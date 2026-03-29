@@ -324,8 +324,8 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
                 context: "Geo Pro"
             })
         }).catch(e => console.error("Failed to send webhook to Power Automate:", e));
-    } catch (e) {
-        console.error("Failed to log safeguarding alert", e);
+    } catch (error) {
+        console.error("Error saving Geo Pro safeguarding alert:", error);
     }
 };
 
