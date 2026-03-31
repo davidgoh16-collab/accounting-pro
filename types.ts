@@ -36,7 +36,8 @@ export type Page =
     | 'simulations_hub'
     | 'simulation_view'
     | 'memory_recall_hub'
-    | 'memory_recall_active';
+    | 'memory_recall_active'
+    | 'song_generator';
 
 export interface AuthUser {
     uid: string;

@@ -32,13 +32,15 @@ interface TopicProgressStats {
 const FeatureSettingsPanel: React.FC = () => {
     const [limit, setLimit] = useState<number>(50);
     const [imageLimit, setImageLimit] = useState<number>(5);
+    const [songLimit, setSongLimit] = useState<number>(1);
     const [toggles, setToggles] = useState({
         birdGame: true,
         blockBlast: true,
         practiceQuizzes: true,
         swipeQuizzes: false,
         aiTutor: true,
-        ragAssessment: true
+        ragAssessment: true,
+        songGenerator: true
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -52,6 +54,7 @@ const FeatureSettingsPanel: React.FC = () => {
                     const data = snap.data();
                     setLimit(data.dailyRequestLimit ?? 50);
                     setImageLimit(data.dailyImageLimit ?? 5);
+                    setSongLimit(data.dailySongLimit ?? 1);
                     setToggles(prev => ({ ...prev, ...data.featureToggles }));
                 }
             } catch (e) {
@@ -69,6 +72,7 @@ const FeatureSettingsPanel: React.FC = () => {
             await setDoc(doc(db, 'settings', 'global'), {
                 dailyRequestLimit: limit,
                 dailyImageLimit: imageLimit,
+                dailySongLimit: songLimit,
                 featureToggles: toggles
             }, { merge: true });
             alert("Settings saved successfully!");
@@ -132,6 +136,18 @@ const FeatureSettingsPanel: React.FC = () => {
                             className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
                         />
                     </div>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+                        <div>
+                            <p className="font-semibold text-stone-700 dark:text-stone-200">Daily Song Generation Limit</p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400">Separate limit for AI song generation. (Default: 1)</p>
+                        </div>
+                        <input
+                            type="number"
+                            value={songLimit}
+                            onChange={(e) => setSongLimit(parseInt(e.target.value))}
+                            className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
+                        />
+                    </div>
                 </div>
 
                 {/* Memory Recall Content Generation */}
@@ -156,6 +172,7 @@ const FeatureSettingsPanel: React.FC = () => {
                             { key: 'swipeQuizzes', label: 'Swipe Quizzes', desc: 'Tinder-style True/False quizzes.' },
                             { key: 'aiTutor', label: 'AI Tutor & Feedback', desc: 'Gemini-powered feedback and hints.' },
                             { key: 'ragAssessment', label: 'RAG Self-Assessment', desc: 'Topic confidence tracking.' },
+                            { key: 'songGenerator', label: 'Song Generator', desc: 'AI educational songs.' },
                         ].map((feature) => (
                             <div key={feature.key} className="flex items-center justify-between p-4 bg-white dark:bg-stone-700 rounded-xl border border-stone-200 dark:border-stone-600">
                                 <div>
