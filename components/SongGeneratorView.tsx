@@ -155,7 +155,7 @@ const SongGeneratorView: React.FC<SongGeneratorViewProps> = ({ user, onBack }) =
     return (
         <HubLayout
             title="AI Song Generator"
-            subtitle="Turn your revision into catchy tunes using Lyria 3."
+            subtitle="Turn your revision into catchy tunes using AI."
             gradient="from-pink-500 via-purple-500 to-indigo-500"
             onBack={onBack}
         >

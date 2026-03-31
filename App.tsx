@@ -719,7 +719,7 @@ const App: React.FC = () => {
                                         <HubCard
                                             icon={<span className="text-4xl">🎵</span>}
                                             title="Song Generator"
-                                            description="Turn your revision into catchy tunes using Lyria 3."
+                                            description="Turn your revision into catchy tunes using AI."
                                             onClick={() => handleNavigate('song_generator')}
                                             shadowColor="shadow-violet-500/20"
                                             accentColor="text-violet-600 hover:text-violet-700"

@@ -172,7 +172,7 @@ const FeatureSettingsPanel: React.FC = () => {
                             { key: 'swipeQuizzes', label: 'Swipe Quizzes', desc: 'Tinder-style True/False quizzes.' },
                             { key: 'aiTutor', label: 'AI Tutor & Feedback', desc: 'Gemini-powered feedback and hints.' },
                             { key: 'ragAssessment', label: 'RAG Self-Assessment', desc: 'Topic confidence tracking.' },
-                            { key: 'songGenerator', label: 'Song Generator', desc: 'Lyria-powered AI educational songs.' },
+                            { key: 'songGenerator', label: 'Song Generator', desc: 'AI educational songs.' },
                         ].map((feature) => (
                             <div key={feature.key} className="flex items-center justify-between p-4 bg-white dark:bg-stone-700 rounded-xl border border-stone-200 dark:border-stone-600">
                                 <div>
