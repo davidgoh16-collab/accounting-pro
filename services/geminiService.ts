@@ -226,6 +226,56 @@ const checkAndIncrementImageLimit = async (): Promise<void> => {
     }
 };
 
+export const getSongLimitStatus = async (): Promise<{ used: number, limit: number }> => {
+    const user = auth.currentUser;
+    if (!user) return { used: 0, limit: 0 };
+
+    try {
+        const settingsRef = doc(db, 'settings', 'global');
+        const settingsSnap = await getDoc(settingsRef);
+        const limit = settingsSnap.exists() ? (settingsSnap.data().dailySongLimit ?? 1) : 1;
+
+        if (limit === -1) return { used: 0, limit: 9999 };
+
+        const today = new Date().toISOString().split('T')[0];
+        const usageRef = doc(db, 'users', user.uid, 'usage_stats', today);
+        const usageSnap = await getDoc(usageRef);
+        const used = usageSnap.exists() ? (usageSnap.data().songCount ?? 0) : 0;
+
+        return { used, limit };
+    } catch (e) {
+        console.error("Failed to fetch song limit status", e);
+        return { used: 0, limit: 1 };
+    }
+};
+
+const checkAndIncrementSongLimit = async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const { used, limit } = await getSongLimitStatus();
+
+        if (limit !== -1 && used >= limit) {
+            throw new Error(`Daily song generation limit of ${limit} reached. Please try again tomorrow.`);
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        const usageRef = doc(db, 'users', user.uid, 'usage_stats', today);
+
+        const usageSnap = await getDoc(usageRef);
+
+        if (!usageSnap.exists()) {
+            await setDoc(usageRef, { count: 0, songCount: 1, date: today }, { merge: true });
+        } else {
+            await updateDoc(usageRef, { songCount: increment(1) });
+        }
+    } catch (e: any) {
+        console.error("Song limit check failed:", e);
+        throw e;
+    }
+};
+
 const handleApiCall = async <T>(apiCall: () => Promise<T>): Promise<T> => {
     try {
         await checkDailyLimit();
@@ -1943,6 +1993,57 @@ export const evaluateMemoryRecallAttempt = async (
     });
 
     return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const generateSong = async (
+    topic: string,
+    subTopic: string,
+    level: string,
+    songType: string,
+    vocals: string,
+    instruments: string,
+    customInstructions: string
+): Promise<{ lyrics: string; audioBase64: string }> => {
+    await checkAndIncrementSongLimit();
+
+    let prompt = `Create an educational ${songType} song about the ${level} Geography topic: "${topic}", specifically focusing on "${subTopic}".
+    The song should be accurate, use key geographical terminology, and help students remember the core concepts.
+    Vocals style: ${vocals}.
+    Instruments: ${instruments}.`;
+
+    if (customInstructions) {
+        prompt += `\nAdditional Instructions: ${customInstructions}`;
+    }
+
+    prompt += `\nPlease provide the song structure using tags like [Verse 1], [Chorus], etc.`;
+
+    try {
+        const response = await fetch('/api/generate-song', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to generate song: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        return {
+            lyrics: data.lyrics,
+            audioBase64: data.audioBase64
+        };
+    } catch (e: any) {
+        console.error("Song generation failed:", e);
+        throw e;
+    }
 };
 
 export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTopicId: string, level: UserLevel): Promise<MemoryRecallSummary> => {
