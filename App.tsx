@@ -141,6 +141,7 @@ import SimulationsHubView from './components/SimulationsHubView';
 import SimulationView from './components/SimulationView';
 import MemoryRecallHubView from './components/MemoryRecallHubView';
 import MemoryRecallActiveView from './components/MemoryRecallActiveView';
+import SongGeneratorView from './components/SongGeneratorView';
 
 const CountdownWidget: React.FC<{ mocks: MockConfig[], userLevel?: UserLevel, userYearGroup?: string }> = ({ mocks, userLevel, userYearGroup }) => {
     const nextExam = useMemo(() => {
@@ -292,7 +293,8 @@ const App: React.FC = () => {
         practiceQuizzes: true,
         swipeQuizzes: false,
         aiTutor: true,
-        ragAssessment: true
+        ragAssessment: true,
+        songGenerator: true
     });
 
     const checkAdmin = (email: string | null, uid: string) => {
@@ -715,6 +717,15 @@ const App: React.FC = () => {
                                             accentColor="text-pink-600 hover:text-pink-700"
                                         />
                                         <HubCard
+                                            icon={<span className="text-4xl">🎵</span>}
+                                            title="Song Generator"
+                                            description="Turn your revision into catchy tunes using Lyria 3."
+                                            onClick={() => handleNavigate('song_generator')}
+                                            shadowColor="shadow-violet-500/20"
+                                            accentColor="text-violet-600 hover:text-violet-700"
+                                            disabled={!featureFlags.songGenerator}
+                                        />
+                                        <HubCard
                                             icon={<span className="text-4xl">🎮</span>}
                                             title="Game Zone"
                                             description="Test your knowledge with interactive games like Flappy Geo, Block Blast, and Swipe Quiz."
@@ -797,6 +808,8 @@ const App: React.FC = () => {
 
             {page === 'memory_recall_hub' && <MemoryRecallHubView user={user} onNavigate={handleNavigate} onBack={() => handleNavigate('dashboard')} />}
             {page === 'memory_recall_active' && memoryRecallSessionParams && <MemoryRecallActiveView user={user} {...memoryRecallSessionParams} onBack={() => handleNavigate('memory_recall_hub')} />}
+
+            {page === 'song_generator' && <SongGeneratorView user={user} onBack={() => handleNavigate('dashboard')} />}
 
             {featureFlags.aiTutor && user && <Chatbot user={user} onNavigate={handleNavigate} />}
         </div>
