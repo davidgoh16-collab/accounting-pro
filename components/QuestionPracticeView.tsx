@@ -184,17 +184,20 @@ interface QuestionPracticeViewProps {
     sessionToView?: CompletedSession | null;
     draftToResume?: DraftSession | null;
     onBack: () => void;
+    initialUnitFilter?: string;
+    initialSubTopicFilter?: string;
+    autoGenerate?: boolean;
 }
 
-const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessionToView, draftToResume, onBack }) => {
+const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessionToView, draftToResume, onBack, initialUnitFilter, initialSubTopicFilter, autoGenerate }) => {
     const availableUnits = useMemo(() => {
         if (user.level === 'IGCSE') return IGCSE_UNITS;
         return user.level === 'GCSE' ? GCSE_UNITS : ALEVEL_UNITS;
     }, [user.level]);
 
-    const [unitFilter, setUnitFilter] = useState<string>(availableUnits[1]);
+    const [unitFilter, setUnitFilter] = useState<string>(initialUnitFilter && availableUnits.includes(initialUnitFilter) ? initialUnitFilter : availableUnits[1]);
     const [marksFilter, setMarksFilter] = useState<number>(user.level === 'GCSE' || user.level === 'IGCSE' ? 9 : 6);
-    const [subTopicFilter, setSubTopicFilter] = useState<string>('All Sub-topics');
+    const [subTopicFilter, setSubTopicFilter] = useState<string>(initialSubTopicFilter || 'All Sub-topics');
     const [includeFigure, setIncludeFigure] = useState(false);
     const [isFormationQuestion, setIsFormationQuestion] = useState(false);
     const [imageLimitStatus, setImageLimitStatus] = useState<{ used: number, limit: number } | null>(null);
@@ -308,9 +311,14 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
         };
     }, [studentAnswer, structuredPlan, figureNotes, liveAnswer, practiceMode, time, startTime]);
 
-    // Reset sub-topic when unit changes
+    // Reset sub-topic when unit changes, UNLESS we are currently setting the initial ones
+    const [hasInitialized, setHasInitialized] = useState(false);
     useEffect(() => {
-        setSubTopicFilter('All Sub-topics');
+        if (hasInitialized) {
+            setSubTopicFilter('All Sub-topics');
+        } else {
+            setHasInitialized(true);
+        }
     }, [unitFilter]);
 
     // Fetch Image Limit Status
@@ -888,6 +896,12 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
         return () => clearInterval(interval);
     }, [currentQuestion, isTimerRunning, saveDraft]);
 
+    // Auto-generate if prop is set
+    useEffect(() => {
+        if (autoGenerate && !currentQuestion && !isGenerating && !sessionToView && !draftToResume) {
+            handleGenerateQuestion();
+        }
+    }, [autoGenerate]); // run once on mount if autoGenerate is true
 
     const renderAoBreakdown = (ao: Question['ao']) => {
         const parts = [];
