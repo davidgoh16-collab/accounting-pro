@@ -287,6 +287,9 @@ const App: React.FC = () => {
     // Memory Recall State
     const [memoryRecallSessionParams, setMemoryRecallSessionParams] = useState<{sessionId: string, topicId: string, subTopicId: string, isResume: boolean} | null>(null);
 
+    // Question Practice State
+    const [questionPracticeParams, setQuestionPracticeParams] = useState<{initialTopic: string, initialSubTopic: string, autoGenerate: boolean} | null>(null);
+
     const [featureFlags, setFeatureFlags] = useState({
         birdGame: true,
         blockBlast: true,
@@ -488,6 +491,12 @@ const App: React.FC = () => {
 
         if (newPage === 'memory_recall_active' && param) {
             setMemoryRecallSessionParams(param);
+        }
+
+        if (newPage === 'question_practice' && param) {
+            setQuestionPracticeParams(param);
+        } else if (newPage !== 'question_practice') {
+            setQuestionPracticeParams(null); // Clear when navigating away
         }
     };
 
@@ -778,7 +787,7 @@ const App: React.FC = () => {
             {page === 'walking_talking_mock' && <WalkingTalkingMockView user={user} onBack={() => handleNavigate('dashboard')} />}
 
             {page === 'question_practice_hub' && <QuestionPracticeHubView onNavigate={handleNavigate} user={user} onResumeDraft={handleResumeDraft} />}
-            {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} />}
+            {page === 'question_practice' && <QuestionPracticeView user={user} sessionToView={sessionToView} draftToResume={draftToResume} onBack={() => handleNavigate('question_practice_hub')} initialUnitFilter={questionPracticeParams?.initialTopic} initialSubTopicFilter={questionPracticeParams?.initialSubTopic} autoGenerate={questionPracticeParams?.autoGenerate} />}
             {page === 'lesson_practice_view' && <LessonPracticeView user={user} onBack={() => handleNavigate('question_practice_hub')} />}
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
             
@@ -807,7 +816,7 @@ const App: React.FC = () => {
             {page === 'simulation_view' && <SimulationView user={user} onBack={() => handleNavigate('simulations_hub')} simulationId={selectedSimulationId} />}
 
             {page === 'memory_recall_hub' && <MemoryRecallHubView user={user} onNavigate={handleNavigate} onBack={() => handleNavigate('dashboard')} />}
-            {page === 'memory_recall_active' && memoryRecallSessionParams && <MemoryRecallActiveView user={user} {...memoryRecallSessionParams} onBack={() => handleNavigate('memory_recall_hub')} />}
+            {page === 'memory_recall_active' && memoryRecallSessionParams && <MemoryRecallActiveView user={user} {...memoryRecallSessionParams} onBack={() => handleNavigate('memory_recall_hub')} onPracticeExam={(topic, subTopic) => handleNavigate('question_practice', { initialTopic: topic, initialSubTopic: subTopic, autoGenerate: true })} />}
 
             {page === 'song_generator' && <SongGeneratorView user={user} onBack={() => handleNavigate('dashboard')} />}
 
