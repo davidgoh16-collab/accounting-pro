@@ -13,11 +13,12 @@ interface Props {
     subTopicId: string;
     isResume: boolean;
     onBack: () => void;
+    onPracticeExam?: (topic: string, subTopic: string) => void;
 }
 
 type ViewMode = 'study' | 'recall' | 'feedback' | 'warmup';
 
-const MemoryRecallActiveView: React.FC<Props> = ({ user, sessionId, topicId, subTopicId, isResume, onBack }) => {
+const MemoryRecallActiveView: React.FC<Props> = ({ user, sessionId, topicId, subTopicId, isResume, onBack, onPracticeExam }) => {
     const [session, setSession] = useState<MemoryRecallSession | null>(null);
     const [summary, setSummary] = useState<MemoryRecallSummary | null>(null);
     const [mode, setMode] = useState<ViewMode>(isResume ? 'warmup' : 'study');
@@ -268,9 +269,18 @@ const MemoryRecallActiveView: React.FC<Props> = ({ user, sessionId, topicId, sub
                         </div>
                         <div className="max-w-xl mx-auto p-4 bg-emerald-50 dark:bg-stone-800/50 rounded-xl border border-emerald-100 dark:border-stone-700">
                              <p className="text-lg text-emerald-800 dark:text-emerald-300 font-medium italic">
-                                "Keep going! You missed some details about the nutrient cycle, but your explanation of plant adaptations was spot on."
-                                {/* Assuming encouragement is passed in real implementation, hardcoding a placeholder or extracting from AI if we update the Attempt type. Let's assume the AI returns it in highlightedSummary or we add it to the type. Since we added it to AttemptResult but not Attempt, we'll just show the highlights for now, or you can update the type. */}
+                                {latestAttempt.score === 100
+                                    ? "Perfect recall! You've mastered this topic. Ready to test your knowledge in an exam setting?"
+                                    : "Keep going! Review what you missed and try again to improve your score."}
                             </p>
+                            {latestAttempt.score === 100 && onPracticeExam && (
+                                <button
+                                    onClick={() => onPracticeExam(topicId, subTopicId)}
+                                    className="mt-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 mx-auto"
+                                >
+                                    <span>📝</span> Try an Exam Question
+                                </button>
+                            )}
                         </div>
                     </div>
 
