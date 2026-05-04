@@ -300,12 +300,14 @@ const App: React.FC = () => {
         songGenerator: true
     });
 
-    const checkAdmin = (email: string | null, uid: string) => {
-        const envUIDs = import.meta.env.VITE_ADMIN_USER_IDS
-            ? import.meta.env.VITE_ADMIN_USER_IDS.split(',').map((id: string) => id.trim())
-            : [];
-        if (envUIDs.includes(uid)) return true;
-        return email?.includes('admin') || false;
+    const checkAdmin = async (uid: string): Promise<boolean> => {
+        const res = await fetch('/api/check-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid }),
+        });
+        const data = await res.json();
+        return data.isAdmin === true;
     };
 
     useEffect(() => {
@@ -430,7 +432,7 @@ const App: React.FC = () => {
                 setUser(authUser);
                 logUserActivity(authUser.uid, 'login', { timestamp: new Date().toISOString() });
                 
-                if (role === 'admin' || checkAdmin(firebaseUser.email, firebaseUser.uid)) setIsAdmin(true);
+                if (role === 'admin' || await checkAdmin(firebaseUser.uid)) setIsAdmin(true);
 
             } else {
                 setUser(null);

@@ -233,6 +233,15 @@ app.post('/api/safeguarding-alert', async (req, res) => {
   }
 });
 
+app.post('/api/check-admin', (req, res) => {
+  const { uid } = req.body;
+  if (!uid) return res.status(400).json({ isAdmin: false });
+  const adminUIDs = process.env.ADMIN_USER_IDS
+    ? process.env.ADMIN_USER_IDS.split(',').map(id => id.trim())
+    : [];
+  res.json({ isAdmin: adminUIDs.includes(uid) });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
