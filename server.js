@@ -18,8 +18,9 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  // Legacy XSS Protection (still useful for older browsers)
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Allow Firebase auth popups to communicate back to the opener window
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   next();
 });
 
