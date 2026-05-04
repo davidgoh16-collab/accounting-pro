@@ -282,7 +282,7 @@ const App: React.FC = () => {
     // Mocks State
     const [activeMocks, setActiveMocks] = useState<MockConfig[]>([]);
     const [selectedMockId, setSelectedMockId] = useState<string | null>(null);
-    const [selectedSimulationId, setSelectedSimulationId] = useState<string>('ecosystem_balance');
+    const [selectedSimulationId, setSelectedSimulationId] = useState<string>('break_even_analysis');
 
     // Memory Recall State
     const [memoryRecallSessionParams, setMemoryRecallSessionParams] = useState<{sessionId: string, topicId: string, subTopicId: string, isResume: boolean} | null>(null);
@@ -528,28 +528,11 @@ const App: React.FC = () => {
     };
 
     const theme = React.useMemo(() => {
-        const level = user?.level || 'A-Level';
-        if (level === 'GCSE') {
-            return {
-                bgClass: "bg-emerald-50 dark:bg-emerald-950",
-                bgPattern: "bg-[url('/grid.svg')]",
-                hubGradient: "bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600",
-                subtitle: "Your GCSE Geography Hub (AQA 8035)"
-            };
-        }
-        if (level === 'IGCSE') {
-            return {
-                bgClass: "bg-orange-50 dark:bg-stone-950",
-                bgPattern: "bg-[url('/grid.svg')]",
-                hubGradient: "bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500",
-                subtitle: "Your IGCSE Geography Hub (Edexcel)"
-            };
-        }
         return {
             bgClass: "bg-blue-50 dark:bg-blue-950",
             bgPattern: "bg-[url('/grid.svg')]",
             hubGradient: "bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400",
-            subtitle: "Your A-Level Geography Hub"
+            subtitle: "Your A-Level Accounting Hub (AQA 7127)"
         };
     }, [user?.level]);
 
@@ -570,7 +553,7 @@ const App: React.FC = () => {
             
             {page === 'dashboard' && (
                 <HubLayout 
-                    title={`Welcome back, ${user.displayName?.split(' ')[0] || 'Geographer'}`} 
+                    title={`Welcome back, ${user.displayName?.split(' ')[0] || 'Accountant'}`} 
                     subtitle={theme.subtitle} 
                     gradient={theme.hubGradient}
                     onReplayTutorial={handleReplayTour}
@@ -737,15 +720,15 @@ const App: React.FC = () => {
                                         <HubCard
                                             icon={<span className="text-4xl">🎮</span>}
                                             title="Game Zone"
-                                            description="Test your knowledge with interactive games like Flappy Geo, Block Blast, and Swipe Quiz."
+                                            description="Test your knowledge with interactive games like Flappy Accounts, Block Blast, and Account Swipe."
                                             onClick={() => handleNavigate('games_hub')}
                                             shadowColor="shadow-teal-500/20"
                                             accentColor="text-teal-600 hover:text-teal-700"
                                         />
                                         <HubCard
-                                            icon={<span className="text-4xl">🔬</span>}
-                                            title="Simulations"
-                                            description="Explore interactive simulations to deepen your understanding of complex geographical systems."
+                                            icon={<span className="text-4xl">💼</span>}
+                                            title="Scenario Explorer"
+                                            description="Explore interactive business scenarios to deepen your understanding of accounting concepts."
                                             onClick={() => handleNavigate('simulations_hub')}
                                             shadowColor="shadow-emerald-500/20"
                                             accentColor="text-emerald-600 hover:text-emerald-700"
@@ -753,9 +736,9 @@ const App: React.FC = () => {
                                     </>
                                 )}
                                 <HubCard
-                                    icon={<span className="text-4xl">🗺️</span>}
-                                    title="Case Study Explorer"
-                                    description="Interactive map and detailed insights for all your core case studies."
+                                    icon={<span className="text-4xl">📊</span>}
+                                    title="Scenario Explorer"
+                                    description="Interactive map and detailed insights for all your core accounting scenarios."
                                     onClick={() => handleNavigate('case_study_explorer')}
                                     shadowColor="shadow-emerald-500/20"
                                     accentColor="text-emerald-600 hover:text-emerald-700"
@@ -792,7 +775,7 @@ const App: React.FC = () => {
             {page === 'session_analysis' && <SessionAnalysisView user={user} onViewSession={handleViewSession} onBack={() => handleNavigate('question_practice_hub')} />}
             
             {page === 'games_hub' && <GamesHubView onNavigate={handleNavigate} onStartGame={handleStartGame} user={user} featureFlags={featureFlags} />}
-            {page === 'flappy_geo' && <GameModeView topic={selectedGameTopic} user={user} onExit={() => handleNavigate('games_hub')} />}
+            {page === 'flappy_accountant' && <GameModeView topic={selectedGameTopic} user={user} onExit={() => handleNavigate('games_hub')} />}
             {page === 'block_blast' && <BlockBlastView topic={selectedGameTopic} user={user} onExit={() => handleNavigate('games_hub')} />}
             {page === 'swipe_quiz' && <SwipeQuizView topic={selectedGameTopic} user={user} onBack={() => handleNavigate('games_hub')} />}
             {page === 'game_analysis' && <GameAnalysisView user={user} onBack={() => handleNavigate('games_hub')} />}

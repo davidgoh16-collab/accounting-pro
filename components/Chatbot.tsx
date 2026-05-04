@@ -101,7 +101,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
         className="fixed bottom-6 right-6 bg-green-500 text-white w-16 h-16 flex items-center justify-center rounded-full shadow-lg shadow-green-500/30 hover:bg-green-600 transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 z-50"
         aria-label="Open Chat"
       >
-        <span className="text-3xl">🌍</span>
+        <span className="text-3xl">📊</span>
       </button>
     );
   }
@@ -110,9 +110,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
     <div className="fixed bottom-6 right-6 w-[90vw] max-w-md h-[70vh] max-h-[600px] bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-2xl flex flex-col z-50 transition-all duration-300 ease-in-out">
       <header className="flex items-center justify-between p-4 bg-stone-50/80 dark:bg-stone-800/80 border-b border-stone-200/80 dark:border-stone-700 rounded-t-3xl">
         <div className="flex items-center gap-2">
-            <span className="text-3xl">🌍</span>
+            <span className="text-3xl">🤖</span>
             <div className="flex flex-col">
-                <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100 leading-tight">Geo Pro Chat</h2>
+                <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100 leading-tight">Acc Pro Chat</h2>
                 <span className="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wider">Tutor Mode</span>
             </div>
         </div>
@@ -129,7 +129,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onNavigate }) => {
       <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
         {messages.length === 0 && (
             <div className="text-center text-stone-500 dark:text-stone-400 mt-10">
-                <p>👋 Hi! I'm Geo Pro.</p>
+                <p>👋 Hi! I'm Acc Pro.</p>
                 <p className="text-sm mt-2">I can help with definitions and specification questions.</p>
                 <p className="text-xs mt-4 text-stone-400">For research & citations, switch to full screen mode (↗️).</p>
             </div>

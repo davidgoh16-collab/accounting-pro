@@ -21,7 +21,7 @@ const CommandWordToolkitView: React.FC<CommandWordToolkitViewProps> = ({ user, o
     return (
         <HubLayout
             title="Command Word Toolkit"
-            subtitle={`Master key command words for ${level} Geography with definitions, action plans, and examples.`}
+            subtitle={`Master key command words for ${level} Accounting with definitions, action plans, and examples.`}
             gradient="bg-gradient-to-r from-amber-500 to-orange-600"
             onBack={onBack}
         >

@@ -100,16 +100,16 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
         <>
             <HubLayout
                 title="Game Zone"
-                subtitle="Choose a game to test your geography skills in a fun and interactive way."
+                subtitle="Choose a game to test your accounting knowledge in a fun and interactive way."
                 gradient="bg-gradient-to-r from-teal-500 via-cyan-500 to-sky-500"
                 onBack={() => onNavigate('dashboard')}
             >
                 <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
                     <HubCard
                         icon={<span className="text-4xl">🐦</span>}
-                        title="Flappy Geo"
-                        description="Keep the globe afloat, dodge the pipes, and answer questions when you collide."
-                        onClick={() => handleOpenModal('flappy_geo', 'Flappy Geo')}
+                        title="Flappy Accounts"
+                        description="Keep the calculator afloat, dodge the pipes, and answer accounting questions when you collide."
+                        onClick={() => handleOpenModal('flappy_accountant', 'Flappy Accounts')}
                         shadowColor="shadow-teal-500/20"
                         accentColor="text-teal-600 hover:text-teal-700"
                         actionText="Play Now"
@@ -127,9 +127,9 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                     />
                     <HubCard
                         icon={<span className="text-4xl">↔️</span>}
-                        title="Geo Swipe"
-                        description="A rapid-fire quiz. Swipe right for true, left for false on unique statements and images."
-                        onClick={() => handleOpenModal('swipe_quiz', 'Geo Swipe')}
+                        title="Account Swipe"
+                        description="A rapid-fire quiz. Swipe right for true, left for false on accounting statements."
+                        onClick={() => handleOpenModal('swipe_quiz', 'Account Swipe')}
                         shadowColor="shadow-fuchsia-500/20"
                         accentColor="text-fuchsia-600 hover:text-fuchsia-700"
                         actionText="Play Now"

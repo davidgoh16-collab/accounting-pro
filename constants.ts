@@ -4,1279 +4,402 @@ import { ALL_QUESTIONS } from './database';
 
 export const ALEVEL_UNITS = [
     'All Units',
-    'Global Systems and Global Governance',
-    'Changing Places',
-    'Contemporary Urban Environments',
-    'Population and the Environment',
-    'Resource Security',
-    'Water and Carbon Cycles',
-    'Coastal Systems and Landscapes',
-    'Hazards',
-    'Ecosystems Under Stress'
+    'The Role of the Accountant in Business',
+    'Types of Business Organisation',
+    'The Double Entry Model',
+    'Verification of Accounting Records',
+    'Accounting Concepts',
+    'Financial Statements of Sole Traders',
+    'Limited Company Accounts',
+    'Analysis and Interpretation of Financial Information',
+    'Budgeting',
+    'Marginal Costing',
+    'Standard Costing and Variance Analysis',
+    'Absorption and Activity Based Costing',
+    'Capital Investment Appraisal',
+    'Incomplete Records',
+    'Partnership Accounts',
+    'Accounting Standards (IAS/IFRS)',
+    'Ethics for Accountants',
+    'Impact of Technology on Accounting'
 ];
 
-export const GCSE_UNITS = [
-    'All Units',
-    'The Challenge of Natural Hazards',
-    'The Living World',
-    'Physical Landscapes in the UK',
-    'Urban Issues and Challenges',
-    'The Changing Economic World',
-    'The Challenge of Resource Management',
-    'Geographical Applications'
-];
+export const GCSE_UNITS = ALEVEL_UNITS;
 
-export const IGCSE_UNITS = [
-    'All Units',
-    'River environments',
-    'Coastal environments',
-    'Hazardous environments',
-    'Economic activity and energy',
-    'Rural environments',
-    'Urban environments',
-    'Fragile environments and climate change',
-    'Globalisation and migration',
-    'Development and human welfare'
-];
+export const IGCSE_UNITS = ALEVEL_UNITS;
 
 export const AQA_UNITS = ALEVEL_UNITS; 
 
 export const QUESTIONS = ALL_QUESTIONS;
 
 export const VIDEO_LIBRARY: VideoResource[] = [
-    { id: 'v1', title: 'SnapRevise: The Ultimate A-level Geography Resource', videoId: '5wJURQ3FetE', level: 'A-Level' },
-    { id: 'v2', title: 'System Frameworks & Types of Feedback', videoId: '7kvltkvO4Wk', level: 'A-Level' },
-    { id: 'v3', title: 'The Water Cycle', videoId: 'W3G2z7z9XBU', level: 'A-Level' },
-    { id: 'v4', title: 'Water Balance', videoId: 'Y5ygf5tgL8c', level: 'A-Level' },
-    { id: 'v5', title: 'The Carbon Cycle', videoId: 'xKMTaJCJ6Ww', level: 'A-Level' },
-    { id: 'v6', title: 'Carbon Budget', videoId: '6smbaPNisPk', level: 'A-Level' },
-    { id: 'v7', title: 'The Impact of the Water and Carbon Cycle on the Atmosphere', videoId: 'Ttuw_oBBT9s', level: 'A-Level' },
-    { id: 'v8', title: 'Introduction to Coasts', videoId: 'Ak2vhd8IZ6E', level: 'A-Level' },
-    { id: 'v9', title: 'Coasts: Sediment Budgets', videoId: 'rVc5gqxi0-I', level: 'A-Level' },
-    { id: 'v10', title: 'Coasts: Geomorphological Processes', videoId: '_JG_yE3XQ7g', level: 'A-Level' },
-    { id: 'v11', title: 'Coasts: Landscape Development', videoId: 'dY_WTVmoQIg', level: 'A-Level' },
-    { id: 'v12', title: 'Coasts: Eustatic and Isostatic Sea Level Change', videoId: 'joYo0m-TaRs', level: 'A-Level' },
-    { id: 'v13', title: 'Coasts: Coastal Management', videoId: 'PlJ7QpDhqo0', level: 'A-Level' },
-    { id: 'v14', title: 'Coasts Case Study: Nile Delta', videoId: '3HxZNACWC98', level: 'A-Level' },
-    { id: 'v15', title: 'Introduction to Glaciation', videoId: 'D-pjVNIROzM', level: 'A-Level' },
-    { id: 'v16', title: 'Glaciation: Periglacial Landforms', videoId: 'CuIC2FUHlso', level: 'A-Level' },
-    { id: 'v17', title: 'Natural Hazards', videoId: 'ieY0ymVv-nw', level: 'A-Level' },
-    { id: 'v18', title: 'The Theory of Plate Tectonics', videoId: 'SYHMLtHQRmI', level: 'A-Level' },
-    { id: 'v19', title: 'Natural Hazards: Volcanoes', videoId: 'JMdSAOUthBQ', level: 'A-Level' },
-    { id: 'v20', title: 'Introduction to Places', videoId: 'hdZXR_eC60I', level: 'A-Level' },
-    { id: 'v21', title: 'Changing Places', videoId: 'J1GCsi7FYZQ', level: 'A-Level' },
-    { id: 'v22', title: 'Urbanisation: Patterns and Growth', videoId: 'uVkytXbkWIw', level: 'A-Level' },
-    { id: 'v23', title: 'Urbanisation: Issues', videoId: 'ME9s21yrORU', level: 'A-Level' },
-    { id: 'v24', title: 'The Urban Heat Island', videoId: 'kJ4x7F5oErw', level: 'A-Level' },
-    { id: 'v25', title: 'Urban Case Study: London', videoId: 'xoKreMRQYo4', level: 'A-Level' },
-    { id: 'v26', title: 'Urban Case Study: Rio de Janeiro', videoId: 'gFJTVOreh08', level: 'A-Level' },
-    { id: 'v27', title: 'Deserts', videoId: 'Q2gTVr7uXOA', level: 'A-Level' },
-    { id: 'v28', title: 'Globalisation', videoId: 'K-cymvzbE9I', level: 'A-Level' },
-    { id: 'v29', title: 'Factors Affecting Globalisation', videoId: '4Nx2BezF0Bo', level: 'A-Level' },
-    { id: 'v30', title: 'Global Trade', videoId: 'bbYwU3EGWjI', level: 'A-Level' },
-    { id: 'v31', title: 'Transnational Corporations', videoId: 'U6MgUVehl2A', level: 'A-Level' },
-    { id: 'v32', title: 'Global Governance', videoId: 'PGFue66Fgz4', level: 'A-Level' },
-    { id: 'v33', title: 'Global Commons', videoId: 'ThhrwcWG_v0', level: 'A-Level' },
-    { id: 'v34', title: 'Human Population and the Environment', videoId: 'a3En6Vpl_ds', level: 'A-Level' },
-    { id: 'v35', title: 'International Migration', videoId: 'muqHF7u5AQQ', level: 'A-Level' },
+    // --- A-LEVEL ACCOUNTING VIDEOS ---
+    // Double Entry & Bookkeeping
+    { id: 'v1', title: 'Introduction to Double Entry Bookkeeping', videoId: 'VhwZ9t2b3Zk', level: 'A-Level', topic: 'The Double Entry Model', paper: 'Paper 1' },
+    { id: 'v2', title: 'T-Accounts and Ledger Entries', videoId: '2xKaVgIbcag', level: 'A-Level', topic: 'The Double Entry Model', paper: 'Paper 1' },
+    { id: 'v3', title: 'Trial Balance Explained', videoId: '0gJzEXMqxos', level: 'A-Level', topic: 'Verification of Accounting Records', paper: 'Paper 1' },
 
-    // --- GCSE VIDEOS ---
-    // Natural Hazards (Paper 1)
-    { id: 'gcse_v1', title: 'Natural Hazards (Part 1)', videoId: 'LQp_82E2fTs', level: 'GCSE', topic: 'Natural Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v2', title: 'Natural Hazards (Part 2)', videoId: '9AAWepfiu2Q', level: 'GCSE', topic: 'Natural Hazards', paper: 'Paper 1' },
+    // Financial Statements
+    { id: 'v4', title: 'Income Statement (Profit & Loss Account)', videoId: 'WBsBCDEdxBw', level: 'A-Level', topic: 'Financial Statements of Sole Traders', paper: 'Paper 1' },
+    { id: 'v5', title: 'Statement of Financial Position (Balance Sheet)', videoId: 'ATn63UcjO2Y', level: 'A-Level', topic: 'Financial Statements of Sole Traders', paper: 'Paper 1' },
+    { id: 'v6', title: 'Limited Company Financial Statements', videoId: 'f3xt0FpVkBE', level: 'A-Level', topic: 'Limited Company Accounts', paper: 'Paper 1' },
 
-    // Tectonic Hazards (Paper 1)
-    { id: 'gcse_v3', title: 'Tectonic Hazards (Part 1)', videoId: 'RzKj4zWfjLY', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v4', title: 'Tectonic Hazards (Part 2)', videoId: 'zUaYhJrhnrE', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v5', title: 'Tectonic Hazards (Part 3)', videoId: 'OhtAtNuFtzQ', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v6', title: 'Tectonic Hazards (Part 4)', videoId: 'OzMeGF0GXWU', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v7', title: 'Tectonic Hazards (Part 5)', videoId: 'GoCkjr5WfyQ', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v8', title: 'Tectonic Hazards (Part 6)', videoId: '1RuhHqOdBnQ', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v9', title: 'Tectonic Hazards (Part 7)', videoId: 'lrS_240BkBA', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v10', title: 'Tectonic Hazards (Part 8)', videoId: 'tWVSmATx3jk', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v11', title: 'Tectonic Hazards (Part 9)', videoId: '8R7lwY4vjv4', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v12', title: 'Tectonic Hazards (Part 10)', videoId: 'T6Botca1_FQ', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v13', title: 'Tectonic Hazards (Part 11)', videoId: 'hK-dUnWv7Zg', level: 'GCSE', topic: 'Tectonic Hazards', paper: 'Paper 1' },
+    // Accounting Concepts
+    { id: 'v7', title: 'Accounting Concepts and Conventions', videoId: 'QYIqvIjQ4sE', level: 'A-Level', topic: 'Accounting Concepts', paper: 'Paper 1' },
+    { id: 'v8', title: 'Depreciation Methods Explained', videoId: '2wQ1TGUEjYA', level: 'A-Level', topic: 'Accounting Concepts', paper: 'Paper 1' },
+    { id: 'v9', title: 'Accruals and Prepayments', videoId: 'OaC0TGiAJOI', level: 'A-Level', topic: 'Accounting Concepts', paper: 'Paper 1' },
 
-    // Weather Hazards (Paper 1)
-    { id: 'gcse_v14', title: 'Weather Hazards (Part 1)', videoId: 'jvfB4YFRC3w', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v15', title: 'Weather Hazards (Part 2)', videoId: '6hHMCgLtwao', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v16', title: 'Weather Hazards (Part 3)', videoId: '72LhtyFZadw', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v17', title: 'Weather Hazards (Part 4)', videoId: '0DIqel4KLW0', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v18', title: 'Weather Hazards (Part 5)', videoId: 'iEopE8qCKGE', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v19', title: 'Weather Hazards (Part 6)', videoId: '5MuabnhLOdY', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v20', title: 'Weather Hazards (Part 7)', videoId: 'Cui7eS7tPJc', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v21', title: 'Weather Hazards (Part 8)', videoId: 'pkCpqANQJA0', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v22', title: 'Weather Hazards (Part 9)', videoId: 'HPuSZZaJnJ0', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v23', title: 'Weather Hazards (Part 10)', videoId: '3KNDGPq1n9k', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v24', title: 'Weather Hazards (Part 11)', videoId: 'lFNHFC4ZBgI', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v25', title: 'Weather Hazards (Part 12)', videoId: 'rB4g0pE4Tw8', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v26', title: 'Weather Hazards (Part 13)', videoId: 'Arhqus8MQGQ', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v27', title: 'Weather Hazards (Part 14)', videoId: 'D-I2zlJLMm8', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
-    { id: 'gcse_v28', title: 'Weather Hazards (Part 15)', videoId: 'FH8E2Q3qfJg', level: 'GCSE', topic: 'Weather Hazards', paper: 'Paper 1' },
+    // Ratio Analysis
+    { id: 'v10', title: 'Profitability Ratios', videoId: 'ZXjMYvqrE3A', level: 'A-Level', topic: 'Analysis and Interpretation of Financial Information', paper: 'Paper 1' },
+    { id: 'v11', title: 'Liquidity Ratios', videoId: 'jM3aCv5FWjE', level: 'A-Level', topic: 'Analysis and Interpretation of Financial Information', paper: 'Paper 1' },
+    { id: 'v12', title: 'Efficiency Ratios', videoId: '8REvGYoYE7I', level: 'A-Level', topic: 'Analysis and Interpretation of Financial Information', paper: 'Paper 1' },
 
-    // Climate Change (Paper 1)
-    { id: 'gcse_v29', title: 'Climate Change (Part 1)', videoId: '3fyOyHMlyRQ', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v30', title: 'Climate Change (Part 2)', videoId: 'OS8_p_J9VLE', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v31', title: 'Climate Change (Part 3)', videoId: 'DpEUOOwQ_XU', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v32', title: 'Climate Change (Part 4)', videoId: 'EglASOE5eBo', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v33', title: 'Climate Change (Part 5)', videoId: 'DutpzaJpMHQ', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v34', title: 'Climate Change (Part 6)', videoId: 'U_0kWdNaPzY', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v35', title: 'Climate Change (Part 7)', videoId: '9N-pN5zHfZI', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
-    { id: 'gcse_v36', title: 'Climate Change (Part 8)', videoId: 'aAN0_UxXli4', level: 'GCSE', topic: 'Climate Change', paper: 'Paper 1' },
+    // Management Accounting
+    { id: 'v13', title: 'Budgeting Basics', videoId: 'lOsRFJbyD0w', level: 'A-Level', topic: 'Budgeting', paper: 'Paper 2' },
+    { id: 'v14', title: 'Marginal Costing and Break-Even', videoId: 'JuDRkVJFWHg', level: 'A-Level', topic: 'Marginal Costing', paper: 'Paper 2' },
+    { id: 'v15', title: 'Absorption Costing Explained', videoId: 'hLKIFw3Rq70', level: 'A-Level', topic: 'Absorption and Activity Based Costing', paper: 'Paper 2' },
+    { id: 'v16', title: 'Standard Costing and Variance Analysis', videoId: 'ZOSm3D0dXfk', level: 'A-Level', topic: 'Standard Costing and Variance Analysis', paper: 'Paper 2' },
+    { id: 'v17', title: 'Capital Investment Appraisal (NPV, IRR, Payback)', videoId: 'b2G1JdPCl_4', level: 'A-Level', topic: 'Capital Investment Appraisal', paper: 'Paper 2' },
 
-    // Coastal Landscapes (Paper 1)
-    { id: 'gcse_v37', title: 'Coastal Landscapes (Part 1)', videoId: 'JC47DJU4gWE', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v38', title: 'Coastal Landscapes (Part 2)', videoId: 'l20SZC3O090', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v39', title: 'Coastal Landscapes (Part 3)', videoId: '6z2N8Mtv_kw', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v40', title: 'Coastal Landscapes (Part 4)', videoId: 'Ww_yhWXW47Q', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v41', title: 'Coastal Landscapes (Part 5)', videoId: 'gIUThLF7bIw', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v42', title: 'Coastal Landscapes (Part 6)', videoId: 'MaqDvbh0J0Q', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v43', title: 'Coastal Landscapes (Part 7)', videoId: 'TeHfdWJ5hEk', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v44', title: 'Coastal Landscapes (Part 8)', videoId: 'n3sMxrCl5Yc', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v45', title: 'Coastal Landscapes (Part 9)', videoId: 'MGHissPs180', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v46', title: 'Coastal Landscapes (Part 10)', videoId: '20jHXUHs1ek', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v47', title: 'Coastal Landscapes (Part 11)', videoId: '6hkqQ8YkV4U', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v48', title: 'Coastal Landscapes (Part 12)', videoId: 'c8KEs0x_vyw', level: 'GCSE', topic: 'Coastal Landscapes', paper: 'Paper 1' },
+    // Partnerships & Incomplete Records
+    { id: 'v18', title: 'Partnership Accounts', videoId: 'ygBu7wd2mGk', level: 'A-Level', topic: 'Partnership Accounts', paper: 'Paper 1' },
+    { id: 'v19', title: 'Incomplete Records', videoId: 'sFlb5VZEybs', level: 'A-Level', topic: 'Incomplete Records', paper: 'Paper 1' },
 
-    // River Landscapes (Paper 1)
-    { id: 'gcse_v49', title: 'River Landscapes (Part 1)', videoId: '5JBVCaDntzI', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v50', title: 'River Landscapes (Part 2)', videoId: '67JGxLsi8oM', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v51', title: 'River Landscapes (Part 3)', videoId: 'mTIQDg1bV2I', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v52', title: 'River Landscapes (Part 4)', videoId: 'N_ZC9vBX4Wo', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v53', title: 'River Landscapes (Part 5)', videoId: 'YROlZS6sflI', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v54', title: 'River Landscapes (Part 6)', videoId: 'zuzUGNWO6ec', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v55', title: 'River Landscapes (Part 7)', videoId: 'b_B9VQ5WCVs', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v56', title: 'River Landscapes (Part 8)', videoId: 'XrGp0tFi6IQ', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v57', title: 'River Landscapes (Part 9)', videoId: '5ThPRongOzU', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v58', title: 'River Landscapes (Part 10)', videoId: 'GjyqlBloRGs', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
-    { id: 'gcse_v59', title: 'River Landscapes (Part 11)', videoId: 'suPuE-Q8Ipk', level: 'GCSE', topic: 'River Landscapes', paper: 'Paper 1' },
+    // Ethics & Standards
+    { id: 'v20', title: 'International Accounting Standards (IAS)', videoId: 'xLnKFgnCHNc', level: 'A-Level', topic: 'Accounting Standards (IAS/IFRS)', paper: 'Paper 3' },
+    { id: 'v21', title: 'Ethics in Accounting', videoId: 'tWwJMUl4gro', level: 'A-Level', topic: 'Ethics for Accountants', paper: 'Paper 3' },
 
-    // Ecosystems (Paper 1)
-    { id: 'gcse_v60', title: 'Ecosystems (Part 1)', videoId: 't4Pbt0a7E_I', level: 'GCSE', topic: 'Ecosystems', paper: 'Paper 1' },
-    { id: 'gcse_v61', title: 'Ecosystems (Part 2)', videoId: 'PpzGpnFwQcU', level: 'GCSE', topic: 'Ecosystems', paper: 'Paper 1' },
-    { id: 'gcse_v62', title: 'Ecosystems (Part 3)', videoId: 'PlBTnEnhR44', level: 'GCSE', topic: 'Ecosystems', paper: 'Paper 1' },
-    { id: 'gcse_v63', title: 'Ecosystems (Part 4)', videoId: 'f2vt9mh7dfc', level: 'GCSE', topic: 'Ecosystems', paper: 'Paper 1' },
-
-    // Tropical Rainforests (Paper 1)
-    { id: 'gcse_v64', title: 'Tropical Rainforests (Part 1)', videoId: 'EiBJ6fFDoAU', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v65', title: 'Tropical Rainforests (Part 2)', videoId: 'AoI_ueDjC-s', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v66', title: 'Tropical Rainforests (Part 3)', videoId: '7rwUbm2ShkA', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v67', title: 'Tropical Rainforests (Part 4)', videoId: 'jUaZv6D6aE0', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v68', title: 'Tropical Rainforests (Part 5)', videoId: 'KniEgtNYpEM', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v69', title: 'Tropical Rainforests (Part 6)', videoId: 'LgM1vq1cj7g', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v70', title: 'Tropical Rainforests (Part 7)', videoId: '7-G8Z0GigqQ', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v71', title: 'Tropical Rainforests (Part 8)', videoId: 'IIkFA9ds7kg', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v72', title: 'Tropical Rainforests (Part 9)', videoId: 'UTUz6c4pGD4', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-    { id: 'gcse_v73', title: 'Tropical Rainforests (Part 10)', videoId: '95p3f52_lVE', level: 'GCSE', topic: 'Tropical Rainforests', paper: 'Paper 1' },
-
-    // Hot Deserts (Paper 1)
-    { id: 'gcse_v74', title: 'Hot Deserts (Part 1)', videoId: 'umj-z3Q5154', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v75', title: 'Hot Deserts (Part 2)', videoId: 'uGRvnUVkwec', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v76', title: 'Hot Deserts (Part 3)', videoId: 'lyxATVYWOVQ', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v77', title: 'Hot Deserts (Part 4)', videoId: 'yfnr0BmJmMk', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v78', title: 'Hot Deserts (Part 5)', videoId: 'opiMGsWd8iA', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v79', title: 'Hot Deserts (Part 6)', videoId: '5EIGP7AuKps', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v80', title: 'Hot Deserts (Part 7)', videoId: 'ZTihfkXrdaY', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v81', title: 'Hot Deserts (Part 8)', videoId: 'l6gnjNw0Aak', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v82', title: 'Hot Deserts (Part 9)', videoId: '86OKOiKZBwc', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-    { id: 'gcse_v83', title: 'Hot Deserts (Part 10)', videoId: '4bVB_zF-TGY', level: 'GCSE', topic: 'Hot Deserts', paper: 'Paper 1' },
-
-    // Cold Environments (Paper 1)
-    { id: 'gcse_v84', title: 'Cold Environments (Part 1)', videoId: 'eAMzMNBV4Bw', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v85', title: 'Cold Environments (Part 2)', videoId: 'yhCdLs78GEA', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v86', title: 'Cold Environments (Part 3)', videoId: 's6nTDjGSL4o', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v87', title: 'Cold Environments (Part 4)', videoId: 'SeX-IL8oZJo', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v88', title: 'Cold Environments (Part 5)', videoId: 'vLCe_BVpEiY', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v89', title: 'Cold Environments (Part 6)', videoId: 'cykVSlX729Q', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v90', title: 'Cold Environments (Part 7)', videoId: 'W8YdLL0iWp0', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v91', title: 'Cold Environments (Part 8)', videoId: '0iBzxrA396k', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v92', title: 'Cold Environments (Part 9)', videoId: 'VuWIgc7SfrU', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-    { id: 'gcse_v93', title: 'Cold Environments (Part 10)', videoId: 'sN4UN98f_jg', level: 'GCSE', topic: 'Cold Environments', paper: 'Paper 1' },
-
-    // Urbanisation (Paper 2)
-    { id: 'gcse_v94', title: 'Urbanisation (Part 1)', videoId: '7lwllykzeKo', level: 'GCSE', topic: 'Urbanisation', paper: 'Paper 2' },
-    { id: 'gcse_v95', title: 'Urbanisation (Part 2)', videoId: 'REcu0XG0iqc', level: 'GCSE', topic: 'Urbanisation', paper: 'Paper 2' },
-    { id: 'gcse_v96', title: 'Urbanisation (Part 3)', videoId: '_aIrhbzNbNQ', level: 'GCSE', topic: 'Urbanisation', paper: 'Paper 2' },
-
-    // Lagos (Nigeria) City Study (Paper 2)
-    { id: 'gcse_v97', title: 'Lagos Case Study (Part 1)', videoId: '8_0NaR9eRNE', level: 'GCSE', topic: 'Lagos Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v98', title: 'Lagos Case Study (Part 2)', videoId: 'FZm2fMs6xAk', level: 'GCSE', topic: 'Lagos Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v99', title: 'Lagos Case Study (Part 3)', videoId: 'YCIgCbDY0WM', level: 'GCSE', topic: 'Lagos Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v100', title: 'Lagos Case Study (Part 4)', videoId: 'ydf86QTk5fk', level: 'GCSE', topic: 'Lagos Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v101', title: 'Lagos Case Study (Part 5)', videoId: 'dLxaw1fqlfE', level: 'GCSE', topic: 'Lagos Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v102', title: 'Lagos Case Study (Part 6)', videoId: '2shl49kIeNQ', level: 'GCSE', topic: 'Lagos Case Study', paper: 'Paper 2' },
-
-    // Rio de Janeiro (Brazil) City Study (Paper 2)
-    { id: 'gcse_v103', title: 'Rio Case Study (Part 1)', videoId: 'lk0efjOZPHo', level: 'GCSE', topic: 'Rio Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v104', title: 'Rio Case Study (Part 2)', videoId: 'YWj0JLt9gG0', level: 'GCSE', topic: 'Rio Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v105', title: 'Rio Case Study (Part 3)', videoId: 'XqoOMrQcVrI', level: 'GCSE', topic: 'Rio Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v106', title: 'Rio Case Study (Part 4)', videoId: 'sQAW56dASZI', level: 'GCSE', topic: 'Rio Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v107', title: 'Rio Case Study (Part 5)', videoId: '8LyC2_r-4EA', level: 'GCSE', topic: 'Rio Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v108', title: 'Rio Case Study (Part 6)', videoId: 'YMQhHP6LCuc', level: 'GCSE', topic: 'Rio Case Study', paper: 'Paper 2' },
-
-    // London Case Study (Paper 2)
-    { id: 'gcse_v109', title: 'London Case Study (Part 1)', videoId: 'x8oCoT38mn0', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v110', title: 'London Case Study (Part 2)', videoId: 'WrpuYWwtUq8', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v111', title: 'London Case Study (Part 3)', videoId: 'iDlnpjKNovA', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v112', title: 'London Case Study (Part 4)', videoId: '2craMeAtstw', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v113', title: 'London Case Study (Part 5)', videoId: 'z_z-53HYOE0', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v114', title: 'London Case Study (Part 6)', videoId: '2s7vs--ZK2k', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v115', title: 'London Case Study (Part 7)', videoId: 'oykc4cbExek', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v116', title: 'London Case Study (Part 8)', videoId: 'qkk4BbIRWmQ', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v117', title: 'London Case Study (Part 9)', videoId: 'TVbQ0g_2S5o', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-    { id: 'gcse_v118', title: 'London Case Study (Part 10)', videoId: '_XSHPXJ_PMU', level: 'GCSE', topic: 'London Case Study', paper: 'Paper 2' },
-
-    // Sustainable Urban Environments (Paper 2)
-    { id: 'gcse_v119', title: 'Sustainable Urban Environments (Part 1)', videoId: 'b9APfOuR1V4', level: 'GCSE', topic: 'Sustainable Urban Environments', paper: 'Paper 2' },
-    { id: 'gcse_v120', title: 'Sustainable Urban Environments (Part 2)', videoId: 'salk-6AykLA', level: 'GCSE', topic: 'Sustainable Urban Environments', paper: 'Paper 2' },
-
-    // --- Resource Management (Paper 2) ---
-    // Global Resources
-    { id: 'gcse_v121', title: 'Global Resources', videoId: 'C-XH8hqMePQ', level: 'GCSE', topic: 'Global Resources', paper: 'Paper 2' },
-
-    // UK Resources Overview
-    { id: 'gcse_v122', title: 'UK Resources (Part 1)', videoId: 'jmh4DCfdhVY', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v123', title: 'UK Resources (Part 2)', videoId: 'Nw_sSIqhqh4', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v124', title: 'UK Resources (Part 3)', videoId: 'WiXEyMnOtak', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v125', title: 'UK Resources (Part 4)', videoId: 'SagDgyuXLsI', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v126', title: 'UK Resources (Part 5)', videoId: 'Z2rdgmWChrU', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v127', title: 'UK Resources (Part 6)', videoId: 'Xgn62Bpi7u4', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v128', title: 'UK Resources (Part 7)', videoId: 'zobzSFrQyqM', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v129', title: 'UK Resources (Part 8)', videoId: 'd2ny2lmqTX0', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-    { id: 'gcse_v130', title: 'UK Resources (Part 9)', videoId: '19ccv16wrOE', level: 'GCSE', topic: 'UK Resources Overview', paper: 'Paper 2' },
-
-    // Food
-    { id: 'gcse_v131', title: 'Food (Part 1)', videoId: 'bH13o72Wjlo', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v132', title: 'Food (Part 2)', videoId: 'HfOSq8ILL_4', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v133', title: 'Food (Part 3)', videoId: 'yDccTm2Wv9U', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v134', title: 'Food (Part 4)', videoId: 'Zz7y7lEKFag', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v135', title: 'Food (Part 5)', videoId: 'UCqVXEP-cwI', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v136', title: 'Food (Part 6)', videoId: 'irg6H2rpfwE', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v137', title: 'Food (Part 7)', videoId: 'H40oh-UaxXE', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v138', title: 'Food (Part 8)', videoId: '5utbH4L6SRY', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v139', title: 'Food (Part 9)', videoId: 'KtT6l4HYI2g', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-    { id: 'gcse_v140', title: 'Food (Part 10)', videoId: 'jGgrGxl9A1o', level: 'GCSE', topic: 'Food', paper: 'Paper 2' },
-
-    // Water
-    { id: 'gcse_v141', title: 'Water (Part 1)', videoId: 'hMF0hYr8DS4', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v142', title: 'Water (Part 2)', videoId: 'd4yxORl1HVg', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v143', title: 'Water (Part 3)', videoId: '80r5GPNnZmg', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v144', title: 'Water (Part 4)', videoId: 'Ft0yAQCLYYA', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v145', title: 'Water (Part 5)', videoId: 'juN3YnxU23k', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v146', title: 'Water (Part 6)', videoId: 'J1orC1mjyEc', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v147', title: 'Water (Part 7)', videoId: 'LeUTTKAZ9YM', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v148', title: 'Water (Part 8)', videoId: 'Q51xU0fd_1Q', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-    { id: 'gcse_v149', title: 'Water (Part 9)', videoId: 'fH05UUf5OFo', level: 'GCSE', topic: 'Water', paper: 'Paper 2' },
-
-    // Energy
-    { id: 'gcse_v150', title: 'Energy (Part 1)', videoId: 'LnYsB9jd8nk', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v151', title: 'Energy (Part 2)', videoId: 'aLgHA9PnBCc', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v152', title: 'Energy (Part 3)', videoId: 'FKlOyDeTsns', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v153', title: 'Energy (Part 4)', videoId: 'Mvl4D0MHi4I', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v154', title: 'Energy (Part 5)', videoId: 'RXTUtLRyyJg', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v155', title: 'Energy (Part 6)', videoId: 'RIuLD2OS2eE', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v156', title: 'Energy (Part 7)', videoId: 'jfrro-9gTF8', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-    { id: 'gcse_v157', title: 'Energy (Part 8)', videoId: 'OY3ltFcipcY', level: 'GCSE', topic: 'Energy', paper: 'Paper 2' },
-
-    // --- Changing Economic World (Paper 2) ---
-    // Development Gap
-    { id: 'gcse_v158', title: 'Development Gap (Part 1)', videoId: 'LbQ4G0JD-D8', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v159', title: 'Development Gap (Part 2)', videoId: 'mWFAs8eazMw', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v160', title: 'Development Gap (Part 3)', videoId: 'HYwbkswVlgQ', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v161', title: 'Development Gap (Part 4)', videoId: 'OPKzI-7_li4', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v162', title: 'Development Gap (Part 5)', videoId: '6YYIXoywGm8', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v163', title: 'Development Gap (Part 6)', videoId: 'WiUyZhWsDy8', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v164', title: 'Development Gap (Part 7)', videoId: '3Cf55i1cwMw', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v165', title: 'Development Gap (Part 8)', videoId: 'DM-Hiy1uRsM', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v166', title: 'Development Gap (Part 9)', videoId: 's-JKU30B2jY', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v167', title: 'Development Gap (Part 10)', videoId: 'HFE2L0FSfqs', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v168', title: 'Development Gap (Part 11)', videoId: '5Xvgsyxb5Pc', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v169', title: 'Development Gap (Part 12)', videoId: '_7sgtFYBBog', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v170', title: 'Development Gap (Part 13)', videoId: 'DgVGYMbLERA', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v171', title: 'Development Gap (Part 14)', videoId: 'xAI1tSHWZyI', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v172', title: 'Development Gap (Part 15)', videoId: 'MWLFYg5ZSwo', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-    { id: 'gcse_v173', title: 'Development Gap (Part 16)', videoId: '5ehZZmAeA1g', level: 'GCSE', topic: 'Development Gap', paper: 'Paper 2' },
-
-    // UK Economic Futures
-    { id: 'gcse_v174', title: 'UK Economic Futures (Part 1)', videoId: '9obg_rnGTJw', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v175', title: 'UK Economic Futures (Part 2)', videoId: 'sZ3HkC7-R1s', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v176', title: 'UK Economic Futures (Part 3)', videoId: 'qEyUDHPzNHY', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v177', title: 'UK Economic Futures (Part 4)', videoId: 'nLfFLCN9xNA', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v178', title: 'UK Economic Futures (Part 5)', videoId: 't5OvzXGpONc', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v179', title: 'UK Economic Futures (Part 6)', videoId: '5M1CLvWatbs', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v180', title: 'UK Economic Futures (Part 7)', videoId: '_zgjuy0advs', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v181', title: 'UK Economic Futures (Part 8)', videoId: '3WUX1Zv9D6M', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-    { id: 'gcse_v182', title: 'UK Economic Futures (Part 9)', videoId: 'AOOgc6gyMMM', level: 'GCSE', topic: 'UK Economic Futures', paper: 'Paper 2' },
-
-    // --- IGCSE VIDEOS ---
-    { id: 'igcse_v1', title: 'ALL of Edexcel IGCSE Physical Geography!', videoId: 'Bpz_k3cs3eA', level: 'IGCSE', topic: 'River environments', paper: 'Paper 1' },
-    { id: 'igcse_v2', title: 'Volcanoes | GCSE & IGCSE Geography', videoId: 'gRbqtQoHMoE', level: 'IGCSE', topic: 'Hazardous environments', paper: 'Paper 1' },
-    { id: 'igcse_v3', title: 'Earthquakes | GCSE & IGCSE Geography', videoId: 'yDtSQ3mHFRY', level: 'IGCSE', topic: 'Hazardous environments', paper: 'Paper 1' },
-    { id: 'igcse_v4', title: 'Tropical Cyclone Formation | GCSE & IGCSE Geography', videoId: 'GA34V0VP_hg', level: 'IGCSE', topic: 'Hazardous environments', paper: 'Paper 1' },
-    { id: 'igcse_v5', title: 'Soft Engineering Strategies For Coastal Flood Defences', videoId: 'CGZxyscWqko', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' },
-    { id: 'igcse_v6', title: 'Hard Engineering Strategies For Coastal Flood Defences', videoId: 'Jg7e1bZp0_I', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' },
-    { id: 'igcse_v7', title: 'Causes Of Coastal Flooding', videoId: '0_Jg7e1bZp0', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' }, // Placeholder ID as list was truncated, using best guess pattern or generic
-    { id: 'igcse_v8', title: 'Rivers - ALL of GCSE & IGCSE Geography River Content', videoId: '5JBVCaDntzI', level: 'IGCSE', topic: 'River environments', paper: 'Paper 1' },
-    { id: 'igcse_v9', title: 'Conflicts Over The Use Of Coastal Ecosystems', videoId: 'TeHfdWJ5hEk', level: 'IGCSE', topic: 'Coastal environments', paper: 'Paper 1' }
+    // Business Organisation
+    { id: 'v22', title: 'Types of Business Organisation', videoId: 'XYsrX5mOP_U', level: 'A-Level', topic: 'Types of Business Organisation', paper: 'Paper 1' },
+    { id: 'v23', title: 'Role of the Accountant', videoId: 'c0rNA8lMhPU', level: 'A-Level', topic: 'The Role of the Accountant in Business', paper: 'Paper 3' },
 ];
 
+
+
+
 export const COMMAND_WORDS: CommandWord[] = [
-  // --- A-LEVEL SPECIFIC ---
   {
-    word: 'Assess',
-    definition: 'Offer a reasoned judgement of the standard/quality of situation/skill informed by relevant facts.',
-    requiredAction: 'Weigh up the importance of different factors or arguments. A clear judgement is essential throughout.',
-    aoFocus: 'AO2 (Evaluation)',
+    word: 'Prepare',
+    definition: 'Produce a financial statement, ledger account, or other accounting record.',
+    requiredAction: 'Set out the document in the correct format with appropriate headings, line items, and totals. Ensure double-entry principles are followed.',
+    aoFocus: 'AO2 (Application)',
     tips: [
-      'Start with a clear line of argument.',
-      'Use "However" and "On the other hand" to show balance.',
-      'Conclude by stating which factor is most important and why.'
+      'Use the correct format (T-account, columnar, vertical).',
+      'Show all workings clearly.',
+      'Double-check that the statement balances or totals correctly.'
     ],
     levels: ['A-Level']
   },
   {
-    word: 'Evaluate',
-    definition: 'Make a judgement on the effectiveness, value or success of something.',
-    requiredAction: 'Review information and bring it together to form a conclusion, drawing on evidence like strengths, weaknesses, alternatives.',
-    aoFocus: 'AO2 (Evaluation)',
+    word: 'Calculate',
+    definition: 'Work out a numerical answer, showing your working.',
+    requiredAction: 'Apply the correct formula and show each step of the calculation. State the final answer clearly with appropriate units.',
+    aoFocus: 'AO2 (Application)',
     tips: [
-      'Focus on the value or success of strategies/responses.',
-      'Consider short-term vs long-term.',
-      'Consider different scales (local vs national).'
-    ],
-    levels: ['A-Level']
-  },
-  {
-    word: 'To what extent',
-    definition: 'Judge the importance or success of a statement or strategy.',
-    requiredAction: 'Consider the statement. Argue for it, argue against it (or for alternative views). State clearly how much you agree.',
-    aoFocus: 'AO2 (Evaluation) & AO1 (Knowledge)',
-    tips: [
-      'Avoid sitting on the fence. Use phrases like "To a significant extent..."',
-      'Structure: Argument For -> Argument Against -> Judgement.',
-      'Your conclusion must explicitly answer "how much".'
+      'Always show your workings — marks are awarded for method.',
+      'State the formula before substituting values.',
+      'Round to 2 decimal places unless told otherwise.'
     ],
     levels: ['A-Level']
   },
   {
     word: 'Analyse',
-    definition: 'Break down data/information to find connections and patterns.',
-    requiredAction: 'Use the TESLA framework (Trend, Evidence, Shape, Link, Anomaly) to deconstruct the figure.',
-    aoFocus: 'AO3 (Skills)',
+    definition: 'Break down data or information to identify patterns, trends, and relationships.',
+    requiredAction: 'Examine the figures or scenario in detail. Identify what the data shows, compare figures, and draw out meaning.',
+    aoFocus: 'AO3 (Analysis)',
     tips: [
-      'Do not explain WHY (unless asked). Focus on WHAT the data shows.',
-      'Manipulate data (e.g. calculate range or % change).',
-      'Identify anomalies.'
+      'Use ratios and percentages to support your analysis.',
+      'Compare across time periods or against industry benchmarks.',
+      'Identify trends, anomalies, and significant changes.'
     ],
     levels: ['A-Level']
   },
-
-  // --- GCSE SPECIFIC ---
-  {
-    word: 'Assess',
-    definition: 'Weigh up the importance of something.',
-    requiredAction: 'Give reasons for and against. Come to a conclusion about which is more important/significant.',
-    aoFocus: 'AO3 (Judgement)',
-    tips: [
-      'Use phrases like "The most significant factor is..."',
-      'Look at both sides of the argument.',
-      'Give a clear conclusion.'
-    ],
-    levels: ['GCSE', 'IGCSE']
-  },
   {
     word: 'Evaluate',
-    definition: 'Judge the success or effectiveness.',
-    requiredAction: 'Use your evidence to decide how good or bad something is. Often used for management strategies.',
-    aoFocus: 'AO3 (Judgement)',
+    definition: 'Make a judgement on the effectiveness, value, or success of something, weighing up evidence.',
+    requiredAction: 'Consider strengths and weaknesses, advantages and disadvantages. Reach a supported conclusion.',
+    aoFocus: 'AO3 (Analysis & Evaluation)',
     tips: [
-      'What went well? What went wrong?',
-      'Did it work in the long term?',
-      'Was it worth the money?'
+      'Consider both sides of the argument.',
+      'Use accounting data to support your judgement.',
+      'Reach a clear, justified conclusion.'
     ],
-    levels: ['GCSE', 'IGCSE']
-  },
-  {
-    word: 'To what extent',
-    definition: 'How much do you agree?',
-    requiredAction: 'State your opinion (completely, partially, not at all). Support it with evidence.',
-    aoFocus: 'AO3 (Judgement)',
-    tips: [
-      'Start your answer by stating your level of agreement.',
-      'Use evidence to back up your opinion.',
-      'Address the counter-argument.'
-    ],
-    levels: ['GCSE', 'IGCSE']
-  },
-  {
-    word: 'Describe',
-    definition: 'Say what you see.',
-    requiredAction: 'Write about the main features of a photo, map, or graph.',
-    aoFocus: 'AO3 (Skills) or AO1 (Knowledge)',
-    tips: [
-      'Do not explain why.',
-      'Use compass directions (North, South).',
-      'Quote figures if looking at a graph.'
-    ],
-    levels: ['GCSE', 'IGCSE']
-  },
-  {
-    word: 'Suggest',
-    definition: 'Give a possible reason or solution.',
-    requiredAction: 'Apply your knowledge to a new situation (usually a photo or map).',
-    aoFocus: 'AO3 (Application)',
-    tips: [
-      'Look at the figure provided.',
-      'Use phrases like "This might be because..."',
-      'There may be more than one correct answer.'
-    ],
-    levels: ['GCSE', 'IGCSE']
-  },
-  {
-    word: 'Justify',
-    definition: 'Give reasons for your choice.',
-    requiredAction: 'Explain why you chose one option over another (often in Paper 3).',
-    aoFocus: 'AO3 (Decision Making)',
-    tips: [
-      'Explain the benefits of your choice.',
-      'Explain the problems with the rejected options.'
-    ],
-    levels: ['GCSE', 'IGCSE']
-  },
-
-  // --- SHARED / GENERIC ---
-  {
-    word: 'Explain',
-    definition: 'Give reasons why something happens.',
-    requiredAction: 'Use the "so what?" rule. Point -> Explain -> This means that...',
-    aoFocus: 'AO1 (Understanding) / AO2 (Application)',
-    tips: [
-      'Use connectives like "because", "therefore", "leading to".',
-      'Develop your points fully.'
-    ],
-    levels: ['GCSE', 'A-Level', 'IGCSE']
+    levels: ['A-Level']
   },
   {
     word: 'Discuss',
-    definition: 'Explore a topic by looking at different ideas and arguments around it.',
-    requiredAction: 'Present a balanced view, considering various perspectives. Use evidence to support the different sides.',
-    aoFocus: 'Tests a mix of AO1 (Knowledge) and AO2 (Application/Evaluation).',
+    definition: 'Explore a topic by considering different viewpoints, arguments, and evidence.',
+    requiredAction: 'Present a balanced view with arguments for and against. Support each point with accounting knowledge.',
+    aoFocus: 'AO1 (Knowledge) & AO3 (Analysis)',
     tips: [
-      'Consider the pros and cons.',
-      'Use case study evidence to illustrate different viewpoints.',
-      'The command word is a trigger to explore, not just describe.'
+      'Consider stakeholder perspectives (shareholders, creditors, managers).',
+      'Use real-world accounting examples where possible.',
+      'Provide a balanced discussion before concluding.'
     ],
-    levels: ['A-Level', 'GCSE', 'IGCSE']
+    levels: ['A-Level']
+  },
+  {
+    word: 'Explain',
+    definition: 'Give reasons why something happens or how it works.',
+    requiredAction: 'Describe the process or concept, then develop your point to show understanding of why or how.',
+    aoFocus: 'AO1 (Knowledge & Understanding)',
+    tips: [
+      'Use connectives like "because", "therefore", "this means that".',
+      'Develop your points fully — don\'t just state facts.',
+      'Link back to accounting principles where relevant.'
+    ],
+    levels: ['A-Level']
+  },
+  {
+    word: 'State',
+    definition: 'Give a brief, factual answer without explanation.',
+    requiredAction: 'Provide a concise answer. No development or justification is required.',
+    aoFocus: 'AO1 (Knowledge)',
+    tips: [
+      'Keep your answer short and precise.',
+      'Use correct accounting terminology.',
+      'One clear point per mark available.'
+    ],
+    levels: ['A-Level']
   },
   {
     word: 'Outline',
-    definition: 'Set out the main characteristics or aspects of a topic or concept.',
-    requiredAction: 'Provide a brief summary or description. This does not require detailed explanation.',
-    aoFocus: 'Primarily tests AO1 (Knowledge and Understanding).',
+    definition: 'Set out the main points or characteristics briefly.',
+    requiredAction: 'Provide a summary of the key features without going into detailed explanation.',
+    aoFocus: 'AO1 (Knowledge & Understanding)',
     tips: [
-      'Think in terms of bullet points or a short, structured list.',
-      'Avoid going into deep explanation.'
+      'Think in bullet-point style — concise and structured.',
+      'Cover the main points without excessive detail.',
+      'Use correct accounting terminology.'
     ],
-    levels: ['A-Level', 'GCSE', 'IGCSE']
+    levels: ['A-Level']
+  },
+  {
+    word: 'Justify',
+    definition: 'Give valid reasons or evidence to support an answer or conclusion.',
+    requiredAction: 'Explain why your answer or recommendation is appropriate, using supporting data or accounting principles.',
+    aoFocus: 'AO3 (Analysis & Evaluation)',
+    tips: [
+      'Clearly link your reasoning to the data provided.',
+      'Reference accounting standards or concepts where appropriate.',
+      'Explain why alternatives were rejected.'
+    ],
+    levels: ['A-Level']
+  },
+  {
+    word: 'Reconcile',
+    definition: 'Identify and explain the differences between two sets of figures and bring them into agreement.',
+    requiredAction: 'List the items causing the difference, apply adjustments, and show that the two figures agree after reconciliation.',
+    aoFocus: 'AO2 (Application)',
+    tips: [
+      'Work systematically through each difference.',
+      'Present in the correct format (e.g., bank reconciliation statement).',
+      'Check that your final figures agree.'
+    ],
+    levels: ['A-Level']
   },
 ];
 
 export const MATHS_SKILLS: MathsSkill[] = [
-    {
-        id: 'mean',
-        name: 'Mean',
-        category: 'Measures of Central Tendency',
-        instructions: [
-            '1. Add up all the values in the dataset.',
-            '2. Count how many values there are.',
-            '3. Divide the sum of the values (Step 1) by the number of values (Step 2).'
-        ],
-        formula: 'Mean = (Sum of values) / (Number of values)',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'median',
-        name: 'Median',
-        category: 'Measures of Central Tendency',
-        instructions: [
-            '1. Arrange all the values in the dataset in ascending order (smallest to largest).',
-            '2. Find the middle value.',
-            '3. If there are two middle values (i.e., an even number of values), add them together and divide by 2.'
-        ],
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'mode',
-        name: 'Mode',
-        category: 'Measures of Central Tendency',
-        instructions: [
-            '1. Look at all the values in the dataset.',
-            '2. Identify the value that appears most frequently.',
-            '3. It is possible to have more than one mode (bimodal) or no mode at all.'
-        ],
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'range',
-        name: 'Range',
-        category: 'Measures of Dispersion',
-        instructions: [
-            '1. Identify the largest value in the dataset.',
-            '2. Identify the smallest value in the dataset.',
-            '3. Subtract the smallest value from the largest value.'
-        ],
-        formula: 'Range = Maximum value - Minimum value',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'iqr',
-        name: 'Inter-Quartile Range (IQR)',
-        category: 'Measures of Dispersion',
-        instructions: [
-            '1. Arrange the data in ascending order.',
-            '2. Find the median. This is the second quartile (Q2).',
-            '3. Find the median of the lower half of the data. This is the lower quartile (Q1).',
-            '4. Find the median of the upper half of the data. This is the upper quartile (Q3).',
-            '5. Subtract the lower quartile from the upper quartile.'
-        ],
-        formula: 'IQR = Q3 - Q1',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'std_dev',
-        name: 'Standard Deviation',
-        category: 'Measures of Dispersion',
-        instructions: [
-            '1. Calculate the mean of the dataset.',
-            '2. For each value, subtract the mean and square the result.',
-            '3. Calculate the mean of these squared differences (this is the variance).',
-            '4. Take the square root of the variance.'
-        ],
-        formula: 'σ = √[ Σ(x - μ)² / N ]',
-        levels: ['A-Level']
-    },
-    {
-        id: 'spearman',
-        name: "Spearman's Rank Correlation",
-        category: 'Inferential and Relational Techniques',
-        instructions: [
-            '1. Rank the data for the first variable (1 for highest, etc.).',
-            '2. Rank the data for the second variable.',
-            '3. Calculate the difference in ranks (d) for each pair.',
-            '4. Square the differences (d²).',
-            '5. Sum the squared differences (Σd²).',
-            '6. Substitute the values into the formula to find the correlation coefficient (rs).'
-        ],
-        formula: 'rs = 1 - (6 * Σd²) / (n(n² - 1))',
-        levels: ['A-Level']
-    },
-    {
-        id: 'chi_square',
-        name: 'Chi-Square Test',
-        category: 'Inferential and Relational Techniques',
-        instructions: [
-            '1. For each category, find the difference between the Observed (O) and Expected (E) values.',
-            '2. Square this difference: (O - E)². ',
-            '3. Divide the result by the Expected value: (O - E)² / E.',
-            '4. Sum all of these results to get the Chi-Square (Χ²) value.'
-        ],
-        formula: 'Χ² = Σ [ (O - E)² / E ]',
-        levels: ['A-Level']
-    },
-    {
-        id: 'percentage',
-        name: 'Percentage Increase/Decrease',
-        category: 'Basic Numeracy',
-        instructions: [
-            '1. Find the difference between the two numbers.',
-            '2. Divide the difference by the ORIGINAL number.',
-            '3. Multiply by 100.'
-        ],
-        formula: '% Change = (Difference / Original) x 100',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    }
+    { id: 'gross_profit_margin', name: 'Gross Profit Margin', category: 'Profitability Ratios',
+      instructions: ['1. Calculate Gross Profit (Revenue - Cost of Sales).', '2. Divide Gross Profit by Revenue.', '3. Multiply by 100 to get a percentage.'],
+      formula: 'Gross Profit Margin = (Gross Profit / Revenue) × 100', levels: ['A-Level'] },
+    { id: 'net_profit_margin', name: 'Net Profit Margin (Profit for the Year %)', category: 'Profitability Ratios',
+      instructions: ['1. Find the Profit for the Year (after all expenses).', '2. Divide by Revenue.', '3. Multiply by 100.'],
+      formula: 'Net Profit Margin = (Profit for Year / Revenue) × 100', levels: ['A-Level'] },
+    { id: 'roce', name: 'Return on Capital Employed (ROCE)', category: 'Profitability Ratios',
+      instructions: ['1. Calculate Operating Profit.', '2. Calculate Capital Employed (Total Assets – Current Liabilities).', '3. Divide Operating Profit by Capital Employed and multiply by 100.'],
+      formula: 'ROCE = (Operating Profit / Capital Employed) × 100', levels: ['A-Level'] },
+    { id: 'current_ratio', name: 'Current Ratio', category: 'Liquidity Ratios',
+      instructions: ['1. Find Current Assets from the statement of financial position.', '2. Find Current Liabilities.', '3. Divide Current Assets by Current Liabilities.'],
+      formula: 'Current Ratio = Current Assets / Current Liabilities', levels: ['A-Level'] },
+    { id: 'acid_test', name: 'Acid Test Ratio (Quick Ratio)', category: 'Liquidity Ratios',
+      instructions: ['1. Find Current Assets and subtract Inventories.', '2. Divide the result by Current Liabilities.'],
+      formula: 'Acid Test = (Current Assets – Inventories) / Current Liabilities', levels: ['A-Level'] },
+    { id: 'straight_line_dep', name: 'Straight Line Depreciation', category: 'Depreciation',
+      instructions: ['1. Find the depreciable amount (Cost – Residual Value).', '2. Divide by the useful life in years.'],
+      formula: 'Annual Depreciation = (Cost – Residual Value) / Useful Life', levels: ['A-Level'] },
+    { id: 'reducing_balance_dep', name: 'Reducing Balance Depreciation', category: 'Depreciation',
+      instructions: ['1. Take the Net Book Value at the start of the year.', '2. Multiply by the depreciation rate (%).', '3. The result is the depreciation charge for that year.'],
+      formula: 'Depreciation = NBV × Rate%', levels: ['A-Level'] },
+    { id: 'break_even', name: 'Break-Even Point', category: 'Management Accounting',
+      instructions: ['1. Calculate Contribution per Unit (Selling Price – Variable Cost per Unit).', '2. Divide Total Fixed Costs by the Contribution per Unit.'],
+      formula: 'BEP (units) = Fixed Costs / Contribution per Unit', levels: ['A-Level'] },
+    { id: 'margin_of_safety', name: 'Margin of Safety', category: 'Management Accounting',
+      instructions: ['1. Calculate the break-even point in units.', '2. Subtract BEP from budgeted/actual sales.'],
+      formula: 'Margin of Safety = Actual Sales – Break-Even Sales', levels: ['A-Level'] },
+    { id: 'variance', name: 'Variance Calculation', category: 'Standard Costing',
+      instructions: ['1. Find the Standard (budgeted) figure.', '2. Find the Actual figure.', '3. Calculate the difference.', '4. Label as Favourable (F) if actual cost < standard, or Adverse (A) if actual cost > standard.'],
+      formula: 'Variance = Standard – Actual', levels: ['A-Level'] },
+    { id: 'npv', name: 'Net Present Value (NPV)', category: 'Capital Investment Appraisal',
+      instructions: ['1. Multiply each year\'s net cash flow by its discount factor.', '2. Sum all discounted cash flows.', '3. Subtract the initial investment.', '4. A positive NPV means the project is worthwhile.'],
+      formula: 'NPV = Σ(Cash Flow × Discount Factor) – Initial Investment', levels: ['A-Level'] },
+    { id: 'payback', name: 'Payback Period', category: 'Capital Investment Appraisal',
+      instructions: ['1. List the cumulative cash flows year by year.', '2. Identify the year when cumulative cash flows turn positive.', '3. For the exact month, interpolate within that year.'],
+      formula: 'Payback = Years before full recovery + (Remaining / Cash flow in payback year)', levels: ['A-Level'] },
+    { id: 'percentage', name: 'Percentage Change', category: 'Basic Numeracy',
+      instructions: ['1. Find the difference between the two numbers.', '2. Divide the difference by the ORIGINAL number.', '3. Multiply by 100.'],
+      formula: '% Change = (Difference / Original) × 100', levels: ['A-Level'] }
 ];
 
 export const MATHS_PROBLEMS: MathsProblem[] = [
-    {
-        id: 'm1',
-        type: 'mean',
-        question: 'Calculate the mean annual rainfall for the following locations (in mm):',
-        data: [1200, 1150, 1300, 1250, 1100],
-        answer: 1200,
-        explanation: 'Sum of values / Number of values = 6000 / 5 = 1200.',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'm3',
-        type: 'median',
-        question: 'Find the median river discharge (cumecs) from this dataset:',
-        data: [15, 22, 18, 14, 25, 12, 20],
-        answer: 18,
-        explanation: 'First, order the data: 12, 14, 15, 18, 20, 22, 25. The median is the middle value.',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'm5',
-        type: 'mode',
-        question: 'Find the modal soil moisture content (%) from these samples:',
-        data: [25, 28, 26, 28, 30, 25, 28, 22],
-        answer: 28,
-        explanation: 'The value 28 appears three times, which is more than any other value.',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'm4',
-        type: 'range',
-        question: 'Calculate the range of temperatures (°C) recorded at this weather station:',
-        data: [-2, 5, 8, 12, 15, 11, 4, 0],
-        answer: 17,
-        explanation: 'Range = Maximum value - Minimum value = 15 - (-2) = 17.',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'm6',
-        type: 'iqr',
-        question: 'Calculate the inter-quartile range (IQR) for this set of river pebble sizes (mm):',
-        data: [15, 20, 22, 28, 35, 40, 48],
-        answer: 20,
-        explanation: 'Q1 is 20, Q3 is 40. IQR = 40 - 20 = 20.',
-        levels: ['A-Level', 'GCSE', 'IGCSE']
-    },
-    {
-        id: 'm7',
-        type: 'std_dev',
-        question: 'Calculate the standard deviation for these five measurements of coastal erosion per year (cm).',
-        data: [6, 8, 9, 10, 12],
-        answer: '2.28',
-        explanation: 'Represents the average distance of each data point from the mean.',
-        levels: ['A-Level']
-    },
-    {
-        id: 'm8',
-        type: 'spearman',
-        question: "Calculate Spearman's Rank correlation coefficient for this data on river depth and velocity. The data is provided in pairs of (depth rank, velocity rank).",
-        data: [1, 2, 2, 1, 3, 4, 4, 3, 5, 5], // (1,2), (2,1), (3,4), (4,3), (5,5)
-        answer: '0.8',
-        explanation: 'A strong positive correlation between river depth and velocity.',
-        levels: ['A-Level']
-    },
-     {
-        id: 'm9',
-        type: 'chi_square',
-        question: 'Calculate the Chi-Square value for this study on beach material distribution. The data is provided in pairs of (Observed count, Expected count).',
-        data: [20, 15, 30, 35, 10, 10], // (O1, E1), (O2, E2), (O3, E3)
-        answer: '2.38',
-        explanation: 'Used to determine if there is a significant difference between observed and expected frequencies.',
-        levels: ['A-Level']
-    },
-    {
-        id: 'm10',
-        type: 'percentage',
-        question: 'The population of a town increased from 12,000 to 15,000. Calculate the percentage increase.',
-        data: [12000, 15000],
-        answer: '25',
-        explanation: '(3000 / 12000) * 100 = 25%',
-        levels: ['GCSE', 'IGCSE']
-    }
+    { id: 'm1', type: 'gross_profit_margin', question: 'A business has revenue of £250,000 and cost of sales of £150,000. Calculate the gross profit margin.', data: [250000, 150000], answer: '40', explanation: 'Gross Profit = £250,000 – £150,000 = £100,000. GPM = (100,000 / 250,000) × 100 = 40%.', levels: ['A-Level'] },
+    { id: 'm2', type: 'current_ratio', question: 'A company has current assets of £45,000 and current liabilities of £30,000. Calculate the current ratio.', data: [45000, 30000], answer: '1.5', explanation: 'Current Ratio = 45,000 / 30,000 = 1.5:1.', levels: ['A-Level'] },
+    { id: 'm3', type: 'acid_test', question: 'Current assets are £60,000 (including £15,000 inventories). Current liabilities are £30,000. Calculate the acid test ratio.', data: [60000, 15000, 30000], answer: '1.5', explanation: 'Acid Test = (60,000 – 15,000) / 30,000 = 45,000 / 30,000 = 1.5:1.', levels: ['A-Level'] },
+    { id: 'm4', type: 'straight_line_dep', question: 'A machine costs £24,000 with a residual value of £4,000 and a useful life of 5 years. Calculate the annual straight-line depreciation.', data: [24000, 4000, 5], answer: '4000', explanation: '(24,000 – 4,000) / 5 = £4,000 per year.', levels: ['A-Level'] },
+    { id: 'm5', type: 'break_even', question: 'Fixed costs are £50,000. Selling price is £20 per unit. Variable cost is £12 per unit. Calculate the break-even point.', data: [50000, 20, 12], answer: '6250', explanation: 'Contribution = £20 – £12 = £8. BEP = £50,000 / £8 = 6,250 units.', levels: ['A-Level'] },
+    { id: 'm6', type: 'npv', question: 'An investment costs £10,000 and returns £6,000 in Year 1 (discount factor 0.909) and £7,000 in Year 2 (discount factor 0.826). Calculate the NPV.', data: [10000, 6000, 0.909, 7000, 0.826], answer: '1236', explanation: 'Year 1: 6,000 × 0.909 = £5,454. Year 2: 7,000 × 0.826 = £5,782. NPV = 5,454 + 5,782 – 10,000 = £1,236.', levels: ['A-Level'] },
+    { id: 'm7', type: 'roce', question: 'Operating profit is £36,000. Total assets are £200,000 and current liabilities are £40,000. Calculate ROCE.', data: [36000, 200000, 40000], answer: '22.5', explanation: 'Capital Employed = 200,000 – 40,000 = £160,000. ROCE = (36,000 / 160,000) × 100 = 22.5%.', levels: ['A-Level'] },
+    { id: 'm8', type: 'percentage', question: 'Revenue increased from £120,000 to £150,000. Calculate the percentage increase.', data: [120000, 150000], answer: '25', explanation: '(30,000 / 120,000) × 100 = 25%.', levels: ['A-Level'] },
+    { id: 'm9', type: 'variance', question: 'Budgeted material cost was £8,000 but actual was £8,500. Calculate the variance and state whether it is favourable or adverse.', data: [8000, 8500], answer: '500 Adverse', explanation: 'Variance = 8,000 – 8,500 = –£500 (Adverse, as actual cost exceeded budget).', levels: ['A-Level'] },
+    { id: 'm10', type: 'payback', question: 'An investment of £20,000 generates net cash flows of £5,000 per year. Calculate the payback period.', data: [20000, 5000], answer: '4', explanation: '£20,000 / £5,000 = 4 years.', levels: ['A-Level'] }
 ];
 
 export const STRUCTURE_GUIDES: StructureGuide[] = [
     {
-        title: '20-MARK ESSAY (A-Level)',
-        aoWeighting: 'AO1 (Knowledge) = 10 marks; AO2 (Evaluation) = 10 marks.',
+        title: 'Paper 1: Financial Accounting (3 hours, 120 marks, 50%)',
+        aoWeighting: 'AO1 (Knowledge): 25-30%; AO2 (Application): 50-55%; AO3 (Analysis & Evaluation): 15-25%.',
         structureComponents: [
-            {
-                title: 'Introduction (Approx 5 mins)',
-                details: 'Define key terms. State your argument immediately (e.g., "I agree to a large extent"). Outline the main points you will cover.'
-            },
-            {
-                title: 'Main Body (Approx 25 mins)',
-                details: 'Write 3-4 detailed paragraphs. Each must follow the PEEL structure (Point, Evidence, Explain, Link/Evaluate). Ensure you balance your argument (counter-points). Link back to the question at the end of every paragraph.'
-            },
-            {
-                title: 'Conclusion (Approx 5 mins)',
-                details: 'Summarise your main arguments. Provide a final, definitive judgement that answers the specific question asked. Do not introduce new information.'
-            }
+            { title: 'Section A: Compulsory Structured Questions', details: 'Multiple short and medium-length questions covering double entry, verification of records, financial statements of sole traders, and limited company accounts. Prepare accounts, journals, and ledgers.' },
+            { title: 'Section B: Extended Questions', details: 'Longer scenario-based questions requiring preparation of complex financial statements, ratio analysis, and partnership accounts. Show all workings clearly.' },
+            { title: 'Approach', details: 'Read the scenario carefully. Set out financial statements in the correct format. Label all workings. Check that balance sheets balance.' }
         ],
         extraTips: [
-            'Focus on "Evaluation" - don\'t just tell the story, judge the significance.',
-            'Use specific Case Study evidence (facts, figures, dates).',
-            'Synopticity: Make links to other topics where relevant.'
+            'Always show your workings — method marks are available.',
+            'Use correct accounting terminology and formats.',
+            'Double-check arithmetic, especially totals and balancing figures.',
+            'Allocate time proportionally: roughly 1.5 minutes per mark.'
         ],
         levels: ['A-Level']
     },
     {
-        title: '9-MARK QUESTION (A-Level)',
-        aoWeighting: 'AO1 (4 marks) + AO2 (5 marks).',
+        title: 'Paper 2: Management Accounting (2 hours, 80 marks, 33.3%)',
+        aoWeighting: 'AO1 (Knowledge): 25-30%; AO2 (Application): 50-55%; AO3 (Analysis & Evaluation): 15-25%.',
         structureComponents: [
-            {
-                title: 'Structure',
-                details: 'Two or three well-developed paragraphs. Introduction and conclusion are brief or not strictly necessary if the argument is clear throughout, but a short concluding sentence helps.'
-            },
-            {
-                title: 'Content',
-                details: 'Focus on depth. Make a point (AO1), support with evidence, and then evaluate/analyse (AO2).'
-            }
-        ],
-        levels: ['A-Level']
-    },
-    {
-        title: '6-MARK ANALYSIS (A-Level)',
-        aoWeighting: 'AO3 (6 marks).',
-        structureComponents: [
-            {
-                title: 'TESLA Technique',
-                details: 'Trend (General pattern), Evidence (Quote data), Shape (Linear/Fluctuating), Link (Connections), Anomaly (Outliers).'
-            }
-        ],
-        levels: ['A-Level']
-    },
-    {
-        title: '9-MARK QUESTION (GCSE)',
-        aoWeighting: 'AO1 (Knowledge), AO2 (Application), AO3 (Judgement).',
-        structureComponents: [
-            {
-                title: 'Introduction',
-                details: 'Briefly state your judgement.'
-            },
-            {
-                title: 'Paragraph 1 (For/Factor A)',
-                details: 'Point, Evidence (Case Study), Explain.'
-            },
-            {
-                title: 'Paragraph 2 (Against/Factor B)',
-                details: 'Point, Evidence (Case Study), Explain.'
-            },
-            {
-                title: 'Conclusion',
-                details: 'Final judgement. "To a great extent..." or "However, X is more important because..."'
-            }
-        ],
-        levels: ['GCSE', 'IGCSE']
-    },
-    {
-        title: '6-MARK QUESTION (GCSE)',
-        aoWeighting: 'AO1 (Knowledge) & AO2 (Explain/Apply).',
-        structureComponents: [
-            {
-                title: 'Point 1',
-                details: 'State a reason/factor/impact. Explain it fully using "this means that...". Add an example.'
-            },
-            {
-                title: 'Point 2',
-                details: 'State a second reason/factor/impact. Explain it fully. Link back to the question.'
-            }
+            { title: 'Section A: Compulsory Questions', details: 'Questions on budgeting, marginal costing, break-even analysis, and standard costing. Expect calculations with follow-up explanation questions.' },
+            { title: 'Section B: Extended Questions', details: 'Capital investment appraisal (NPV, payback, ARR), absorption costing, and activity-based costing. May include discursive elements.' },
+            { title: 'Approach', details: 'Show formula → substitution → answer. For discursive questions, consider both quantitative and qualitative factors.' }
         ],
         extraTips: [
-            'Often uses "Explain" or "Suggest".',
-            'If it asks for "impacts", try to give two distinct ones.',
-            'Use geographical terminology.'
+            'State the formula before calculating.',
+            'Label variances as Favourable (F) or Adverse (A).',
+            'For investment appraisal, consider non-financial factors too.',
+            'Allocate time: roughly 1.5 minutes per mark.'
         ],
-        levels: ['GCSE', 'IGCSE']
+        levels: ['A-Level']
     },
     {
-        title: '4-MARK QUESTION',
-        aoWeighting: 'AO1 (Knowledge & Understanding).',
+        title: 'Paper 3: Accounting Principles and Ethics (1 hour, 40 marks, 16.7%)',
+        aoWeighting: 'AO1 (Knowledge): 30-40%; AO2 (Application): 30-40%; AO3 (Analysis & Evaluation): 20-30%.',
         structureComponents: [
-            {
-                title: 'Point & Develop',
-                details: 'Make a point (1 mark). Develop it with an explanation or example (1 mark). Repeat this twice for 4 marks.'
-            }
+            { title: 'Section A: Short Answer Questions', details: 'Test knowledge of accounting standards (IAS/IFRS), ethical principles, the role of the accountant, and the impact of technology.' },
+            { title: 'Section B: Extended Response', details: 'Scenario-based ethical dilemmas or discussion of accounting standards. Requires balanced evaluation and clear judgement.' },
+            { title: 'Approach', details: 'For ethics questions, identify the ethical issue, consider stakeholder perspectives, reference relevant standards/principles, and reach a justified conclusion.' }
         ],
-        levels: ['GCSE', 'A-Level', 'IGCSE']
-    },
-    {
-        title: '8-MARK QUESTION (IGCSE)',
-        aoWeighting: 'AO3 (Analysis) & AO4 (Skills) or AO1/AO2.',
-        structureComponents: [
-            {
-                title: 'Introduction (Optional)',
-                details: 'Briefly define the key term or state your main argument/judgement.'
-            },
-            {
-                title: 'Paragraph 1',
-                details: 'Point 1: State a factor/reason. Evidence: Use specific case study facts or figure data. Explain: Develop the point fully (chain of reasoning).'
-            },
-            {
-                title: 'Paragraph 2',
-                details: 'Point 2: State a contrasting factor or a second reason. Evidence: Support with data/facts. Explain: Further development.'
-            },
-            {
-                title: 'Conclusion',
-                details: 'Provide a clear conclusion or judgement if the command word is "Assess", "Evaluate" or "To what extent". Weigh up the factors.'
-            }
+        extraTips: [
+            'Know the five fundamental ethical principles (integrity, objectivity, professional competence, confidentiality, professional behaviour).',
+            'Reference specific IAS/IFRS standards by name and number where relevant.',
+            'Consider the impact of technology (cloud accounting, AI, automation).',
+            'Reach a clear conclusion in evaluation questions.'
         ],
-        levels: ['IGCSE']
-    },
-    {
-        title: '12-MARK ESSAY (IGCSE)',
-        aoWeighting: 'AO1 (Knowledge), AO2 (Understanding), AO3 (Judgement).',
-        structureComponents: [
-            {
-                title: 'Introduction',
-                details: 'Define key terms. Outline your line of argument (what is your view?).'
-            },
-            {
-                title: 'Main Body (3 Paragraphs)',
-                details: 'Each paragraph should follow PEEL (Point, Evidence, Explain, Link). Cover a range of factors (social, economic, environmental) or scales (local, national, global). Ensure you have a balanced argument.'
-            },
-            {
-                title: 'Conclusion',
-                details: 'Summarise your main points. Provide a final justified conclusion that directly answers the question.'
-            }
-        ],
-        levels: ['IGCSE']
+        levels: ['A-Level']
     }
 ];
 
-// --- COURSEWORK STRUCTURE ---
+// --- COURSE LESSONS (AQA Accounting 7127) ---
 export const COURSE_LESSONS: CourseLesson[] = [
-    // --- A-LEVEL LESSONS ---
-    // Water and Carbon Cycles (A-Level)
-    { id: '1.1', title: 'Systems framework and their application', chapter: 'Water and Carbon Cycles' },
-    { id: '1.2', title: 'The water cycle', chapter: 'Water and Carbon Cycles' },
-    { id: '1.3', title: 'The carbon cycle', chapter: 'Water and Carbon Cycles' },
-    { id: '1.4', title: 'Water, carbon, climate and life on Earth', chapter: 'Water and Carbon Cycles' },
-
-    // Coastal Systems and Landscapes (A-Level)
-    { id: '3.1', title: 'Introduction to coastal systems and landscapes', chapter: 'Coastal Systems and Landscapes' },
-    { id: '3.2', title: 'Systems and processes in coastal environments', chapter: 'Coastal Systems and Landscapes' },
-    { id: '3.3', title: 'Coastal landscape development', chapter: 'Coastal Systems and Landscapes' },
-    { id: '3.4', title: 'Coastal management', chapter: 'Coastal Systems and Landscapes' },
-    { id: '3.5', title: 'Quantitative and qualitative skills in coastal landscapes', chapter: 'Coastal Systems and Landscapes' },
-
-    // Hazards (A-Level)
-    { id: '5.1', title: 'The concept of a hazard in a geographical context', chapter: 'Hazards' },
-    { id: '5.2', title: 'Plate tectonics', chapter: 'Hazards' },
-    { id: '5.3', title: 'Volcanic hazards', chapter: 'Hazards' },
-    { id: '5.4', title: 'Seismic hazards', chapter: 'Hazards' },
-    { id: '5.5', title: 'Storm (typhoons, hurricanes) hazards', chapter: 'Hazards' },
-    { id: '5.6', title: 'Fires in nature: The nature of wildfires', chapter: 'Hazards' },
-
-    // Global Systems and Global Governance (A-Level)
-    { id: '7.1', title: 'Globalisation', chapter: 'Global Systems and Global Governance' },
-    { id: '7.2', title: 'Global systems', chapter: 'Global Systems and Global Governance' },
-    { id: '7.3', title: 'International trade and access to markets', chapter: 'Global Systems and Global Governance' },
-    { id: '7.4', title: 'Global governance', chapter: 'Global Systems and Global Governance' },
-    { id: '7.5', title: "The 'global commons'", chapter: 'Global Systems and Global Governance' },
-    { id: '7.6', title: 'Globalisation critique', chapter: 'Global Systems and Global Governance' },
-
-    // Changing Places (A-Level)
-    { id: '8.1', title: 'The nature and importance of places', chapter: 'Changing Places' },
-    { id: '8.2', title: 'Changing places: relationships and connections', chapter: 'Changing Places' },
-    { id: '8.3', title: 'Changing places: meaning and representation', chapter: 'Changing Places' },
-    { id: '8.4', title: 'Representations of place: quantitative and qualitative sources', chapter: 'Changing Places' },
-
-    // Contemporary Urban Environments (A-Level)
-    { id: '9.1', title: 'Patterns of urbanisation since 1945', chapter: 'Contemporary Urban Environments' },
-    { id: '9.2', title: 'Urban forms', chapter: 'Contemporary Urban Environments' },
-    { id: '9.3', title: 'Social and economic issues associated with urbanisation', chapter: 'Contemporary Urban Environments' },
-    { id: '9.4', title: 'Urban climate', chapter: 'Contemporary Urban Environments' },
-    { id: '9.5', title: 'Urban drainage', chapter: 'Contemporary Urban Environments' },
-    { id: '9.6', title: 'Urban waste and its disposal', chapter: 'Contemporary Urban Environments' },
-    { id: '9.7', title: 'Other contemporary urban environmental issues', chapter: 'Contemporary Urban Environments' },
-    { id: '9.8', title: 'Sustainable urban development', chapter: 'Contemporary Urban Environments' },
-
-    // --- GCSE LESSONS (Aligned to AQA Textbook) ---
-    // The Challenge of Natural Hazards (Section A)
-    { id: 'G-Ch1', title: 'Natural hazards', chapter: 'The Challenge of Natural Hazards' },
-    { id: 'G-Ch2', title: 'Tectonic hazards', chapter: 'The Challenge of Natural Hazards' },
-    { id: 'G-Ch3', title: 'Weather hazards', chapter: 'The Challenge of Natural Hazards' },
-    { id: 'G-Ch4', title: 'Climate change', chapter: 'The Challenge of Natural Hazards' },
-
-    // The Living World (Section B)
-    { id: 'G-Ch5', title: 'Ecosystems', chapter: 'The Living World' },
-    { id: 'G-Ch6', title: 'Tropical rainforests', chapter: 'The Living World' },
-    { id: 'G-Ch7', title: 'Hot deserts', chapter: 'The Living World' },
-    { id: 'G-Ch8', title: 'Cold environments', chapter: 'The Living World' },
-
-    // Physical Landscapes in the UK (Section C)
-    { id: 'G-Ch9', title: 'The physical diversity of the UK', chapter: 'Physical Landscapes in the UK' },
-    { id: 'G-Ch10', title: 'Coastal landscapes', chapter: 'Physical Landscapes in the UK' },
-    { id: 'G-Ch11', title: 'River landscapes', chapter: 'Physical Landscapes in the UK' },
-    { id: 'G-Ch12', title: 'Glacial landscapes', chapter: 'Physical Landscapes in the UK' },
-
-    // Urban Issues and Challenges (Paper 2, Section A)
-    { id: 'G-Ch13', title: 'The global pattern of urban change', chapter: 'Urban Issues and Challenges' },
-    { id: 'G-Ch14', title: 'Urban growth in Nigeria (Lagos)', chapter: 'Urban Issues and Challenges' },
-    { id: 'G-Ch15', title: 'Urban challenges in the UK (London)', chapter: 'Urban Issues and Challenges' },
-    { id: 'G-Ch16', title: 'Sustainable development of urban areas', chapter: 'Urban Issues and Challenges' },
-
-    // The Changing Economic World (Paper 2, Section B)
-    { id: 'G-Ch17', title: 'Economic development and quality of life', chapter: 'The Changing Economic World' },
-    { id: 'G-Ch18', title: 'Reducing the global development gap', chapter: 'The Changing Economic World' },
-    { id: 'G-Ch19', title: 'Economic development in Nigeria', chapter: 'The Changing Economic World' },
-    { id: 'G-Ch20', title: 'Economic change in the UK', chapter: 'The Changing Economic World' },
-
-    // The Challenge of Resource Management (Paper 2, Section C)
-    { id: 'G-Ch21', title: 'Global resource management', chapter: 'The Challenge of Resource Management' },
-    { id: 'G-Ch22', title: 'Resources in the UK', chapter: 'The Challenge of Resource Management' },
-    { id: 'G-Ch23', title: 'Food', chapter: 'The Challenge of Resource Management' },
-    { id: 'G-Ch24', title: 'Water', chapter: 'The Challenge of Resource Management' },
-    { id: 'G-Ch25', title: 'Energy', chapter: 'The Challenge of Resource Management' },
-
-    // Geographical Applications (Paper 3)
-    { id: 'G-Ch26', title: 'Issue evaluation', chapter: 'Geographical Applications' },
-    { id: 'G-Ch27', title: 'Fieldwork and geographical enquiry', chapter: 'Geographical Applications' },
-
-    // --- IGCSE LESSONS ---
-    // River environments
-    { id: 'I-1.1', title: 'Hydrological cycle and drainage basins', chapter: 'River environments' },
-    { id: 'I-1.2', title: 'River regime factors', chapter: 'River environments' },
-    { id: 'I-1.3', title: 'Fluvial processes', chapter: 'River environments' },
-    { id: 'I-1.4', title: 'River landforms (Upper, Middle, Lower)', chapter: 'River environments' },
-    { id: 'I-1.5', title: 'Water uses and supply', chapter: 'River environments' },
-    { id: 'I-1.6', title: 'Water quality and pollution', chapter: 'River environments' },
-    { id: 'I-1.7', title: 'River flooding management', chapter: 'River environments' },
-
-    // Coastal environments
-    { id: 'I-2.1', title: 'Coastal processes', chapter: 'Coastal environments' },
-    { id: 'I-2.2', title: 'Coastal landforms', chapter: 'Coastal environments' },
-    { id: 'I-2.3', title: 'Coastal ecosystems', chapter: 'Coastal environments' },
-    { id: 'I-2.4', title: 'Coastal management conflicts', chapter: 'Coastal environments' },
-    { id: 'I-2.5', title: 'Coastal flooding', chapter: 'Coastal environments' },
-    { id: 'I-2.6', title: 'Coastal management strategies', chapter: 'Coastal environments' },
-
-    // Hazardous environments
-    { id: 'I-3.1', title: 'Hazard characteristics', chapter: 'Hazardous environments' },
-    { id: 'I-3.2', title: 'Causes of hazards', chapter: 'Hazardous environments' },
-    { id: 'I-3.3', title: 'Impacts of hazards', chapter: 'Hazardous environments' },
-    { id: 'I-3.4', title: 'Managing hazards', chapter: 'Hazardous environments' },
-
-    // Economic activity and energy
-    { id: 'I-4.1', title: 'Economic sectors', chapter: 'Economic activity and energy' },
-    { id: 'I-4.2', title: 'Location of economic activity', chapter: 'Economic activity and energy' },
-    { id: 'I-4.3', title: 'Sectoral shifts', chapter: 'Economic activity and energy' },
-    { id: 'I-4.4', title: 'Informal employment', chapter: 'Economic activity and energy' },
-    { id: 'I-4.5', title: 'Population and resources', chapter: 'Economic activity and energy' },
-    { id: 'I-4.6', title: 'Energy demand and production', chapter: 'Economic activity and energy' },
-    { id: 'I-4.7', title: 'Sustainable energy management', chapter: 'Economic activity and energy' },
-
-    // Rural environments
-    { id: 'I-5.1', title: 'Biomes and ecosystems', chapter: 'Rural environments' },
-    { id: 'I-5.2', title: 'Human use of ecosystems', chapter: 'Rural environments' },
-    { id: 'I-5.3', title: 'Rural characteristics and changes', chapter: 'Rural environments' },
-    { id: 'I-5.4', title: 'Rural challenges in developed countries', chapter: 'Rural environments' },
-    { id: 'I-5.5', title: 'Rural challenges in developing countries', chapter: 'Rural environments' },
-    { id: 'I-5.6', title: 'Farm diversification', chapter: 'Rural environments' },
-    { id: 'I-5.7', title: 'Sustainable rural management', chapter: 'Rural environments' },
-
-    // Urban environments
-    { id: 'I-6.1', title: 'Urbanisation trends', chapter: 'Urban environments' },
-    { id: 'I-6.2', title: 'Urban land use', chapter: 'Urban environments' },
-    { id: 'I-6.3', title: 'Urban challenges', chapter: 'Urban environments' },
-    { id: 'I-6.4', title: 'Rural-urban fringe', chapter: 'Urban environments' },
-    { id: 'I-6.5', title: 'Sustainable urban strategies', chapter: 'Urban environments' },
-
-    // Fragile environments and climate change
-    { id: 'I-7.1', title: 'Fragile environments characteristics', chapter: 'Fragile environments and climate change' },
-    { id: 'I-7.2', title: 'Desertification causes', chapter: 'Fragile environments and climate change' },
-    { id: 'I-7.3', title: 'Deforestation causes', chapter: 'Fragile environments and climate change' },
-    { id: 'I-7.4', title: 'Climate change causes', chapter: 'Fragile environments and climate change' },
-    { id: 'I-7.5', title: 'Impacts on fragile environments', chapter: 'Fragile environments and climate change' },
-    { id: 'I-7.6', title: 'Sustainable management', chapter: 'Fragile environments and climate change' },
-    { id: 'I-7.7', title: 'Climate change responses', chapter: 'Fragile environments and climate change' },
-
-    // Globalisation and migration
-    { id: 'I-8.1', title: 'Rise of global economy', chapter: 'Globalisation and migration' },
-    { id: 'I-8.2', title: 'Global institutions', chapter: 'Globalisation and migration' },
-    { id: 'I-8.3', title: 'Migration causes', chapter: 'Globalisation and migration' },
-    { id: 'I-8.4', title: 'Impacts of globalisation', chapter: 'Globalisation and migration' },
-    { id: 'I-8.5', title: 'Impacts of migration', chapter: 'Globalisation and migration' },
-    { id: 'I-8.6', title: 'Global tourism', chapter: 'Globalisation and migration' },
-    { id: 'I-8.7', title: 'Managing tourism and migration', chapter: 'Globalisation and migration' },
-
-    // Development and human welfare
-    { id: 'I-9.1', title: 'Defining development', chapter: 'Development and human welfare' },
-    { id: 'I-9.2', title: 'Uneven development patterns', chapter: 'Development and human welfare' },
-    { id: 'I-9.3', title: 'Impacts of uneven development', chapter: 'Development and human welfare' },
-    { id: 'I-9.4', title: 'Demographic data', chapter: 'Development and human welfare' },
-    { id: 'I-9.5', title: 'Strategies to reduce the gap', chapter: 'Development and human welfare' },
-    { id: 'I-9.6', title: 'Top-down vs Bottom-up', chapter: 'Development and human welfare' }
+    { id: '3.1.1', title: 'Users of financial information', chapter: 'The Role of the Accountant in Business' },
+    { id: '3.1.2', title: 'Financial vs management accounting', chapter: 'The Role of the Accountant in Business' },
+    { id: '3.2.1', title: 'Sole traders', chapter: 'Types of Business Organisation' },
+    { id: '3.2.2', title: 'Partnerships', chapter: 'Types of Business Organisation' },
+    { id: '3.2.3', title: 'Limited companies (Ltd and PLC)', chapter: 'Types of Business Organisation' },
+    { id: '3.3.1', title: 'Books of prime entry', chapter: 'The Double Entry Model' },
+    { id: '3.3.2', title: 'Double entry bookkeeping and ledger accounts', chapter: 'The Double Entry Model' },
+    { id: '3.3.3', title: 'The trial balance', chapter: 'The Double Entry Model' },
+    { id: '3.4.1', title: 'Bank reconciliation statements', chapter: 'Verification of Accounting Records' },
+    { id: '3.4.2', title: 'Control accounts', chapter: 'Verification of Accounting Records' },
+    { id: '3.4.3', title: 'Correction of errors and suspense accounts', chapter: 'Verification of Accounting Records' },
+    { id: '3.5.1', title: 'Accruals and prepayments', chapter: 'Accounting Concepts' },
+    { id: '3.5.2', title: 'Depreciation (straight-line and reducing balance)', chapter: 'Accounting Concepts' },
+    { id: '3.5.3', title: 'Irrecoverable debts and allowances', chapter: 'Accounting Concepts' },
+    { id: '3.6.1', title: 'Income statement of a sole trader', chapter: 'Financial Statements of Sole Traders' },
+    { id: '3.6.2', title: 'Statement of financial position of a sole trader', chapter: 'Financial Statements of Sole Traders' },
+    { id: '3.7.1', title: 'Income statement of a limited company', chapter: 'Limited Company Accounts' },
+    { id: '3.7.2', title: 'Statement of financial position of a limited company', chapter: 'Limited Company Accounts' },
+    { id: '3.7.3', title: 'Statement of changes in equity', chapter: 'Limited Company Accounts' },
+    { id: '3.8.1', title: 'Ratio analysis: profitability', chapter: 'Analysis and Interpretation of Financial Information' },
+    { id: '3.8.2', title: 'Ratio analysis: liquidity', chapter: 'Analysis and Interpretation of Financial Information' },
+    { id: '3.8.3', title: 'Ratio analysis: efficiency', chapter: 'Analysis and Interpretation of Financial Information' },
+    { id: '3.8.4', title: 'Limitations of ratio analysis', chapter: 'Analysis and Interpretation of Financial Information' },
+    { id: '3.9.1', title: 'Purpose and types of budgets', chapter: 'Budgeting' },
+    { id: '3.9.2', title: 'Preparing budgets', chapter: 'Budgeting' },
+    { id: '3.10.1', title: 'Marginal costing and contribution', chapter: 'Marginal Costing' },
+    { id: '3.10.2', title: 'Break-even analysis', chapter: 'Marginal Costing' },
+    { id: '3.10.3', title: 'Margin of safety and target profit', chapter: 'Marginal Costing' },
+    { id: '3.11.1', title: 'Standard costs and standard costing', chapter: 'Standard Costing and Variance Analysis' },
+    { id: '3.11.2', title: 'Variance analysis', chapter: 'Standard Costing and Variance Analysis' },
+    { id: '3.12.1', title: 'Absorption costing', chapter: 'Absorption and Activity Based Costing' },
+    { id: '3.12.2', title: 'Activity based costing (ABC)', chapter: 'Absorption and Activity Based Costing' },
+    { id: '3.13.1', title: 'Payback period', chapter: 'Capital Investment Appraisal' },
+    { id: '3.13.2', title: 'Accounting rate of return (ARR)', chapter: 'Capital Investment Appraisal' },
+    { id: '3.13.3', title: 'Net present value (NPV)', chapter: 'Capital Investment Appraisal' },
+    { id: '3.14.1', title: 'Accounting for incomplete records', chapter: 'Incomplete Records' },
+    { id: '3.14.2', title: 'Reconstructing accounts from limited information', chapter: 'Incomplete Records' },
+    { id: '3.15.1', title: 'Partnership appropriation accounts', chapter: 'Partnership Accounts' },
+    { id: '3.15.2', title: 'Changes in partnerships', chapter: 'Partnership Accounts' },
+    { id: '3.15.3', title: 'Goodwill in partnerships', chapter: 'Partnership Accounts' },
+    { id: '3.16.1', title: 'International Accounting Standards overview', chapter: 'Accounting Standards (IAS/IFRS)' },
+    { id: '3.16.2', title: 'Key standards (IAS 1, IAS 2, IAS 16, IAS 37, IAS 38)', chapter: 'Accounting Standards (IAS/IFRS)' },
+    { id: '3.17.1', title: 'Ethical principles for accountants', chapter: 'Ethics for Accountants' },
+    { id: '3.17.2', title: 'Ethical dilemmas and conflicts of interest', chapter: 'Ethics for Accountants' },
+    { id: '3.18.1', title: 'Cloud accounting and digital bookkeeping', chapter: 'Impact of Technology on Accounting' },
+    { id: '3.18.2', title: 'AI, automation and the future of accounting', chapter: 'Impact of Technology on Accounting' },
 ];
 
-// --- SPECIFICATION TOPICS (Granular) ---
-export const GCSE_SPEC_TOPICS: Record<string, string[]> = {
-    // Paper 1
-    "The Challenge of Natural Hazards": [
-        "Plate Tectonics Theory (Distribution, Margins)",
-        "Tectonic Hazards (Effects, Responses)",
-        "Management of Tectonic Hazards",
-        "Global Atmospheric Circulation",
-        "Tropical Storms (Formation, Structure, Climate Change effects)",
-        "Tropical Storm Case Study (Effects, Responses)",
-        "Extreme Weather in the UK (Case Study)",
-        "Climate Change (Evidence, Natural & Human Causes)",
-        "Climate Change Effects & Mitigation/Adaptation"
-    ],
-    "Physical Landscapes in the UK": [
-        // Merging Coasts and Rivers which are usually separate in spec but grouped in chapter here?
-        // Actually COURSE_LESSONS has one chapter "Physical Landscapes in the UK" for G-Ch9..12
-        // But FebMocksView separates Coasts and Rivers.
-        // We will include all sub-topics here.
-        "Wave types & Weathering processes",
-        "Mass movement & Erosion processes",
-        "Transportation (Longshore Drift) & Deposition",
-        "Erosional Landforms (Headlands, Bays, Caves, Arches, Stacks)",
-        "Depositional Landforms (Beaches, Spits, Bars)",
-        "Coastal Management (Hard Engineering vs Soft Engineering)",
-        "Managed Retreat (Case Study)",
-        "River Profiles (Long & Cross) & Processes",
-        "Erosional Landforms (Waterfalls, Gorges, Interlocking Spurs)",
-        "Erosion & Deposition Landforms (Meanders, Ox-bow lakes)",
-        "Depositional Landforms (Levees, Estuaries)",
-        "Flood Risk Factors (Physical & Human)",
-        "Flood Hydrographs",
-        "Flood Management Strategies (Hard & Soft)",
-        "Glacial processes (Freeze-thaw, plucking, abrasion)",
-        "Glacial landforms (Corries, Arêtes, Pyramidal peaks)",
-        "Glacial transportation & deposition",
-        "Economic opportunities in glaciated areas"
-    ],
-    "The Living World": [
-         "Ecosystems: Concepts and global distribution",
-         "Tropical Rainforests: Characteristics and adaptations",
-         "Tropical Rainforests: Deforestation (Causes/Impacts)",
-         "Tropical Rainforests: Management strategies",
-         "Hot Deserts: Characteristics and adaptations",
-         "Hot Deserts: Opportunities and Challenges",
-         "Hot Deserts: Desertification (Causes/Management)",
-         "Cold Environments: Characteristics and adaptations",
-         "Cold Environments: Opportunities and Challenges",
-         "Cold Environments: Management/Protection"
-    ],
-    // Paper 2
-    "Urban Issues and Challenges": [
-        "Global Urbanisation Trends & Megacities",
-        "Lagos: Location, Growth & Importance",
-        "Lagos: Challenges (Slums/Squatter Settlements, Crime, Waste)",
-        "Lagos: Urban Planning Strategies",
-        "London: Location, Importance & Migration",
-        "London: Opportunities (Cultural Mix, Employment, Transport)",
-        "London: Challenges (Inequality, Sprawl, Waste)",
-        "London: Urban Regeneration (e.g. Stratford/Docklands)",
-        "Sustainable Urban Living (Water, Energy, Waste, Transport)"
-    ],
-    "The Changing Economic World": [
-        "Measures of Development (GNI, HDI, etc.)",
-        "The DTM (Demographic Transition Model)",
-        "Causes of Uneven Development",
-        "Strategies to Reduce the Gap (Aid, Fairtrade, Tourism)",
-        "Nigeria: Industrial Structure & TNCs (e.g. Shell)",
-        "Nigeria: Aid & Environmental Impacts",
-        "UK Economy (De-industrialisation, Post-industrial)",
-        "UK Transport Infrastructure & North-South Divide"
-    ],
-    "The Challenge of Resource Management": [
-        "Global Distribution of Food, Water, Energy",
-        "Provision of Food, Water, Energy in the UK",
-        "Energy: Global Demand & Insecurity Factors",
-        "Energy: Impacts of Insecurity",
-        "Energy: Strategies to Increase Supply (Renewable/Non-renewable)",
-        "Energy: Sustainable Energy (Case Study)",
-        "Food: Global supply and consumption",
-        "Food: Impacts of insecurity",
-        "Water: Global supply and consumption",
-        "Water: Impacts of insecurity"
-    ],
-    // Paper 3
-    "Geographical Applications": [
-        "Cartographic Skills (Maps, Grid Refs, Scale)",
-        "Graphical Skills (Bar, Line, Pie, Scatter, Chloropleth)",
-        "Statistical Skills (Mean, Median, Mode, Range, Quartiles)",
-        "Fieldwork Enquiry Process (Hypothesis to Conclusion)",
-        "Data Collection Methods (Primary vs Secondary)",
-        "Data Presentation & Analysis",
-        "Evaluation of Fieldwork Methods",
-        "Issue Evaluation (Decision Making)"
-    ]
-};
-
 export const ALEVEL_SPEC_TOPICS: Record<string, string[]> = {
-    "Water and Carbon Cycles": [
-        "Systems framework and their application",
-        "The water cycle",
-        "The carbon cycle",
-        "Water, carbon, climate and life on Earth"
-    ],
-    "Coastal Systems and Landscapes": [
-        "Introduction to coastal systems and landscapes",
-        "Systems and processes in coastal environments",
-        "Coastal landscape development",
-        "Coastal management",
-        "Quantitative and qualitative skills in coastal landscapes"
-    ],
-    "Hazards": [
-        "The concept of a hazard in a geographical context",
-        "Plate tectonics",
-        "Volcanic hazards",
-        "Seismic hazards",
-        "Storm (typhoons, hurricanes) hazards",
-        "Fires in nature: The nature of wildfires"
-    ],
-    "Global Systems and Global Governance": [
-        "Globalisation",
-        "Global systems",
-        "International trade and access to markets",
-        "Global governance",
-        "The 'global commons'",
-        "Globalisation critique"
-    ],
-    "Changing Places": [
-        "The nature and importance of places",
-        "Changing places: relationships and connections",
-        "Changing places: meaning and representation",
-        "Representations of place: quantitative and qualitative sources"
-    ],
-    "Contemporary Urban Environments": [
-        "Patterns of urbanisation since 1945",
-        "Urban forms",
-        "Social and economic issues associated with urbanisation",
-        "Urban climate",
-        "Urban drainage",
-        "Urban waste and its disposal",
-        "Other contemporary urban environmental issues",
-        "Sustainable urban development"
-    ],
-    "Population and the Environment": [
-        "Natural increase and vital rates",
-        "Demographic Transition Model",
-        "Migration concepts and patterns",
-        "Population structures and pyramids",
-        "Food security and population",
-        "Health, disease and population",
-        "Global population futures"
-    ],
-    "Resource Security": [
-        "Resource development and security",
-        "Water security: supply and demand",
-        "Water conflicts and management",
-        "Energy security: supply and demand",
-        "Energy mix and transitions",
-        "Energy geopolitics and sustainability",
-        "Mineral security"
-    ],
-    "Ecosystems Under Stress": [
-        "Ecosystem concepts and energy flow",
-        "Biomes and succession",
-        "Tropical rainforests: characteristics and threats",
-        "Savannas: characteristics and threats",
-        "Coral reefs: characteristics and threats",
-        "Local ecosystem case study",
-        "Global ecosystem management"
-    ]
-};
-
-export const GCSE_PAPER_MAPPING: Record<string, string> = {
-    "The Challenge of Natural Hazards": "Paper 1",
-    "The Living World": "Paper 1",
-    "Physical Landscapes in the UK": "Paper 1",
-    "Urban Issues and Challenges": "Paper 2",
-    "The Changing Economic World": "Paper 2",
-    "The Challenge of Resource Management": "Paper 2",
-    "Geographical Applications": "Paper 3"
+    'The Role of the Accountant in Business': ['Users of financial information', 'Stewardship and accountability', 'Financial vs management accounting'],
+    'Types of Business Organisation': ['Sole traders', 'Partnerships', 'Private limited companies', 'Public limited companies'],
+    'The Double Entry Model': ['Books of prime entry', 'Double entry bookkeeping', 'Ledger accounts', 'Trial balance'],
+    'Verification of Accounting Records': ['Bank reconciliation', 'Control accounts', 'Suspense accounts', 'Correction of errors'],
+    'Accounting Concepts': ['Going concern', 'Accruals', 'Consistency', 'Prudence', 'Depreciation', 'Irrecoverable debts'],
+    'Financial Statements of Sole Traders': ['Income statement', 'Statement of financial position', 'Adjustments'],
+    'Limited Company Accounts': ['Share capital and reserves', 'Income statement', 'Statement of financial position', 'Statement of changes in equity'],
+    'Analysis and Interpretation of Financial Information': ['Profitability ratios', 'Liquidity ratios', 'Efficiency ratios', 'Gearing ratio', 'Limitations'],
+    'Budgeting': ['Purpose of budgets', 'Cash budgets', 'Trade receivables budgets', 'Budgetary control'],
+    'Marginal Costing': ['Contribution', 'Break-even analysis', 'Margin of safety', 'Target profit', 'Limiting factors'],
+    'Standard Costing and Variance Analysis': ['Standard costs', 'Material variances', 'Labour variances', 'Overhead variances'],
+    'Absorption and Activity Based Costing': ['Overhead absorption rates', 'Over/under absorption', 'Activity based costing'],
+    'Capital Investment Appraisal': ['Payback period', 'ARR', 'NPV', 'Non-financial factors'],
+    'Incomplete Records': ['Calculating missing figures', 'Statement of affairs', 'Margins and mark-ups'],
+    'Partnership Accounts': ['Appropriation accounts', 'Capital and current accounts', 'Admission and retirement', 'Goodwill'],
+    'Accounting Standards (IAS/IFRS)': ['IAS 1', 'IAS 2', 'IAS 16', 'IAS 37', 'IAS 38'],
+    'Ethics for Accountants': ['Integrity', 'Objectivity', 'Professional competence', 'Confidentiality', 'Professional behaviour'],
+    'Impact of Technology on Accounting': ['Cloud accounting', 'Digital bookkeeping', 'AI and automation', 'Cyber security'],
 };
 
 export const ALEVEL_PAPER_MAPPING: Record<string, string> = {
-    "Water and Carbon Cycles": "Paper 1",
-    "Coastal Systems and Landscapes": "Paper 1",
-    "Hazards": "Paper 1",
-    "Ecosystems Under Stress": "Paper 1",
-    "Global Systems and Global Governance": "Paper 2",
-    "Changing Places": "Paper 2",
-    "Contemporary Urban Environments": "Paper 2",
-    "Population and the Environment": "Paper 2",
-    "Resource Security": "Paper 2"
+    'The Role of the Accountant in Business': 'Paper 3',
+    'Types of Business Organisation': 'Paper 1',
+    'The Double Entry Model': 'Paper 1',
+    'Verification of Accounting Records': 'Paper 1',
+    'Accounting Concepts': 'Paper 1',
+    'Financial Statements of Sole Traders': 'Paper 1',
+    'Limited Company Accounts': 'Paper 1',
+    'Analysis and Interpretation of Financial Information': 'Paper 1',
+    'Budgeting': 'Paper 2',
+    'Marginal Costing': 'Paper 2',
+    'Standard Costing and Variance Analysis': 'Paper 2',
+    'Absorption and Activity Based Costing': 'Paper 2',
+    'Capital Investment Appraisal': 'Paper 2',
+    'Incomplete Records': 'Paper 1',
+    'Partnership Accounts': 'Paper 1',
+    'Accounting Standards (IAS/IFRS)': 'Paper 3',
+    'Ethics for Accountants': 'Paper 3',
+    'Impact of Technology on Accounting': 'Paper 3',
 };
 
-export const IGCSE_SPEC_TOPICS: Record<string, string[]> = {
-    "River environments": [
-        "Hydrological cycle and drainage basins",
-        "River regime factors (Physical/Human)",
-        "Fluvial processes (Erosion, Transport, Deposition)",
-        "River landforms (Upper, Middle, Lower course)",
-        "Water uses and demand/supply",
-        "Water quality and pollution",
-        "River flooding causes and management"
-    ],
-    "Coastal environments": [
-        "Coastal processes (Marine, Sub-aerial)",
-        "Coastal landforms (Erosional, Depositional)",
-        "Coastal ecosystems (Mangroves, Coral Reefs, Sand Dunes)",
-        "Threats to coastal ecosystems",
-        "Coastal management conflicts",
-        "Coastal flooding causes",
-        "Coastal management strategies (Hard/Soft)"
-    ],
-    "Hazardous environments": [
-        "Hazard characteristics (Cyclones, Earthquakes, Volcanoes)",
-        "Causes of hazards (Plate tectonics, Atmospheric)",
-        "Impacts of hazards (Short/Long term)",
-        "Managing hazards (Preparation, Response, Recovery)",
-        "Reasons for living in hazardous areas"
-    ],
-    "Economic activity and energy": [
-        "Economic sectors (Clark Fisher Model)",
-        "Factors affecting location of economic activity",
-        "Sectoral shifts impacts",
-        "Informal employment in megacities",
-        "Population and resources (Malthus/Boserup)",
-        "Energy demand and production factors",
-        "Energy mix (Renewable/Non-renewable)",
-        "Sustainable energy management"
-    ],
-    "Rural environments": [
-        "Biomes and ecosystems",
-        "Human use of ecosystems (Goods/Services)",
-        "Rural characteristics and changes",
-        "Rural depopulation/counter-urbanisation",
-        "Farm diversification and sustainability",
-        "Managing rural challenges"
-    ],
-    "Urban environments": [
-        "Urbanisation trends and megacities",
-        "Urban land use patterns",
-        "Urban challenges (Developed vs Developing)",
-        "Rural-urban fringe development",
-        "Sustainable urban strategies",
-        "Managing urban challenges"
-    ],
-    "Fragile environments and climate change": [
-        "Fragile environments characteristics",
-        "Desertification and Deforestation causes",
-        "Climate change causes (Natural/Human)",
-        "Impacts of desertification/deforestation/climate change",
-        "Sustainable management of fragile environments",
-        "Responses to climate change"
-    ],
-    "Globalisation and migration": [
-        "Rise of global economy and TNCs",
-        "Global institutions (WTO, IMF)",
-        "Migration causes (Push/Pull)",
-        "Impacts of globalisation and migration",
-        "Growth of global tourism (Impacts)",
-        "Managing migration and sustainable tourism"
-    ],
-    "Development and human welfare": [
-        "Defining and measuring development (HDI, GDP)",
-        "Global patterns of uneven development",
-        "Impacts of uneven development",
-        "Demographic data and development",
-        "Strategies to reduce uneven development (Aid, Trade)",
-        "Top-down vs Bottom-up development"
-    ]
-};
+export const GCSE_SPEC_TOPICS = ALEVEL_SPEC_TOPICS;
+export const IGCSE_SPEC_TOPICS = ALEVEL_SPEC_TOPICS;
 
-export const IGCSE_PAPER_MAPPING: Record<string, string> = {
-    "River environments": "Paper 1",
-    "Coastal environments": "Paper 1",
-    "Hazardous environments": "Paper 1",
-    "Economic activity and energy": "Paper 2",
-    "Rural environments": "Paper 2",
-    "Urban environments": "Paper 2",
-    "Fragile environments and climate change": "Paper 2",
-    "Globalisation and migration": "Paper 2",
-    "Development and human welfare": "Paper 2"
-};
+export const GCSE_PAPER_MAPPING = ALEVEL_PAPER_MAPPING;
+export const IGCSE_PAPER_MAPPING = ALEVEL_PAPER_MAPPING;

@@ -22,7 +22,7 @@ interface GameAnalysisViewProps {
 
 const GameAnalysisView: React.FC<GameAnalysisViewProps> = ({ user, onBack }) => {
     const [gameResults, setGameResults] = useState<GameSessionResult[]>([]);
-    const [flappyGeoHighScore, setFlappyGeoHighScore] = useState<number>(0);
+    const [flappyAccHighScore, setFlappyAccHighScore] = useState<number>(0);
     const [blockBlastHighScore, setBlockBlastHighScore] = useState<number>(0);
     const [swipeHighScore, setSwipeHighScore] = useState<number>(0);
     const [topicStats, setTopicStats] = useState<Record<string, TopicStats>>({});
@@ -67,13 +67,13 @@ const GameAnalysisView: React.FC<GameAnalysisViewProps> = ({ user, onBack }) => 
         fetchGameData();
 
         // High scores are still simple, so we can keep them in localStorage for now
-        const flappyHs = localStorage.getItem('geo-guide-highscore');
-        setFlappyGeoHighScore(flappyHs ? JSON.parse(flappyHs) : 0);
+        const flappyHs = localStorage.getItem('acc-pro-flappy-highscore');
+        setFlappyAccHighScore(flappyHs ? JSON.parse(flappyHs) : 0);
         
-        const blastHs = localStorage.getItem('geo-blast-highscore');
+        const blastHs = localStorage.getItem('acc-pro-blast-highscore');
         setBlockBlastHighScore(blastHs ? JSON.parse(blastHs) : 0);
         
-        const swipeHs = localStorage.getItem('geo-swipe-highscore');
+        const swipeHs = localStorage.getItem('acc-pro-swipe-highscore');
         setSwipeHighScore(swipeHs ? JSON.parse(swipeHs) : 0);
 
     }, [user]);
@@ -90,7 +90,7 @@ const GameAnalysisView: React.FC<GameAnalysisViewProps> = ({ user, onBack }) => 
             onBack={onBack}
         >
             <main className="w-full max-w-7xl mx-auto">
-                {totalQuestions === 0 && flappyGeoHighScore === 0 && blockBlastHighScore === 0 && swipeHighScore === 0 ? (
+                {totalQuestions === 0 && flappyAccHighScore === 0 && blockBlastHighScore === 0 && swipeHighScore === 0 ? (
                      <div className="text-center py-20 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border border-stone-200/50 dark:border-stone-700 rounded-3xl shadow-xl">
                         <span className="text-7xl">📊</span>
                         <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mt-4">No Data Yet</h2>
@@ -100,9 +100,9 @@ const GameAnalysisView: React.FC<GameAnalysisViewProps> = ({ user, onBack }) => 
                     <div className="space-y-8">
                         {/* Overall Stats */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <StatCard title="Flappy Geo High Score" value={flappyGeoHighScore.toString()} />
+                            <StatCard title="Flappy Accounts High Score" value={flappyAccHighScore.toString()} />
                             <StatCard title="Block Blast High Score" value={blockBlastHighScore.toString()} />
-                            <StatCard title="Geo Swipe High Score" value={swipeHighScore.toString()} />
+                            <StatCard title="Account Swipe High Score" value={swipeHighScore.toString()} />
                             <StatCard title="Total Questions Answered" value={totalQuestions.toString()} />
                             <StatCard title="Overall Accuracy" value={`${overallAccuracy}%`} />
                         </div>

@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, GeographyCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession, AuthUser, ClassGroup } from "../types";
+import { ChatMessage, Question, MarkedModelAnswer, MathsProblem, MathsSkill, AIFeedback, CaseStudyLocation, CaseStudyQuizQuestion, SwipeQuizItem, AccountingCareer, UniversityCourseInfo, JobOpportunity, TransferableSkill, CVSuggestions, FlashcardItem, UserLevel, VideoLessonPlan, LessonContent, GeneratedQuestionData, VideoQuizContent, CompletedSession, AuthUser, ClassGroup } from "../types";
 import { MASTER_CASE_STUDIES, ALL_QUESTIONS as QUESTION_EXAMPLES } from "../database";
 import { STATIC_LESSONS } from "../lesson-content-database";
 import { KEY_TERMS } from "../knowledge-database";
@@ -14,8 +14,8 @@ import { sanitizeForFirestore } from '../utils/firestoreUtils';
 // --- MODEL CONFIGURATION ---
 // Using stable versions to prevent 400 Bad Request errors.
 
-const STRICT_AQA_CONTEXT = "You are an expert AQA Geography examiner. All content must be strictly aligned with the AQA GCSE and A-Level specifications.";
-const STRICT_IGCSE_CONTEXT = "You are an expert Edexcel International GCSE Geography examiner. All content must be strictly aligned with the Pearson Edexcel International GCSE Geography (4GE1) specification.";
+const STRICT_AQA_CONTEXT = "You are an expert AQA A-Level Accounting (7127) examiner. All content must be strictly aligned with the AQA A-Level Accounting (7127) specification.";
+const STRICT_IGCSE_CONTEXT = "You are an expert Accounting examiner. All content must be strictly aligned with the relevant Accounting specification.";
 
 const getStrictContext = (level?: UserLevel) => {
     if (level === 'IGCSE') return STRICT_IGCSE_CONTEXT;
@@ -325,7 +325,7 @@ export const detectDistress = async (text: string): Promise<boolean> => {
     - Statements indicating feeling "low", "depressed", "anxious", or "hopeless" (mental health concerns).
     - Indications of bullying or abuse.
 
-    Do NOT flag minor frustration with homework (e.g. "I hate geography", "This is killing me" in a hyperbolic sense).
+    Do NOT flag minor frustration with homework (e.g. "I hate accounting", "This is killing me" in a hyperbolic sense).
 
     Prioritize child safety. If in doubt, flag as TRUE.`;
 
@@ -371,23 +371,23 @@ const logSafeguardingAlert = async (text: string, userId: string) => {
                 userName: userName,
                 type: 'Chat Message Distress',
                 content: text,
-                context: "Geo Pro"
+                context: "Acc Pro"
             })
         }).catch(e => console.error("Failed to send webhook to Power Automate:", e));
     } catch (error) {
-        console.error("Error saving Geo Pro safeguarding alert:", error);
+        console.error("Error saving Acc Pro safeguarding alert:", error);
     }
 };
 
 export const generateQuestion = async (params: { unit: string; marks: number; level: UserLevel; includeFigure?: boolean; subTopic?: string; forceFormationQuestion?: boolean; questionType?: string; }): Promise<GeneratedQuestionData> => handleApiCall(async () => {
     const ai = getAiClient();
-    let levelContext = "AQA GCSE Geography (Specification 8035)";
-    if (params.level === 'A-Level') levelContext = "AQA A-Level Geography";
-    if (params.level === 'IGCSE') levelContext = "Edexcel International GCSE Geography (4GE1)";
+    let levelContext = "AQA A-Level Accounting (7127)";
+    if (params.level === 'A-Level') levelContext = "AQA A-Level Accounting (7127)";
+    if (params.level === 'IGCSE') levelContext = "AQA A-Level Accounting (7127)"; // Simplified as primary focus is A-Level Accounting
     
     // Figure instruction
     const figureInstruction = params.includeFigure
-        ? "You MUST generate a relevant 'figureDescription' for a stimulus (map, graph, photo) that the question is based on."
+        ? "You MUST generate a relevant 'figureDescription' for a stimulus (financial statement, table, or graph) that the question is based on."
         : "Do NOT generate a figure or resource. The question should be answerable without a stimulus.";
 
     let promptExtraInstructions = "";
@@ -396,7 +396,7 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     }
 
     if (params.level === 'A-Level' && params.marks === 6) {
-        promptExtraInstructions += `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Require TESLA model in mark scheme. `;
+        promptExtraInstructions += `IMPORTANT: This MUST be a specialized "Analyse the data..." question (AO3). Focus on the financial impact and use accounting ratios where appropriate. `;
     }
 
     if (params.subTopic && params.subTopic !== 'All Sub-topics') {
@@ -404,13 +404,9 @@ export const generateQuestion = async (params: { unit: string; marks: number; le
     }
 
     if (params.forceFormationQuestion) {
-        promptExtraInstructions += `This MUST be a 4-mark "Explain the formation of..." question. `;
-        if (params.includeFigure) {
-            promptExtraInstructions += `The question must ask to explain the formation of the landform shown in the figure (do not name the feature in the question, just refer to Figure X). `;
-        } else {
-            promptExtraInstructions += `The question must name a specific landform (e.g., spit, waterfall, corrie) and ask for its formation. `;
-        }
-        promptExtraInstructions += `Mark scheme must award marks for: 1. Identifying/Defining the feature (if applicable) or stating the start point. 2. Sequenced explanation of formation processes. `;
+        promptExtraInstructions += `This MUST be a 4-mark "Explain why..." question focusing on an accounting concept. `;
+        promptExtraInstructions += `The question must ask to explain a specific process (e.g., why a trial balance is prepared, why depreciation is charged). `;
+        promptExtraInstructions += `Mark scheme must award marks for: 1. Identifying/Defining the concept. 2. Sequenced explanation of why it is necessary or how it impacts the financial statements. `;
     }
 
     const fullPrompt = `Generate a new, unique ${levelContext} exam question.
@@ -445,7 +441,7 @@ export const generateFigure = async (description: string): Promise<string> => {
         const ai = getAiClient();
         const response = await ai.models.generateImages({
             model: 'imagen-4.0-generate-001',
-            prompt: `Geography exam figure: ${description}`,
+            prompt: `Accounting exam figure: ${description}`,
             config: {
                 numberOfImages: 1,
                 aspectRatio: "16:9",
@@ -484,7 +480,7 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
 
     const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
 
-    let systemInstruction = `You are an AI assistant for Geography, supporting ${level} students.`;
+    let systemInstruction = `You are an AI assistant for AQA A-Level Accounting (7127), supporting students.`;
 
     // Fetch User Context
     if (user) {
@@ -506,11 +502,11 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         if (level === 'A-Level') specContent = AQA_ALEVEL_SPEC;
         if (level === 'IGCSE') specContent = EDEXCEL_IGCSE_SPEC;
 
-        const specName = level === 'IGCSE' ? 'Edexcel International GCSE (4GE1)' : `AQA ${level}`;
+        const specName = `AQA A-Level Accounting (7127)`;
 
         systemInstruction += `
         STRICT MODE ENABLED.
-        You must ONLY answer questions using content from the ${specName} Geography specification provided below.
+        You must ONLY answer questions using content from the ${specName} specification provided below.
 
         Reference Context (Specification):
         ${specContent}
@@ -529,7 +525,7 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
         Rules:
         1. You MUST use the googleSearch tool to verify facts.
         2. You MUST provide citations for external information using Markdown links inline (e.g. "According to [BBC News](http://bbc.co.uk)...").
-        3. Ensure information is relevant to AQA ${level} Geography.
+        3. Ensure information is relevant to AQA A-Level Accounting (7127).
         `;
     }
 
@@ -609,7 +605,7 @@ export const generateModelAnswer = async (question: Question): Promise<MarkedMod
 export const streamTutorResponse = async (question: Question, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const systemInstruction = `You are an interactive Geography tutor...`;
+    const systemInstruction = `You are an interactive Accounting tutor...`;
     const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
     const responseStream = await ai.models.generateContentStream({
@@ -661,8 +657,8 @@ export const processMultipleQuestionsFromWork = async (
 
     const base64Data = attachment.data.includes(',') ? attachment.data.split(',')[1] : attachment.data;
 
-    const prompt = `You are an expert ${examinerType} Geography examiner.
-    The attached image/document contains one or more student answers to geography questions.
+    const prompt = `You are an expert ${examinerType} Accounting examiner.
+    The attached image/document contains one or more student answers to accounting questions.
 
     Task:
     1. Identify every distinct question answered on the page(s).
@@ -739,7 +735,7 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
     const ai = getAiClient();
     const examinerType = question.level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
 
-    const prompt = `You are an expert ${examinerType} Geography examiner. Mark the following student answer.
+    const prompt = `You are an expert ${examinerType} Accounting examiner. Mark the following student answer.
 
     Question Context:
     - Title: "${question.title}"
@@ -803,7 +799,7 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     // Summary is generated automatically after marking. It should count as part of the flow.
     await checkDailyLimit();
     const ai = getAiClient();
-    const prompt = `You are a geography teacher writing a concise, one-sentence summary for a student's practice session.
+    const prompt = `You are an accounting teacher writing a concise, one-sentence summary for a student's practice session.
 
     Question Title: ${question.title || question.prompt}
     Student Score: ${feedback.score}/${feedback.totalMarks}
@@ -1011,7 +1007,7 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
                 },
                 {
                     name: "fetchTopicPerformance",
-                    description: "Fetches aggregated global statistics for a specific geography topic (e.g., 'Coasts', 'Tectonics'). Use this to compare class performance.",
+                    description: "Fetches aggregated global statistics for a specific accounting topic (e.g., 'Double Entry', 'Ratio Analysis'). Use this to compare class performance.",
                     parameters: {
                         type: "OBJECT",
                         properties: {
@@ -1024,7 +1020,7 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
         }
     ];
 
-    const systemInstruction = `You are an expert Educational Data Analyst and Assistant for the Admin of a Geography learning platform.
+    const systemInstruction = `You are an expert Educational Data Analyst and Assistant for the Admin of an Accounting learning platform.
 
     Current Data Context (Summary):
     - Users: ${JSON.stringify(userSummary)}
@@ -1187,7 +1183,7 @@ export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStu
     ${item.details}
 
     Instruction:
-    - Create a challenging question suitable for A-Level/GCSE Geography.
+    - Create a challenging question suitable for A-Level Accounting.
     - Provide 4 distinct options.
     - Ensure the "correctAnswer" is EXACTLY identical to one of the "options".
 
@@ -1275,7 +1271,7 @@ export const generateSwipeQuizItem = async (study: CaseStudyLocation): Promise<S
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
-export const generateCareerInfo = async (category: string): Promise<GeographyCareer[]> => {
+export const generateCareerInfo = async (category: string): Promise<AccountingCareer[]> => {
     await checkDailyLimit();
     const ai = getAiClient();
     const response = await ai.models.generateContent({
@@ -1295,14 +1291,14 @@ export const generateLocalOpportunities = async (location: string, level: string
     const age = isGCSE ? '16-18' : '18+';
     const type = isGCSE ? 'Apprenticeships, Work Experience, or Entry Level Jobs' : 'Degree Apprenticeships, Internships, or Entry Level Jobs';
 
-    const prompt = `Find current local ${type} in Geography, Environmental Science, Travel, Tourism, or Sustainability near ${location} (within ${radius}). Suitable for age ${age}.
+    const prompt = `Find current local ${type} in Accounting, Finance, Auditing, or Business Management near ${location} (within ${radius}). Suitable for age ${age}.
 
     Use Google Search to find REAL, current opportunities.
 
     Return a JSON object with this structure:
     {
       "opportunities": [
-        { "title": "string", "company": "string", "location": "string", "description": "Detailed description including key responsibilities and why it's relevant to geography.", "link": "Direct URL to the job posting or company careers page" }
+        { "title": "string", "company": "string", "location": "string", "description": "Detailed description including key responsibilities and why it's relevant to accounting.", "link": "Direct URL to the job posting or company careers page" }
       ]
     }
 
@@ -1380,12 +1376,12 @@ export const generateUniversityCourseInfo = async (interests: string, location?:
 
 export const generateTopUKUniversityInfo = async (): Promise<{ courses: UniversityCourseInfo[], sources: { uri: string; title: string }[] }> => handleApiCall(async () => {
     const ai = getAiClient();
-    const prompt = `Find the top 5 UK universities for Geography (based on recent league tables like Guardian, Times, or Complete University Guide).
+    const prompt = `Find the top 5 UK universities for Accounting and Finance (based on recent league tables like Guardian, Times, or Complete University Guide).
 
     Return a JSON object with this structure:
     {
       "courses": [
-        { "courseTitle": "BSc/BA Geography", "universityName": "string", "description": "Why it is top rated", "entryRequirements": "Typical offer", "url": "string" }
+        { "courseTitle": "BA/BSc Accounting and Finance", "universityName": "string", "description": "Why it is top rated", "entryRequirements": "Typical offer", "url": "string" }
       ]
     }`;
 
@@ -1419,7 +1415,7 @@ export const generateTopUKUniversityInfo = async (): Promise<{ courses: Universi
 export const generateTransferableSkillInfo = async (skillName: string): Promise<TransferableSkill> => {
     await checkDailyLimit();
     const ai = getAiClient();
-    const prompt = `Provide detailed information about the transferable skill: "${skillName}" in the context of Geography.
+    const prompt = `Provide detailed information about the transferable skill: "${skillName}" in the context of Accounting.
 
     Return a JSON object with this structure:
     {
@@ -1547,7 +1543,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
         .join(', ');
 
     const specName = level === 'IGCSE' ? 'Edexcel International GCSE (4GE1)' : 'AQA Specification';
-    const prompt = `Create a highly engaging, interactive Geography lesson for a student studying ${level} (${specName}).
+    const prompt = `Create a highly engaging, interactive Accounting lesson for a student studying ${level} (${specName}).
     
     Chapter: ${chapter}
     Lesson Title: ${lessonTitle}
@@ -1633,7 +1629,7 @@ export const validateLessonAnswer = async (question: string, userAnswer: string,
     await checkDailyLimit();
     const ai = getAiClient();
 
-    const prompt = `You are an automated grading assistant for a Geography lesson.
+    const prompt = `You are an automated grading assistant for an Accounting lesson.
 
     Question: "${question}"
     Correct Answer/Key Concept: "${correctAnswer}"
@@ -1675,9 +1671,9 @@ export const validateLessonAnswer = async (question: string, userAnswer: string,
 export const generateVideoQuestions = async (videoTitle: string, level: string): Promise<VideoQuizContent> => handleApiCall(async () => {
     const ai = getAiClient();
     // Use A-Level specific wording only if the level is A-Level
-    let levelContext = 'Geography';
-    if (level === 'A-Level') levelContext = 'A-Level Geography';
-    if (level === 'IGCSE') levelContext = 'Edexcel International GCSE Geography';
+    let levelContext = 'Accounting';
+    if (level === 'A-Level') levelContext = 'A-Level Accounting';
+    if (level === 'IGCSE') levelContext = 'A-Level Accounting';
 
     const prompt = `Based on the ${levelContext} video titled "${videoTitle}", generate a short quiz to test understanding.
     
@@ -1685,7 +1681,7 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
     1. 3 Multiple Choice Questions (with 4 options, 1 correct answer, and explanation).
     2. 2 Open-Ended "Discussion" Questions (with a sample model answer for checking).
 
-    Context: The user is a student studying ${level} Geography. The questions should be relevant to the likely content of a video with this title.
+    Context: The user is a student studying ${level} Accounting. The questions should be relevant to the likely content of a video with this title.
 
     Return ONLY a JSON object with this structure:
     {
@@ -1745,10 +1741,7 @@ export const chatWithPreRelease = async (history: ChatMessage[], message: string
 
     contents.push({ role: 'user', parts: userParts });
 
-    const systemInstruction = `You are an expert Geography tutor assisting a student with the "June 2025 Paper 3 Pre-release Material".
-    The student is looking at a specific page of the resource booklet (provided as an image).
-    Answer their questions specifically about the data, maps, graphs, or photos shown in the image.
-    Be precise, quote figures if visible, and explain geographical concepts related to the resource.`;
+    const systemInstruction = `You are an expert Accounting tutor assisting a student with their course content and exam preparation. The student is looking at a specific page of the resource booklet (provided as an image). Answer their questions specifically about the data, tables, financial statements, or scenarios shown in the image. Be precise, quote figures if visible, and explain accounting principles related to the resource.`;
 
     const responseStream = await ai.models.generateContentStream({
         model: 'gemini-2.5-pro', // Use Pro for vision capabilities
@@ -1766,7 +1759,7 @@ export const generatePreReleaseQuestion = async (imageBase64: string): Promise<G
     const ai = getAiClient();
     const base64Data = imageBase64.split(',')[1] || imageBase64;
 
-    const prompt = `Look at this Geography Pre-release resource. Generate a GCSE-level exam question based on it.
+    const prompt = `Look at this Accounting resource. Generate an A-Level exam question based on it.
 
     Format as JSON object: { "questionNumber": "03.X", "marks": number, "prompt": "string", "markScheme": { "content": "string" } }
 
@@ -1810,7 +1803,7 @@ export const parseTimetableFile = async (data: string, mimeType: string = 'image
     // If DataURL, split comma. If raw base64, keep it.
     const base64Data = data.includes(',') ? data.split(',')[1] : data;
 
-    let prompt = `Analyze this exam timetable. Extract the dates, times, and durations for Geography exams (Paper 1, Paper 2, Paper 3) for both GCSE and A-Level if present.
+    let prompt = `Analyze this exam timetable. Extract the dates, times, and durations for Accounting exams for A-Level if present.
 
     Return a JSON ARRAY of objects with this structure:
     {
@@ -1821,7 +1814,7 @@ export const parseTimetableFile = async (data: string, mimeType: string = 'image
         "duration": "Xh Ym" (e.g. "1h 30m")
     }
 
-    Ignore non-geography exams.`;
+    Ignore non-accounting exams.`;
 
     // Handle CSV as text prompt if possible, or blob.
     // If it is CSV, we can just decode base64 and pass as text part?
@@ -1858,7 +1851,7 @@ export const parseTimetableFile = async (data: string, mimeType: string = 'image
 
 export const generateFlashcards = async (topic: string, subTopic: string, level: string): Promise<FlashcardItem[]> => handleApiCall(async () => {
     const ai = getAiClient();
-    const prompt = `Generate 10 high-quality flashcards for the ${level} Geography topic: "${topic}".
+    const prompt = `Generate 10 high-quality flashcards for the ${level} Accounting topic: "${topic}".
     Focus specifically on the sub-topic: "${subTopic}".
 
     Include a mix of:
@@ -1908,7 +1901,7 @@ export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLe
     const ai = getAiClient();
     const base64Data = imageBase64.split(',')[1] || imageBase64;
 
-    const prompt = `Analyze this image of a marked ${level} Geography exam answer.
+    const prompt = `Analyze this image of a marked ${level} Accounting exam answer.
 
     Extract the following details:
     1. The student's handwritten answer (transcribe it).
@@ -1957,7 +1950,7 @@ export const evaluateMemoryRecallAttempt = async (
     const ai = getAiClient();
     const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
 
-    const prompt = `You are an expert ${examinerType} Geography tutor helping a student with a "blurting" or "active recall" exercise.
+    const prompt = `You are an expert ${examinerType} Accounting tutor helping a student with a "blurting" or "active recall" exercise.
 
     Original Topic Summary:
     """
@@ -2006,8 +1999,8 @@ export const generateSong = async (
 ): Promise<{ lyrics: string; audioBase64: string }> => {
     await checkAndIncrementSongLimit();
 
-    let prompt = `Create an educational ${songType} song about the ${level} Geography topic: "${topic}", specifically focusing on "${subTopic}".
-    The song should be accurate, use key geographical terminology, and help students remember the core concepts.
+    let prompt = `Create an educational ${songType} song about the ${level} Accounting topic: "${topic}", specifically focusing on "${subTopic}".
+    The song should be accurate, use key accounting terminology, and help students remember the core concepts.
     Vocals style: ${vocals}.
     Instruments: ${instruments}.`;
 
@@ -2087,7 +2080,7 @@ export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTop
     const ai = getAiClient();
     const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
 
-    const prompt = `You are an expert ${examinerType} Geography examiner.
+    const prompt = `You are an expert ${examinerType} Accounting examiner.
     Generate a detailed summary for a memory recall ("blurting") exercise.
 
     Topic: ${topicId}
@@ -2134,7 +2127,7 @@ export const generateAndSaveMemoryRecallSummary = async (topicId: string, subTop
             await checkAndIncrementImageLimit();
             const imgResponse = await ai.models.generateImages({
                 model: 'imagen-4.0-generate-001',
-                prompt: `Geography diagram: ${sec.imagePrompt}`,
+                prompt: `Accounting diagram: ${sec.imagePrompt}`,
                 config: { numberOfImages: 1, aspectRatio: "16:9", safetySettings: SAFETY_SETTINGS }
             });
 

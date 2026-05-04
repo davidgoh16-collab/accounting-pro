@@ -42,27 +42,27 @@ export const migrateFeb2026 = async (): Promise<void> => {
         level: 'A-Level',
         createdAt: new Date().toISOString(),
         topics: [
-            'Carbon Cycle', 'Water Cycle', 'Coasts', 'Hazards',
-            'Global Systems', 'Global Governance', 'Changing Places', 'Urban Issues'
+            'Financial Accounting', 'Double Entry Model', 'Verification of Records', 'Accounting Concepts',
+            'Budgeting', 'Marginal Costing', 'Standard Costing', 'Capital Investment Appraisal'
         ],
         exams: [
             {
                 id: 'paper1',
-                title: 'Paper 1: Physical Geography',
+                title: 'Paper 1: Financial Accounting',
                 paper: 'Paper 1',
                 date: '2026-02-12',
                 time: '09:00',
-                duration: '2h 30m',
-                topics: ['Carbon Cycle', 'Water Cycle', 'Coasts', 'Hazards']
+                duration: '3h 00m',
+                topics: ['Double Entry', 'Verification', 'Concepts', 'Sole Traders', 'Limited Companies', 'Analysis']
             },
             {
                 id: 'paper2',
-                title: 'Paper 2: Human Geography',
+                title: 'Paper 2: Management Accounting',
                 paper: 'Paper 2',
                 date: '2026-02-24',
                 time: '13:00',
-                duration: '2h 30m',
-                topics: ['Global Systems', 'Global Governance', 'Changing Places', 'Urban Issues']
+                duration: '3h 00m',
+                topics: ['Budgeting', 'Marginal Costing', 'Standard Costing', 'Capital Investment Appraisal', 'Decision Making']
             }
         ]
     };

@@ -275,7 +275,7 @@ const SongGeneratorView: React.FC<SongGeneratorViewProps> = ({ user, onBack }) =
                 {/* Results Panel */}
                 {generatedSong && (
                     <div className="bg-white/90 dark:bg-stone-800/90 backdrop-blur-md rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 p-6 md:p-8 animate-fade-in flex flex-col items-center">
-                        <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6 text-center">Your Geography Track</h3>
+                        <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-6 text-center">Your Accounting Track</h3>
 
                         {audioUrl && (
                             <div className="w-full max-w-md mb-8 p-4 bg-stone-100 dark:bg-stone-900 rounded-2xl shadow-inner border border-stone-200 dark:border-stone-700">

@@ -33,7 +33,7 @@ const SwipeQuizView: React.FC<{ topic: string; user: AuthUser; onBack: () => voi
     const [cards, setCards] = useState<SwipeQuizItem[]>([]);
     const [status, setStatus] = useState<'intro' | 'loading' | 'playing' | 'error'>('intro');
     const [score, setScore] = useState(0);
-    const [highScore, setHighScore] = usePersistentState('geo-swipe-highscore', 0);
+    const [highScore, setHighScore] = usePersistentState('acc-pro-swipe-highscore', 0);
     const [dragX, setDragX] = useState(0);
     const [swipeResult, setSwipeResult] = useState<'correct' | 'incorrect' | null>(null);
     
@@ -179,7 +179,7 @@ const SwipeQuizView: React.FC<{ topic: string; user: AuthUser; onBack: () => voi
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                 <div className="bg-white rounded-3xl p-8 text-center max-w-md w-full shadow-2xl border border-stone-200 animate-fade-in">
                     <div className="mb-6 bg-fuchsia-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-4xl">↔️</div>
-                    <h1 className="text-4xl font-black text-stone-800 mb-2 tracking-tight">Geo Swipe</h1>
+                    <h1 className="text-4xl font-black text-stone-800 mb-2 tracking-tight">Account Swipe</h1>
                     <p className="text-stone-600 mb-4 text-lg">Test your knowledge with rapid-fire questions.</p>
                     
                     <div className="mb-8 bg-fuchsia-50 p-3 rounded-lg inline-block">

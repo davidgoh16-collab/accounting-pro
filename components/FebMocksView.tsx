@@ -11,48 +11,34 @@ import PreReleaseView from './FebMocks/PreReleaseView';
 
 const exams = [
     {
-        id: 'p2',
-        title: 'Paper 2: Challenges in the Human Environment',
-        date: '2026-01-30T09:15:00',
-        displayDate: 'Friday 30th Jan 2026',
-        time: '09:15 AM',
-        duration: '1h 30m',
-        color: 'bg-emerald-600',
-        topics: [
-            'Section A: Urban Issues & Challenges (Lagos, London, Sustainability)',
-            'Section B: The Changing Economic World (Development Gap, Nigeria, UK Economy)',
-            'Section C: The Challenge of Resource Management (Focus: Energy)'
-        ],
-        notes: 'This paper includes ALL topics.'
-    },
-    {
         id: 'p1',
-        title: 'Paper 1: Living with the Physical Environment',
-        date: '2026-02-04T11:35:00',
-        displayDate: 'Wednesday 4th Feb 2026',
-        time: '11:35 AM',
-        duration: '1h 10m',
-        color: 'bg-blue-600',
+        title: 'Paper 1: Financial Accounting',
+        date: '2026-05-15T09:00:00',
+        displayDate: 'Friday 15th May 2026',
+        time: '09:00 AM',
+        duration: '3h 00m',
+        color: 'bg-indigo-600',
         topics: [
-            'Section A: The Challenge of Natural Hazards (Tectonics, Weather, Climate Change)',
-            'Section C: Physical Landscapes in the UK (Coasts & Rivers)'
+            'Section A: Multiple Choice & Short Answer',
+            'Section B: Structured Questions (e.g., Sole Trader/Partnership accounts)',
+            'Section C: Extended Answer (e.g., Analysis/Incomplete Records)'
         ],
-        notes: 'EXCLUDES Section B: The Living World (Ecosystems/Rainforests/Deserts/Cold Env) are NOT on this mock.',
-        alert: true
+        notes: 'Covers topics 3.1–3.10 of the specification.'
     },
     {
-        id: 'p3',
-        title: 'Paper 3: Geographical Applications',
-        date: '2026-02-11T11:35:00',
-        displayDate: 'Wednesday 11th Feb 2026',
-        time: '11:35 AM',
-        duration: '1h 15m',
-        color: 'bg-amber-600',
+        id: 'p2',
+        title: 'Paper 2: Management Accounting',
+        date: '2026-06-03T09:00:00',
+        displayDate: 'Wednesday 3rd June 2026',
+        time: '09:00 AM',
+        duration: '3h 00m',
+        color: 'bg-rose-600',
         topics: [
-            'Section A: Issue Evaluation (Energy & Morecambe Bay)',
-            'Section B: Fieldwork (Unfamiliar & Familiar contexts)'
+            'Section A: Multiple Choice & Short Answer',
+            'Section B: Structured Questions (e.g., Budgeting/Marginal Costing)',
+            'Section C: Extended Answer (e.g., Capital Investment Appraisal/Standard Costing)'
         ],
-        notes: 'This paper tests your skills and application of knowledge.'
+        notes: 'Covers topics 3.11–3.18 of the specification.'
     }
 ];
 
@@ -66,129 +52,63 @@ const skills = [
 ];
 
 const resources = [
-    { title: 'Internet Geography', url: 'https://www.internetgeography.net/', desc: 'Case studies, quizzes, and revision guides.' },
-    { title: 'BBC Bitesize', url: 'https://www.bbc.co.uk/bitesize/examspecs/zy3ptyc', desc: 'Concise revision notes and quizzes for AQA.' },
-    { title: 'Seneca Learning', url: 'https://senecalearning.com/en-GB/seneca-certified-resources/geography-gcse-aqa/', desc: 'Interactive revision courses tailored to AQA.' },
-    { title: 'AQA Assessment Resources', url: 'https://www.aqa.org.uk/subjects/geography/gcse/geography-8035/assessment-resources', desc: 'Official past papers, mark schemes and examiner reports.' }
+    { title: 'Tutor2u Accounting', url: 'https://www.tutor2u.net/accounting', desc: 'Expert revision notes, videos, and study guides for AQA.' },
+    { title: 'AccountingCoach', url: 'https://www.accountingcoach.com/', desc: 'Comprehensive explanations of core accounting concepts.' },
+    { title: 'AQA Specification', url: 'https://www.aqa.org.uk/subjects/accounting/as-and-a-level/accounting-7127', desc: 'Official specification and assessment resources.' },
+    { title: 'AQA Past Papers', url: 'https://www.aqa.org.uk/subjects/accounting/as-and-a-level/accounting-7127/assessment-resources', desc: 'Practice with real examiner materials and mark schemes.' }
 ];
 
 const scheduleData = [
     {
-        title: "Week 1: Paper 2 Focus",
+        title: "Week 1: Financial Accounting",
         days: [
-            { id: "d1", date: "Mon 19 Jan", task: "Urban Issues: Lagos & London", type: "p2" },
-            { id: "d2", date: "Tue 20 Jan", task: "Economic World: Dev Gap & Nigeria", type: "p2" },
-            { id: "d3", date: "Wed 21 Jan", task: "UK Economy & Post-Industrial", type: "p2" },
-            { id: "d4", date: "Thu 22 Jan", task: "Resource Management: Energy", type: "p2" },
-            { id: "d5", date: "Fri 23 Jan", task: "Sustainability & Urban Living", type: "p2" },
-            { id: "d6", date: "Weekend", task: "Paper 2 Past Paper Questions", type: "p2" }
+            { id: "d1", date: "Mon 11 May", task: "Double Entry & Trial Balance", type: "p1" },
+            { id: "d2", date: "Tue 12 May", task: "Control Accounts & Bank Recs", type: "p1" },
+            { id: "d3", date: "Wed 13 May", task: "Sole Trader Financial Stmts", type: "p1" },
+            { id: "d4", date: "Thu 14 May", task: "Accounting Concepts Review", type: "p1" },
+            { id: "exam1", date: "Fri 15 May", task: "PAPER 1 EXAM (09:00)", type: "exam" }
         ]
     },
     {
-        title: "Week 2: Paper 2 Final Prep",
+        title: "Week 2: Management Accounting",
         days: [
-            { id: "d7", date: "Mon 26 Jan", task: "Case Study Stats Recap", type: "p2" },
-            { id: "d8", date: "Tue 27 Jan", task: "9-Marker Plans (Human)", type: "p2" },
-            { id: "d9", date: "Wed 28 Jan", task: "Review Weak Topics", type: "p2" },
-            { id: "d10", date: "Thu 29 Jan", task: "Light Revision", type: "p2" },
-            { id: "exam1", date: "Fri 30 Jan", task: "PAPER 2 EXAM (09:15)", type: "exam" }
-        ]
-    },
-    {
-        title: "The Bridge: Paper 1 Focus",
-        days: [
-            { id: "d11", date: "Sat 31 Jan", task: "Natural Hazards: Tectonics", type: "p1" },
-            { id: "d12", date: "Sun 1 Feb", task: "Weather & Climate Change", type: "p1" },
-            { id: "d13", date: "Mon 2 Feb", task: "Coasts: Processes & Landforms", type: "p1" },
-            { id: "d14", date: "Tue 3 Feb", task: "Rivers: Hydrographs & Mgt", type: "p1" },
-            { id: "exam2", date: "Wed 4 Feb", task: "PAPER 1 EXAM (11:35)", type: "exam" }
-        ]
-    },
-    {
-        title: "Final Stretch: Paper 3",
-        days: [
-            { id: "d15", date: "Thu 5 Feb", task: "Fieldwork Skills (Unfamiliar)", type: "p3" },
-            { id: "d16", date: "Fri 6 Feb", task: "Fieldwork (Familiar/Own)", type: "p3" },
-            { id: "d17", date: "Weekend", task: "Pre-Release: Figures 1 & 2", type: "p3" },
-            { id: "d18", date: "Mon 9 Feb", task: "Pre-Release: Figure 3 Decision", type: "p3" },
-            { id: "d19", date: "Tue 10 Feb", task: "Stats & Graphs Review", type: "p3" },
-            { id: "exam3", date: "Wed 11 Feb", task: "PAPER 3 EXAM (11:35)", type: "exam" }
+            { id: "d5", date: "Mon 18 May", task: "Budgeting & Cash Flow", type: "p2" },
+            { id: "d6", date: "Tue 19 May", task: "Marginal & Absorption Costing", type: "p2" },
+            { id: "d7", date: "Wed 20 May", task: "Standard Costing & Variances", type: "p2" },
+            { id: "d8", date: "Thu 21 May", task: "Capital Investment Appraisal", type: "p2" },
+            { id: "d9", date: "Fri 22 May", task: "Ethical Considerations", type: "p2" }
         ]
     }
 ];
 
 const specTopics = {
-    "Paper 1: Physical (No Living World)": {
-        "Natural Hazards": [
-            "Plate Tectonics Theory (Distribution, Margins)",
-            "Tectonic Hazards (Effects, Responses)",
-            "Management of Tectonic Hazards",
-            "Global Atmospheric Circulation",
-            "Tropical Storms (Formation, Structure, Climate Change effects)",
-            "Tropical Storm Case Study (Effects, Responses)",
-            "Extreme Weather in the UK (Case Study)",
-            "Climate Change (Evidence, Natural & Human Causes)",
-            "Climate Change Effects & Mitigation/Adaptation"
+    "Paper 1: Financial Accounting": {
+        "Fundamental Concepts": [
+            "The Role of the Accountant in Business",
+            "Types of Business Organisation",
+            "The Double Entry Model",
+            "Verification of Accounting Records",
+            "Accounting Concepts & Preparation"
         ],
-        "Coasts (UK Landscapes)": [
-            "Wave types & Weathering processes",
-            "Mass movement & Erosion processes",
-            "Transportation (Longshore Drift) & Deposition",
-            "Erosional Landforms (Headlands, Bays, Caves, Arches, Stacks)",
-            "Depositional Landforms (Beaches, Spits, Bars)",
-            "Coastal Management (Hard Engineering vs Soft Engineering)",
-            "Managed Retreat (Case Study)"
-        ],
-        "Rivers (UK Landscapes)": [
-            "River Profiles (Long & Cross) & Processes",
-            "Erosional Landforms (Waterfalls, Gorges, Interlocking Spurs)",
-            "Erosion & Deposition Landforms (Meanders, Ox-bow lakes)",
-            "Depositional Landforms (Levees, Estuaries)",
-            "Flood Risk Factors (Physical & Human)",
-            "Flood Hydrographs",
-            "Flood Management Strategies (Hard & Soft)"
+        "Financial Statements": [
+            "Sole Trader Financial Statements",
+            "Limited Company Financial Statements",
+            "Analysis and Interpretation of Financial Statements",
+            "Accounting for Incomplete Records",
+            "Partnership Accounts"
         ]
     },
-    "Paper 2: Human (All Topics)": {
-        "Urban Issues": [
-            "Global Urbanisation Trends & Megacities",
-            "Lagos: Location, Growth & Importance",
-            "Lagos: Challenges (Slums/Squatter Settlements, Crime, Waste)",
-            "Lagos: Urban Planning Strategies",
-            "London: Location, Importance & Migration",
-            "London: Opportunities (Cultural Mix, Employment, Transport)",
-            "London: Challenges (Inequality, Sprawl, Waste)",
-            "London: Urban Regeneration (e.g. Stratford/Docklands)",
-            "Sustainable Urban Living (Water, Energy, Waste, Transport)"
+    "Paper 2: Management Accounting": {
+        "Costing & Budgeting": [
+            "Budgeting & Control",
+            "Marginal Costing",
+            "Absorption & Activity Based Costing",
+            "Standard Costing & Variance Analysis"
         ],
-        "Economic World": [
-            "Measures of Development (GNI, HDI, etc.)",
-            "The DTM (Demographic Transition Model)",
-            "Causes of Uneven Development",
-            "Strategies to Reduce the Gap (Aid, Fairtrade, Tourism)",
-            "Nigeria: Industrial Structure & TNCs (e.g. Shell)",
-            "Nigeria: Aid & Environmental Impacts",
-            "UK Economy (De-industrialisation, Post-industrial)",
-            "UK Transport Infrastructure & North-South Divide"
-        ],
-        "Resource Management": [
-            "Global Distribution of Food, Water, Energy",
-            "Provision of Food, Water, Energy in the UK",
-            "Energy: Global Demand & Insecurity Factors",
-            "Energy: Impacts of Insecurity",
-            "Energy: Strategies to Increase Supply (Renewable/Non-renewable)",
-            "Energy: Sustainable Energy (Case Study)"
-        ]
-    },
-    "Paper 3: Skills": {
-        "Fieldwork & Skills": [
-            "Cartographic Skills (Maps, Grid Refs, Scale)",
-            "Graphical Skills (Bar, Line, Pie, Scatter, Chloropleth)",
-            "Statistical Skills (Mean, Median, Mode, Range, Quartiles)",
-            "Fieldwork Enquiry Process (Hypothesis to Conclusion)",
-            "Data Collection Methods (Primary vs Secondary)",
-            "Data Presentation & Analysis",
-            "Evaluation of Fieldwork Methods"
+        "Decision Making": [
+            "Capital Investment Appraisal",
+            "Accounting for Limited Companies (Internal)",
+            "Ethical Considerations in Accounting"
         ]
     }
 };
@@ -313,9 +233,8 @@ const FebMocksSchedule: React.FC<{ user: AuthUser }> = ({ user }) => {
                                 const isCompleted = completed[day.id];
 
                                 let borderClass = "border-l-4 border-stone-300 dark:border-stone-600";
-                                if (day.type === 'p1') borderClass = "border-l-4 border-blue-500";
-                                if (day.type === 'p2') borderClass = "border-l-4 border-emerald-500";
-                                if (day.type === 'p3') borderClass = "border-l-4 border-amber-500";
+                                if (day.type === 'p1') borderClass = "border-l-4 border-indigo-500";
+                                if (day.type === 'p2') borderClass = "border-l-4 border-rose-500";
                                 if (isExam) borderClass = "border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20";
 
                                 return (
@@ -520,12 +439,12 @@ interface FebMocksViewProps {
 }
 
 const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
-    const [activeTab, setActiveTab] = useState<'exams' | 'schedule' | 'topics' | 'skills' | 'prerelease'>('exams');
+    const [activeTab, setActiveTab] = useState<'exams' | 'schedule' | 'topics' | 'skills'>('exams');
 
     return (
         <HubLayout
             title="February Mock Revision"
-            subtitle="Year 11 Geography Mock Exams 2026"
+            subtitle="Year 13 Accounting Final Exams 2026"
             gradient="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600"
             onBack={onBack}
         >
@@ -537,7 +456,6 @@ const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
                         { id: 'exams', label: 'Exam Overview', icon: '📝' },
                         { id: 'schedule', label: 'Schedule', icon: '📅' },
                         { id: 'topics', label: 'Topic Tracker', icon: '✅' },
-                        { id: 'prerelease', label: 'Paper 3 Pre-release', icon: '🗺️' },
                         { id: 'skills', label: 'Skills & Info', icon: '🧠' }
                     ].map(tab => (
                         <button
@@ -561,7 +479,6 @@ const FebMocksView: React.FC<FebMocksViewProps> = ({ user, onBack }) => {
                     {activeTab === 'exams' && <FebMocksExams />}
                     {activeTab === 'schedule' && <FebMocksSchedule user={user} />}
                     {activeTab === 'topics' && <FebMocksTopics user={user} />}
-                    {activeTab === 'prerelease' && <PreReleaseView />}
                     {activeTab === 'skills' && <FebMocksSkills />}
                 </div>
 

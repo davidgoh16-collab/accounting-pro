@@ -11,26 +11,26 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ onComplete }) => {
 
     const steps = [
         {
-            title: "Welcome to Geo Pro! 🌍",
-            description: "Your personal AI-powered Geography tutor. Let's take a quick tour of the features designed to help you ace your exams.",
+            title: "Welcome to Accounting Pro! 🧮",
+            description: "Your personal AI-powered AQA A-Level Accounting tutor. Let's take a quick tour of the features designed to help you ace your exams.",
             icon: <Sparkles className="w-16 h-16 text-yellow-500" />,
             color: "bg-yellow-100 dark:bg-yellow-900/30",
         },
         {
             title: "Learning & Progress 🧠",
-            description: "Access interactive lessons in the Learning Academy, watch curated videos, and optimize your revision schedule with the Revision Planner.",
+            description: "Access interactive lessons covering all 18 specification areas, watch curated videos, and optimise your revision schedule with the Revision Planner.",
             icon: <GraduationCap className="w-16 h-16 text-indigo-500" />,
             color: "bg-indigo-100 dark:bg-indigo-900/30",
         },
         {
             title: "Exam Training Centre ✍️",
-            description: "Practice exam-style questions with instant AI marking, master command words, and track your readiness with RAG Analysis and Mock Exams.",
+            description: "Practice exam-style questions for Papers 1, 2 and 3 with instant AI marking, master command words like 'Prepare' and 'Reconcile', and track your readiness with RAG Analysis.",
             icon: <PenTool className="w-16 h-16 text-rose-500" />,
             color: "bg-rose-100 dark:bg-rose-900/30",
         },
         {
             title: "Interactive & Future 🚀",
-            description: "Explore careers, create custom podcasts, play geography games, and dive deep into case studies with the interactive map.",
+            description: "Explore accounting careers, create custom podcasts, play accounting quiz games, and dive deep into business scenarios with the interactive explorer.",
             icon: <Gamepad2 className="w-16 h-16 text-emerald-500" />,
             color: "bg-emerald-100 dark:bg-emerald-900/30",
         },

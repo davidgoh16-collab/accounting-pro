@@ -12,21 +12,23 @@ import {
 } from "firebase/auth";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, arrayUnion, arrayRemove, query, where, writeBatch, deleteDoc } from "firebase/firestore";
 import { getStorage, ref, listAll, getBytes, getMetadata, uploadString, getDownloadURL } from "firebase/storage";
+import { getAnalytics } from "firebase/analytics";
 import { AuthUser, ClassGroup } from "./types";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB-1EHzIdag5GriE076dSxVUCiN1gwC1F8",
-  authDomain: "a-level-geography.firebaseapp.com",
-  projectId: "a-level-geography",
-  storageBucket: "a-level-geography.firebasestorage.app",
-  messagingSenderId: "642592912836",
-  appId: "1:642592912836:web:99d28b88da8edfc0406091",
-  measurementId: "G-NHGBH7PY9Q"
+  apiKey: "AIzaSyAomVajk0-fAkyc7o7PkPg2biqsS8k_HnU",
+  authDomain: "student-apps-ebc94.firebaseapp.com",
+  projectId: "student-apps-ebc94",
+  storageBucket: "student-apps-ebc94.firebasestorage.app",
+  messagingSenderId: "882131158020",
+  appId: "1:882131158020:web:97f5a941e1799046882151",
+  measurementId: "G-6K19WED9P8"
 };
 
 const app = initializeApp(firebaseConfig);
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getFirestore(app, "accounting-app");
 export const storage = getStorage(app);
 
 const microsoftProvider = new OAuthProvider('microsoft.com');
@@ -187,7 +189,7 @@ const fileCache: Record<string, { data: string; mimeType: string }> = {};
 
 export const getCourseFiles = async (level: string): Promise<{name: string, path: string}[]> => {
     try {
-        const folder = level === 'GCSE' ? 'GCSE Geography' : 'A Level Geography';
+        const folder = level === 'GCSE' ? 'GCSE Accounting' : 'A Level Accounting';
         const folderRef = ref(storage, folder);
         const res = await listAll(folderRef);
 

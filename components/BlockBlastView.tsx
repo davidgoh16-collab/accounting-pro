@@ -69,7 +69,7 @@ const BlockBlastView: React.FC<BlockBlastViewProps> = ({ topic, user, onExit }) 
     const [grid, setGrid] = useState<GridType>(createEmptyGrid);
     const [gameState, setGameState] = useState<GameStateType>('playing');
     const [score, setScore] = useState(0);
-    const [highScore, setHighScore] = usePersistentState('geo-blast-highscore', 0);
+    const [highScore, setHighScore] = usePersistentState('acc-pro-blast-highscore', 0);
     const [placements, setPlacements] = useState(0);
     const [pieceTray, setPieceTray] = useState<PieceType[]>([]);
 
@@ -383,9 +383,9 @@ const BlockBlastView: React.FC<BlockBlastViewProps> = ({ topic, user, onExit }) 
                     // Emergency fallback if everything fails
                     setCurrentQuestion({
                          id: 'emergency_fallback',
-                         question: 'What is the capital of the UK?',
-                         options: ['London', 'Paris', 'Berlin', 'Madrid'],
-                         correctAnswer: 'London',
+                         question: 'What does EBITDA stand for?',
+                         options: ['Earnings Before Interest, Taxes, Depreciation, and Amortization', 'Every Business Is Doing Total Accounting', 'Earnings Beyond Internal Total Assets', 'Exempt Business Interest Toward Debt Account'],
+                         correctAnswer: 'Earnings Before Interest, Taxes, Depreciation, and Amortization',
                          topic: 'General',
                          levels: ['GCSE', 'A-Level']
                     });

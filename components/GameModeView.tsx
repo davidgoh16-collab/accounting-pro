@@ -55,8 +55,8 @@ const usePersistentState = <T,>(key: string, initialValue: T): [T, (value: T | (
 const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
     const [gameState, setGameState] = useState<GameState>('start');
     const [score, setScore] = useState(0);
-    const [highScore, setHighScore] = usePersistentState('geo-guide-highscore', 0);
-    const [globeSize, setGlobeSize] = usePersistentState('geo-guide-globe-size', INITIAL_GLOBE_SIZE);
+    const [highScore, setHighScore] = usePersistentState('acc-pro-highscore', 0);
+    const [globeSize, setGlobeSize] = usePersistentState('acc-pro-globe-size', INITIAL_GLOBE_SIZE);
 
     // Game Object State
     const [globeY, setGlobeY] = useState(300); // Start with a temporary, safe value
@@ -415,7 +415,7 @@ const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
             
             {/* Game Objects */}
             {gameState !== 'start' && (
-                <div className="globe absolute top-0" style={{ transform: `translate(${GLOBE_X_POSITION}px, ${globeY}px)`, fontSize: `${globeSize}px`, width: `${globeSize}px`, height: `${globeSize}px` }}>🌍</div>
+                <div className="globe absolute top-0" style={{ transform: `translate(${GLOBE_X_POSITION}px, ${globeY}px)`, fontSize: `${globeSize}px`, width: `${globeSize}px`, height: `${globeSize}px` }}>📟</div>
             )}
 
             {pipes.map(pipe => (
@@ -430,7 +430,7 @@ const GameModeView: React.FC<GameModeViewProps> = ({ topic, user, onExit }) => {
             {/* Game State Overlays */}
             {gameState === 'start' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 text-white p-4">
-                    <h2 className="text-8xl font-black" style={{ fontFamily: 'Figtree, sans-serif', textShadow: '0 0 10px white, 0 0 20px white, 0 0 30px #0ea5e9, 0 0 40px #0ea5e9, 0 0 50px #0ea5e9, 0 0 60px #0ea5e9, 0 0 70px #0ea5e9' }}>Flappy Geo</h2>
+                    <h2 className="text-8xl font-black" style={{ fontFamily: 'Figtree, sans-serif', textShadow: '0 0 10px white, 0 0 20px white, 0 0 30px #0ea5e9, 0 0 40px #0ea5e9, 0 0 50px #0ea5e9, 0 0 60px #0ea5e9, 0 0 70px #0ea5e9' }}>Flappy Accounts</h2>
                     <p className="text-3xl mt-8 font-semibold animate-pulse" style={{ textShadow: '2px 2px 4px #000' }}>Click or Press Space to Start</p>
                 </div>
             )}

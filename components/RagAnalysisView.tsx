@@ -340,7 +340,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
     return (
         <HubLayout
             title="Knowledge Tracker"
-            subtitle={`A RAG (Red-Amber-Green) analysis of your ${user.level} geography mastery.`}
+            subtitle={`A RAG (Red-Amber-Green) analysis of your ${user.level} accounting mastery.`}
             gradient="bg-gradient-to-r from-orange-500 via-red-500 to-rose-600"
             onBack={selectedTopic ? undefined : onBack}
         >

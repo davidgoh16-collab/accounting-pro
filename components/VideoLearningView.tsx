@@ -83,7 +83,7 @@ const VideoLearningView: React.FC<VideoLearningViewProps> = ({ user, onBack }) =
     return (
         <HubLayout 
             title="Video Learning" 
-            subtitle={`Curated video library for ${user.level} Geography with AI-powered interactive quizzes.`}
+            subtitle={`Curated video library for ${user.level} Accounting with AI-powered interactive quizzes.`}
             gradient="bg-gradient-to-r from-red-600 to-rose-600"
             onBack={onBack}
         >

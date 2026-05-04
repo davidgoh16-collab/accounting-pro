@@ -121,7 +121,7 @@ const FullChatView: React.FC<FullChatViewProps> = ({ user, onBack }) => {
                 <header className="p-6 border-b border-stone-200 dark:border-stone-700 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
-                            <span>🌍</span> Geo Pro Chat XL
+                            <span>📊</span> Acc Pro Chat XL
                         </h1>
                         <p className="text-stone-500 dark:text-stone-400 text-sm">
                             {researchMode

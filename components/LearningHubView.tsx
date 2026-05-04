@@ -180,7 +180,7 @@ const LearningHubView: React.FC<LearningHubViewProps> = ({ user, onBack }) => {
     return (
         <HubLayout
             title="Learning Academy"
-            subtitle={`Your personal AI tutor for ${user.level || 'Geography'}. Master content lesson by lesson.`}
+            subtitle={`Your personal AI tutor for ${user.level || 'Accounting'}. Master content lesson by lesson.`}
             gradient="bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-600"
             onBack={onBack}
         >

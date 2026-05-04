@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Page, AuthUser } from '../types';
 import HubLayout from './HubLayout';
 import HubCard from './HubCard';
+import { TrendingUp, BarChart3, PieChart } from 'lucide-react';
 
 interface SimulationsHubViewProps {
     onNavigate: (page: Page, param?: any) => void;
@@ -9,40 +10,58 @@ interface SimulationsHubViewProps {
 }
 
 const SimulationsHubView: React.FC<SimulationsHubViewProps> = ({ onNavigate, user }) => {
-    // Only show Ecosystem Balance for GCSE (or all if we want, but let's stick to GCSE as requested)
-    // The user requested it specifically for GCSE Living World.
-    // I'll show it for all levels but maybe mark it as GCSE, or only show if level is GCSE. Let's only show if GCSE/IGCSE for now, or just show it globally. The prompt said "The first one is for GCSE living world and is an Ecosystem balance simulator".
-
-    // I will show it globally but add a tag indicating it's for GCSE Living World, or just filter it. Let's filter it by level to be strict, or just show it. Let's show it if level is GCSE or IGCSE.
-    const isGcseLevel = user.level === 'GCSE' || user.level === 'IGCSE';
-
     return (
         <HubLayout
-            title="Simulations Hub"
-            subtitle="Explore interactive simulations to deepen your understanding of complex geographical systems."
-            gradient="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"
+            title="AQA Accounting Simulations"
+            subtitle="Master complex accounting models and 'What-If' scenarios aligned with the AQA A Level specification."
+            gradient="bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600"
             onBack={() => onNavigate('dashboard')}
         >
             <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
-                {isGcseLevel ? (
-                    <HubCard
-                        icon={<span className="text-4xl">🌿</span>}
-                        title="Ecosystem Balance"
-                        description="Visualise how physical forces, human intervention, and species removal disturb food webs."
-                        onClick={() => onNavigate('simulation_view', 'ecosystem_balance')}
-                        shadowColor="shadow-emerald-500/20"
-                        accentColor="text-emerald-600 hover:text-emerald-700"
-                        actionText="Start Simulation"
-                    />
-                ) : (
-                    <div className="col-span-full flex flex-col items-center justify-center p-12 bg-white rounded-2xl shadow-sm border border-stone-200">
-                        <span className="text-6xl mb-4">🌍</span>
-                        <h3 className="text-2xl font-bold text-stone-800 mb-2">More Simulations Coming Soon</h3>
-                        <p className="text-stone-600 text-center max-w-lg">
-                            We're currently building interactive simulations for {user.level || 'your'} level. Check back later for updates!
-                        </p>
-                    </div>
-                )}
+                <HubCard
+                    icon={<TrendingUp className="text-indigo-500" size={40} />}
+                    title="Break-Even Analysis"
+                    description="Visualise how fixed costs, variable costs, and selling price affect the break-even point and Margin of Safety."
+                    onClick={() => onNavigate('simulation_view', 'break_even_analysis')}
+                    shadowColor="shadow-indigo-500/20"
+                    accentColor="text-indigo-600 hover:text-indigo-700"
+                />
+
+                <HubCard
+                    icon={<BarChart3 className="text-emerald-500" size={40} />}
+                    title="Cash Flow Forecast"
+                    description="Manage receipts and payments to maintain liquidity. See the impact of credit terms on your closing balance."
+                    onClick={() => onNavigate('simulation_view', 'cash_flow_forecast')}
+                    shadowColor="shadow-emerald-500/20"
+                    accentColor="text-emerald-600 hover:text-emerald-700"
+                />
+
+                <HubCard
+                    icon={<PieChart className="text-violet-500" size={40} />}
+                    title="Investment Appraisal"
+                    description="Evaluate capital projects using Payback, ARR, and NPV as per AQA Project Appraisal standards."
+                    onClick={() => onNavigate('simulation_view', 'investment_appraisal')}
+                    shadowColor="shadow-violet-500/20"
+                    accentColor="text-violet-600 hover:text-violet-700"
+                />
+
+                <HubCard
+                    icon={<TrendingUp className="text-orange-500" size={40} />}
+                    title="Variance Analysis"
+                    description="Master Budgetary Control by comparing budgeted vs. actual figures to identify Favourable and Adverse variances."
+                    onClick={() => onNavigate('simulation_view', 'variance_analysis')}
+                    shadowColor="shadow-orange-500/20"
+                    accentColor="text-orange-600 hover:text-orange-700"
+                />
+
+                <HubCard
+                    icon={<BarChart3 className="text-pink-500" size={40} />}
+                    title="Ratio Analysis"
+                    description="Calculate and interpret liquidity, profitability, and gearing ratios against industry benchmarks."
+                    onClick={() => onNavigate('simulation_view', 'ratio_analysis')}
+                    shadowColor="shadow-pink-500/20"
+                    accentColor="text-pink-600 hover:text-pink-700"
+                />
             </main>
         </HubLayout>
     );

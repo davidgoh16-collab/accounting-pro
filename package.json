@@ -1,5 +1,5 @@
 {
-  "name": "geo-pro",
+  "name": "accounting-pro",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,9 +13,11 @@
     "@google/genai": "^1.48.0",
     "@types/dompurify": "^3.0.5",
     "@types/uuid": "^10.0.0",
+    "canvas-confetti": "^1.9.4",
     "dompurify": "^3.3.3",
     "express": "^5.2.1",
     "firebase": "^12.6.0",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.24",

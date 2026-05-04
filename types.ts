@@ -1,7 +1,7 @@
 
 import { User } from 'firebase/auth';
 
-export type UserLevel = 'GCSE' | 'A-Level' | 'IGCSE';
+export type UserLevel = 'A-Level';
 
 export type Page = 
     | 'dashboard' 
@@ -11,7 +11,7 @@ export type Page =
     | 'lesson_practice_view'
     | 'session_analysis' 
     | 'games_hub' 
-    | 'flappy_geo' 
+    | 'flappy_accountant' 
     | 'block_blast' 
     | 'swipe_quiz' 
     | 'game_analysis' 
@@ -170,19 +170,21 @@ export interface DraftSession {
 
 export interface SessionData {}
 
+// Accounting Scenario (replaces CaseStudyMaster)
 export interface CaseStudyMaster {
     name: string;
     aqaUnitMapping: string[];
-    geographicContext: string;
+    businessContext: string;
     keyConcepts: string[];
     criticalDetailExample: string;
     levels: UserLevel[];
 }
 
+// Accounting Scenario Location (replaces geographic CaseStudyLocation)
 export interface CaseStudyLocation {
     name: string;
     topic: string;
-    geography: 'Physical Geography' | 'Human Geography';
+    category: 'Financial Accounting' | 'Management Accounting';
     lat: number;
     lng: number;
     details: string;
@@ -221,7 +223,8 @@ export interface MultipleChoiceQuestion {
     id: string;
     question: string;
     options: string[];
-    correctAnswer: string;
+    correctAnswer: number; // Index of the correct option
+    explanation?: string;
     topic: string;
     levels: UserLevel[];
 }
@@ -250,7 +253,8 @@ export interface CaseStudyQuizQuestion {
     explanation: string;
 }
 
-export interface GeographyCareer {
+// Accounting Career
+export interface AccountingCareer {
     title: string;
     description: string;
     salaryRange: string;
@@ -360,7 +364,7 @@ export interface VideoResource {
     videoId: string;
     level: UserLevel;
     topic?: string;
-    paper?: 'Paper 1' | 'Paper 2';
+    paper?: 'Paper 1' | 'Paper 2' | 'Paper 3';
 }
 
 export interface VideoQuizContent {
@@ -380,7 +384,7 @@ export interface ClassGroup {
     id: string;
     name: string;
     studentIds: string[];
-    yearGroup?: string; // '10', '11', '12', '13'
+    yearGroup?: string; // '12', '13'
     isLessonMode?: boolean;
 }
 
@@ -417,7 +421,7 @@ export interface MockConfig {
     title: string;
     isActive: boolean;
     level: UserLevel;
-    yearGroups?: string[]; // Target year groups e.g. ['11']
+    yearGroups?: string[]; // Target year groups e.g. ['12', '13']
     exams: MockExam[];
     topics: string[]; // List of all topics covered in this mock series
     createdAt: string;
@@ -442,7 +446,7 @@ export interface TeacherAssessment {
 export interface GradeProfile {
     paper1: string;
     paper2: string;
-    nea: string;
+    paper3: string;
     overall: string;
     target: string;
 }
@@ -450,7 +454,7 @@ export interface GradeProfile {
 export interface WalkingTalkingSession {
     id: string;
     userId: string;
-    structureId: string; // "GCSE-Paper1"
+    structureId: string;
     startTime: string;
     currentQuestionIndex: number;
     questions: {

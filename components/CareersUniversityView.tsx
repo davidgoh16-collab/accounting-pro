@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { GeographyCareer, UniversityCourseInfo, TransferableSkill, CVSuggestions, JobOpportunity } from '../types';
+import { AccountingCareer, UniversityCourseInfo, TransferableSkill, CVSuggestions, JobOpportunity } from '../types';
 import { generateCareerInfo, generateUniversityCourseInfo, generateTransferableSkillInfo, generateCVSuggestions, generateTopUKUniversityInfo, generateLocalOpportunities } from '../services/geminiService';
 import HubLayout from './HubLayout';
 
@@ -8,17 +8,17 @@ interface CareersUniversityViewProps {
 }
 
 const CAREER_CATEGORIES = [
-    { name: 'Environmental & Sustainability', icon: '🌳' },
-    { name: 'GIS & Data Science', icon: '🛰️' },
-    { name: 'Urban & Regional Planning', icon: '🏙️' },
-    { name: 'Physical Geography & Hazards', icon: '🌋' },
-    { name: 'Human & Economic Geography', icon: '📈' },
-    { name: 'Travel, Tourism & Culture', icon: '✈️' },
+    { name: 'Audit & Assurance', icon: '🔍' },
+    { name: 'Taxation & Compliance', icon: '📝' },
+    { name: 'Corporate Finance', icon: '🏢' },
+    { name: 'Management Accounting', icon: '📊' },
+    { name: 'Forensic Accounting', icon: '🕵️' },
+    { name: 'Public Sector Accounting', icon: '🏛️' },
 ];
 
 const TRANSFERABLE_SKILLS = [
-    'Quantitative Skills', 'Qualitative Analysis', 'GIS & Cartography', 'Fieldwork & Observation', 
-    'Problem Solving', 'Critical Thinking', 'Communication', 'Project Management'
+    'Financial Literacy', 'Analytical Thinking', 'Attention to Detail', 'Ethical Judgment', 
+    'Regulatory Compliance', 'Data Interpretation', 'Business Acumen', 'IT Proficiency (Excel)'
 ];
 
 type ActiveTab = 'careers' | 'university' | 'local_opportunities' | 'skills' | 'cv_builder';
@@ -95,24 +95,24 @@ const SkillModal: React.FC<{ skill: string; onClose: () => void }> = ({ skill, o
 const CareersExplorer: React.FC = () => {
     const featuredLinks = [
         {
-            title: "Environment Agency Apprenticeships",
-            url: "https://environmentagencycareers.co.uk/early-careers/apprenticeships/?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
-            description: "Entry-level roles in environmental protection."
+            title: "ICAEW Apprenticeships",
+            url: "https://www.icaew.com/learning-and-development/apprenticeships",
+            description: "Explore paths to becoming a Chartered Accountant."
         },
         {
-            title: "Royal Geographical Society (RGS)",
-            url: "https://www.rgs.org/choose-geography/apprenticeships?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
-            description: "How geography skills apply to apprenticeships."
+            title: "ACCA Careers",
+            url: "https://jobs.accaglobal.com/",
+            description: "Find global opportunities in professional accountancy."
         },
         {
-            title: "Gov.uk Apprenticeship Search",
-            url: "https://findapprenticeshiptraining.apprenticeships.education.gov.uk/courses/254?classId=62899a28-2929-4e2c-ba1e-903f633a7f33",
-            description: "Search for specific training courses near you."
+            title: "CIMA Student Careers",
+            url: "https://www.cimaglobal.com/Careers/",
+            description: "Kickstart your career in management accounting."
         }
     ];
 
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [careers, setCareers] = useState<GeographyCareer[]>([]);
+    const [careers, setCareers] = useState<AccountingCareer[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -229,7 +229,7 @@ const LocalOpportunities: React.FC = () => {
 
     return (
         <div>
-            <p className="text-stone-600 mb-6">Find geography-related apprenticeships and job opportunities near you.</p>
+            <p className="text-stone-600 mb-6">Find accounting-related apprenticeships and job opportunities near you.</p>
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-3 mb-6 p-4 bg-white/50 backdrop-blur-sm border rounded-2xl">
                  <div className="flex-grow w-full md:w-auto space-y-2 md:space-y-0 md:flex md:gap-3">
                     <input
@@ -361,7 +361,7 @@ const UniversityFinder: React.FC = () => {
                         type="text"
                         value={interests}
                         onChange={e => setInterests(e.target.value)}
-                        placeholder="e.g., climate change, urban planning..."
+                        placeholder="e.g., accounting, finance, audit..."
                         className="flex-grow w-full px-4 py-2 text-base bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                     />
                     <input
@@ -417,7 +417,7 @@ const SkillsSpotlight: React.FC = () => {
     return (
         <div>
             {selectedSkill && <SkillModal skill={selectedSkill} onClose={() => setSelectedSkill(null)} />}
-            <p className="text-stone-600 mb-6">A-Level Geography equips you with a powerful set of transferable skills. Click on a skill to learn more about how you develop it and where it can take you.</p>
+            <p className="text-stone-600 mb-6">A-Level Accounting equips you with a powerful set of transferable skills. Click on a skill to learn more about how you develop it and where it can take you.</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {TRANSFERABLE_SKILLS.map(skill => (
                     <button
@@ -456,13 +456,13 @@ const CVBuilder: React.FC = () => {
 
     return (
         <div>
-            <p className="text-stone-600 mb-4">Enter a job title you're interested in to get tailored CV suggestions based on your A-Level Geography skills.</p>
+            <p className="text-stone-600 mb-4">Enter a job title you're interested in to get tailored CV suggestions based on your A-Level Accounting skills.</p>
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-3 mb-6 p-4 bg-white/50 backdrop-blur-sm border rounded-2xl">
                 <input
                     type="text"
                     value={jobTitle}
                     onChange={e => setJobTitle(e.target.value)}
-                    placeholder="e.g., Environmental Consultant, GIS Analyst..."
+                    placeholder="e.g., Junior Accountant, Audit Assistant..."
                     className="flex-grow w-full px-4 py-2 text-base bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                 />
                 <button type="submit" disabled={isLoading || !jobTitle.trim()} className="w-full sm:w-auto px-6 py-2 bg-rose-500 text-white font-bold rounded-lg hover:bg-rose-600 transition disabled:bg-stone-400">
@@ -515,7 +515,7 @@ const CareersUniversityView: React.FC<CareersUniversityViewProps> = ({ onBack })
     return (
         <HubLayout
             title="Careers & University"
-            subtitle="Explore where your geography qualification can take you."
+            subtitle="Explore where your accounting qualification can take you."
             gradient="bg-gradient-to-r from-rose-500 to-red-600"
             onBack={onBack}
         >

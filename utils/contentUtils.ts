@@ -7,7 +7,7 @@ export const getSpecContext = (level: UserLevel): string => {
     if (level === 'A-Level') topics = ALEVEL_SPEC_TOPICS;
     if (level === 'IGCSE') topics = IGCSE_SPEC_TOPICS;
 
-    const specName = level === 'IGCSE' ? 'Edexcel IGCSE Geography' : `${level} Geography (AQA)`;
+    const specName = level === 'IGCSE' ? 'Accounting' : `${level} Accounting (AQA)`;
     let context = `The user is studying ${specName}. The valid topics and sub-topics are:\n`;
 
     Object.entries(topics).forEach(([unit, subTopics]) => {

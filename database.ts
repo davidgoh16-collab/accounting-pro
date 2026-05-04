@@ -1,153 +1,622 @@
 
 import { Question, CaseStudyMaster } from './types';
 
-// This file now contains a small sample of questions to be used as examples for the AI generator.
+// AQA A-Level Accounting 7127 — Sample Questions for AI Generator
 export const ALL_QUESTIONS: Question[] = [
   {
-    id: 'q-2024-p1-01-1',
+    id: 'q-acc-p1-01-1',
     examYear: 2024,
     questionNumber: '01.1',
-    unit: 'Water and Carbon Cycles',
-    title: 'Human Impact on Water Cycle',
-    prompt: 'Outline how human factors impact upon the water cycle.',
+    unit: 'The Double Entry Model',
+    title: 'Books of Prime Entry',
+    prompt: 'Explain the purpose of books of prime entry and identify three examples used in a typical business.',
     marks: 4,
     ao: { ao1: 4, ao2: 0, ao3: 0 },
     caseStudy: {
-      title: 'Stimulus / Context',
-      content: 'No specific stimulus provided. Your answer should draw on your own knowledge.'
+      title: 'Context',
+      content: 'No specific stimulus provided. Your answer should draw on your own knowledge of double entry bookkeeping.'
     },
     markScheme: {
       title: 'AQA Mark Scheme: Notes for answers (AO1)',
       content: `Point marked. Allow 1 mark per valid point with extra mark(s) for developed points (d).
 For example:
-- Deforestation / land clearance will typically reduce transpiration (depending on how the land use changes) (1). Some may point to increased runoff due to the lack of interception (1). This may lead to increased likelihood of flooding (1) (d).
-- Infiltration / percolation rates will also be reduced if natural vegetation is cleared (1). This is as a result of soil compaction (1) (d).
-- Global warming may increase the amount of precipitation in the atmosphere leading to even more intense downpours (1).
-- Global warming may also lead to desertification reducing precipitation even further from already low rates in those affected parts of the world (1).
-- Other human activity such as dam building will have a clear role in disrupting the discharge of a river, creating flooded river valleys as human-made lakes form (1).
-- Effects of urbanisation mean there is less infiltration due to impermeable surfaces (1).
-Max 3 for only one factor. Max 1 for a list of factors without any development. The notes for answers are not exhaustive. Credit any valid points.`
+- Books of prime entry are the first books where transactions are recorded before being posted to the ledger accounts (1).
+- The sales day book records credit sales (1).
+- The purchases day book records credit purchases (1).
+- The cash book records all receipts and payments (1). It may also serve as a ledger account (1)(d).
+- The general journal records non-routine transactions such as corrections and year-end adjustments (1).
+Max 3 for listing without development. Credit any valid points.`
     },
     level: 'A-Level'
   },
   {
-    id: 'q-2024-p1-01-2',
+    id: 'q-acc-p1-01-2',
     examYear: 2024,
     questionNumber: '01.2',
-    unit: 'Water and Carbon Cycles',
-    title: 'Analysis of Lake and River Temperatures',
-    prompt: 'Analyse the data shown in Figure 1a and Figure 1b.',
-    marks: 6,
-    ao: { ao1: 0, ao2: 0, ao3: 6 },
+    unit: 'Verification of Accounting Records',
+    title: 'Bank Reconciliation Statement',
+    prompt: 'Prepare a bank reconciliation statement as at 31 March from the information provided in Figure 1.',
+    marks: 8,
+    ao: { ao1: 2, ao2: 6, ao3: 0 },
     figures: [
-        { name: 'Figure 1a: Change in lake and river surface water temperature by global distribution between 1970 and 2010', url: 'https://storage.googleapis.com/aqa-geography-stimulus-figures/2024-p1-fig1a.png' },
-        { name: 'Figure 1b: Change in lake and surface water temperature by latitude between 1970 and 2010', url: 'https://storage.googleapis.com/aqa-geography-stimulus-figures/2024-p1-fig1b.png' }
+      { name: 'Figure 1: Cash book and bank statement extracts for March', url: '' }
     ],
     caseStudy: {
-      title: 'Stimulus: Figures 1a and 1b',
-      content: "Figure 1a shows a world map of temperature changes. Figure 1b shows a scatter plot of temperature changes by latitude."
+      title: 'Stimulus: Figure 1',
+      content: 'Figure 1 shows the cash book balance of £3,450 (debit) and a bank statement balance of £4,120 (credit). Unpresented cheques total £890 and outstanding lodgements total £220.'
     },
     markScheme: {
-      title: 'AQA Mark Scheme: Notes for answers (AO3)',
-      content: `Level 2 (4–6 marks): AO3 - Clear analysis of the quantitative evidence provided, which makes appropriate use of data in support. Clear connection(s) between different aspects of the data and evidence.
-Level 1 (1–3 marks): AO3 – Basic analysis of the quantitative evidence provided, which makes limited use of data and evidence in support. Basic connection(s) between different aspects of the data and evidence.
-Indicative Content:
-- Between 40–60° north there appears to be a substantial increase in temperature with extremes approaching perhaps 1.25 °C increase.
-- Equally there is a significant anomaly in the data at around 45º north with a 0.75 °C decrease in temperature.
-- It is important to note that there are a substantial number of lakes experiencing minimal change across latitudes.
-- There appears to be a concentration of lakes experiencing more extreme temperature variation in northern and eastern Europe.
-- The data within the dataset is also significant at -0.75 to +1.25 ie a 2 °C variation.
-- Data may be affected by number of recording stations across different parts of the globe ie more data in the northern hemisphere almost certainly due to there being more lakes and therefore recording stations.
-Credit any other valid analysis.`
+      title: 'AQA Mark Scheme: Notes for answers (AO1 + AO2)',
+      content: `AO1: Knowledge of bank reconciliation format and purpose.
+AO2: Accurate application of figures.
+Updated cash book balance: Start with cash book balance, adjust for items on bank statement not in cash book.
+Bank reconciliation statement:
+- Balance per bank statement: £4,120
+- Add: Outstanding lodgements: £220
+- Less: Unpresented cheques: (£890)
+- Balance per updated cash book: £3,450
+Award marks for correct format (2), correct adjustments (4), correct final balance (2).`
     },
     level: 'A-Level'
   },
   {
-    id: 'q-2024-p1-01-4',
+    id: 'q-acc-p1-02-1',
     examYear: 2024,
-    questionNumber: '01.4',
-    unit: 'Water and Carbon Cycles',
-    title: 'Mitigating Climate Change in Tropical Rainforests',
-    prompt: 'With reference to a tropical rainforest that you have studied, evaluate attempts to mitigate the impacts of climate change.',
-    marks: 20,
-    ao: { ao1: 10, ao2: 10, ao3: 0 },
-    caseStudy: {
-      title: 'Stimulus / Context',
-      content: 'No specific stimulus provided. Your answer must be based on a tropical rainforest case study you have studied (e.g., Amazonia, Borneo, Malaysia).'
-    },
-    markScheme: {
-      title: 'AQA Mark Scheme: Notes for answers',
-      content: `AO1: Knowledge and understanding of a tropical rainforest case study. Awareness of attempts to mitigate the impact of climate change.
-AO2: Application of knowledge and understanding to evaluate measures to mitigate the impact of climate change.
-Indicative Content:
-- Expect reference to major forested areas such as Amazonia, Borneo, Malaysia or the Congo Basin.
-- Most answers will focus on strategies such as reforestation, conservation measures, sustainable farming practices and sustainable development of the rainforest.
-- For Amazonia, answers might refer to: Farming co-operatives (e.g., RECA), Conservation strategies (e.g., Central Amazon Conservation Complex), and Reforestation schemes (e.g., Brazil's Paris Agreement target).
-- In evaluating success, expect reference to challenges posed by illegal logging and political policy. In Brazil for example, there has been a 50% increase in deforestation as a direct result of government policy.`
-    },
-    level: 'A-Level'
-  },
-  // GCSE Example
-  {
-    id: 'q-gcse-ex-1',
-    examYear: 2024,
-    questionNumber: '01.3',
-    unit: 'The Challenge of Natural Hazards',
-    title: 'Effects of Tropical Storms',
-    prompt: 'Use a case study to assess the importance of primary and secondary effects of a tropical storm.',
-    marks: 9,
-    ao: { ao1: 3, ao2: 3, ao3: 3 },
+    questionNumber: '02.1',
+    unit: 'Accounting Concepts',
+    title: 'Depreciation Methods',
+    prompt: 'A business purchases a machine for £40,000 with an estimated useful life of 5 years and a residual value of £5,000. Calculate the annual depreciation charge using (a) the straight-line method and (b) the reducing balance method at 30%.',
+    marks: 6,
+    ao: { ao1: 2, ao2: 4, ao3: 0 },
     caseStudy: {
       title: 'Context',
-      content: 'Use a case study of your choice (e.g., Typhoon Haiyan).'
+      content: 'No stimulus. Apply your knowledge of depreciation methods to the data given in the question.'
     },
     markScheme: {
-      title: 'Mark Scheme',
-      content: 'Level 3 (7-9 marks): Detailed and specific knowledge of a tropical storm. Assessment of the relative importance of primary and secondary effects is sound.',
+      title: 'AQA Mark Scheme',
+      content: `(a) Straight-line: (£40,000 – £5,000) / 5 = £7,000 per annum (3 marks: formula 1, substitution 1, answer 1)
+(b) Reducing balance at 30%:
+Year 1: £40,000 × 30% = £12,000 (NBV £28,000)
+Year 2: £28,000 × 30% = £8,400 (NBV £19,600)
+(3 marks: method 1, Year 1 correct 1, Year 2 correct 1)`
     },
-    level: 'GCSE'
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p1-03-1',
+    examYear: 2024,
+    questionNumber: '03.1',
+    unit: 'Financial Statements of Sole Traders',
+    title: 'Income Statement Preparation',
+    prompt: 'From the trial balance extract provided in Figure 2, prepare an income statement for the year ended 31 December 2023 for J. Smith, a sole trader.',
+    marks: 15,
+    ao: { ao1: 5, ao2: 10, ao3: 0 },
+    figures: [
+      { name: 'Figure 2: Trial balance extract for J. Smith as at 31 December 2023', url: '' }
+    ],
+    caseStudy: {
+      title: 'Stimulus: Figure 2',
+      content: 'Revenue £180,000; Purchases £95,000; Opening inventory £12,000; Closing inventory £14,000; Wages £22,000; Rent £8,000; Insurance £3,600 (includes £600 prepayment); Irrecoverable debts £1,200.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `Income Statement for year ended 31 Dec 2023:
+Revenue: £180,000
+Less Cost of Sales: Opening inventory £12,000 + Purchases £95,000 – Closing inventory £14,000 = £93,000
+Gross Profit: £87,000
+Less Expenses: Wages £22,000 + Rent £8,000 + Insurance £3,000 (adjusted) + Irrecoverable debts £1,200 = £34,200
+Profit for the year: £52,800
+Award marks for: correct format (3), cost of sales (4), gross profit (1), adjusted expenses (5), net profit (2).`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p1-04-1',
+    examYear: 2024,
+    questionNumber: '04.1',
+    unit: 'Analysis and Interpretation of Financial Information',
+    title: 'Ratio Analysis and Evaluation',
+    prompt: 'Using the financial statements provided in Figure 3, calculate the gross profit margin, ROCE, and current ratio for both 2022 and 2023. Evaluate the financial performance of the business over the two-year period.',
+    marks: 20,
+    ao: { ao1: 4, ao2: 8, ao3: 8 },
+    figures: [
+      { name: 'Figure 3: Summarised financial statements for Thornton Ltd, 2022 and 2023', url: '' }
+    ],
+    caseStudy: {
+      title: 'Stimulus: Figure 3',
+      content: '2023: Revenue £500,000, Cost of Sales £300,000, Operating Profit £80,000, Current Assets £120,000, Current Liabilities £90,000, Capital Employed £400,000. 2022: Revenue £450,000, Cost of Sales £260,000, Operating Profit £85,000, Current Assets £100,000, Current Liabilities £60,000, Capital Employed £380,000.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `AO1: Knowledge of ratio formulae and their significance.
+AO2: Correct calculation of ratios for both years.
+AO3: Evaluation of performance trends with reasoned judgement.
+GPM 2023: 40%, 2022: 42.2% — slight decline.
+ROCE 2023: 20%, 2022: 22.4% — declining return.
+Current ratio 2023: 1.33:1, 2022: 1.67:1 — deteriorating liquidity.
+Level 3 (16-20): Detailed analysis with inter-year comparison, identification of trends, and balanced evaluation considering limitations of ratio analysis.
+Level 2 (11-15): Sound analysis with correct ratios and some comparison.
+Level 1 (1-10): Basic calculations with limited analysis.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p2-01-1',
+    examYear: 2024,
+    questionNumber: '01.1',
+    unit: 'Marginal Costing',
+    title: 'Break-Even Analysis',
+    prompt: 'A business sells a product at £25 per unit. Variable costs are £15 per unit and fixed costs total £40,000 per annum. Calculate (a) the contribution per unit, (b) the break-even point in units, and (c) the margin of safety if actual sales are 5,500 units.',
+    marks: 8,
+    ao: { ao1: 2, ao2: 6, ao3: 0 },
+    caseStudy: {
+      title: 'Context',
+      content: 'No specific stimulus. Apply marginal costing principles to the data provided.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `(a) Contribution per unit = £25 – £15 = £10 (2 marks)
+(b) Break-even = £40,000 / £10 = 4,000 units (3 marks: formula 1, substitution 1, answer 1)
+(c) Margin of safety = 5,500 – 4,000 = 1,500 units or 27.3% (3 marks)`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p2-02-1',
+    examYear: 2024,
+    questionNumber: '02.1',
+    unit: 'Standard Costing and Variance Analysis',
+    title: 'Material and Labour Variances',
+    prompt: 'Calculate the material price variance, material usage variance, labour rate variance, and labour efficiency variance from the data provided in Figure 4. State whether each variance is favourable or adverse.',
+    marks: 12,
+    ao: { ao1: 4, ao2: 8, ao3: 0 },
+    figures: [
+      { name: 'Figure 4: Standard and actual cost data for Product X', url: '' }
+    ],
+    caseStudy: {
+      title: 'Stimulus: Figure 4',
+      content: 'Standard: 5 kg at £3/kg, 2 hours at £12/hour. Actual (1,000 units): 5,200 kg at £3.20/kg, 1,900 hours at £12.50/hour.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `Material price variance: (£3.00 – £3.20) × 5,200 = £1,040 Adverse (3 marks)
+Material usage variance: (5,000 – 5,200) × £3.00 = £600 Adverse (3 marks)
+Labour rate variance: (£12.00 – £12.50) × 1,900 = £950 Adverse (3 marks)
+Labour efficiency variance: (2,000 – 1,900) × £12.00 = £1,200 Favourable (3 marks)
+Award 1 mark for correct formula, 1 for correct calculation, 1 for correct F/A identification per variance.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p2-03-1',
+    examYear: 2024,
+    questionNumber: '03.1',
+    unit: 'Capital Investment Appraisal',
+    title: 'NPV and Payback Period',
+    prompt: 'A business is considering an investment of £100,000. The expected net cash flows are: Year 1: £30,000, Year 2: £35,000, Year 3: £40,000, Year 4: £25,000, Year 5: £20,000. The cost of capital is 10%. Calculate (a) the payback period, (b) the net present value. Advise whether the business should proceed with the investment.',
+    marks: 15,
+    ao: { ao1: 3, ao2: 6, ao3: 6 },
+    caseStudy: {
+      title: 'Context',
+      content: 'Discount factors at 10%: Year 1: 0.909, Year 2: 0.826, Year 3: 0.751, Year 4: 0.683, Year 5: 0.621.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `(a) Payback: Cumulative: Y1 £30k, Y2 £65k, Y3 £105k. Payback = 2 years + (£35,000/£40,000 × 12) = 2 years 10.5 months (5 marks)
+(b) NPV: £27,270 + £28,910 + £30,040 + £17,075 + £12,420 = £115,715 – £100,000 = £15,715 (positive) (5 marks)
+(c) Advice: NPV is positive (£15,715), indicating the project earns more than the 10% cost of capital. Payback is under 3 years. Both methods support the investment. However, non-financial factors should be considered. (5 marks)
+Level 2 (4-5): Reasoned advice referencing both methods with consideration of limitations.
+Level 1 (1-3): Basic advice referencing one method.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p3-01-1',
+    examYear: 2024,
+    questionNumber: '01.1',
+    unit: 'Accounting Standards (IAS/IFRS)',
+    title: 'Purpose of Accounting Standards',
+    prompt: 'Explain why International Accounting Standards (IAS) are important for the preparation of financial statements.',
+    marks: 6,
+    ao: { ao1: 4, ao2: 2, ao3: 0 },
+    caseStudy: {
+      title: 'Context',
+      content: 'No specific stimulus provided. Draw on your knowledge of IAS/IFRS.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `Point marked with development.
+- IAS provide a consistent framework for preparing financial statements, ensuring comparability between businesses (1)(d).
+- They help ensure that financial statements give a true and fair view (1).
+- They reduce the scope for creative accounting (1).
+- They provide guidance on specific accounting treatments (e.g., IAS 16 on depreciation, IAS 2 on inventory valuation) (1)(d).
+- They are particularly important for multinational companies where investors need to compare accounts across borders (1)(d).
+- They enhance the credibility and reliability of financial information (1).
+Max 4 for listing without development.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-acc-p3-02-1',
+    examYear: 2024,
+    questionNumber: '02.1',
+    unit: 'Ethics for Accountants',
+    title: 'Ethical Dilemma',
+    prompt: 'A junior accountant discovers that their manager has been overstating revenue by including sales from the next financial period. Discuss the ethical issues involved and advise what actions the accountant should take.',
+    marks: 15,
+    ao: { ao1: 5, ao2: 5, ao3: 5 },
+    caseStudy: {
+      title: 'Context',
+      content: 'The business is a private limited company seeking bank finance. The manager has asked the accountant not to raise the issue.'
+    },
+    markScheme: {
+      title: 'AQA Mark Scheme',
+      content: `AO1: Knowledge of ethical principles (integrity, objectivity, professional behaviour, confidentiality).
+AO2: Application to the specific scenario.
+AO3: Evaluation of ethical issues and reasoned advice.
+Level 3 (11-15): Thorough discussion of ethical principles, clear application to scenario, well-reasoned advice considering professional obligations and potential consequences.
+Level 2 (6-10): Sound discussion with some application and partial advice.
+Level 1 (1-5): Basic identification of ethical issues with limited application.
+Key points: Breach of accruals concept; overstating revenue misleads stakeholders; integrity requires the accountant to report; conflict between loyalty to employer and professional duty; should escalate internally first, then consider external reporting.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-cox-01',
+    examYear: 2021,
+    questionNumber: 'Cox.01',
+    unit: 'The Role of the Accountant in Business',
+    title: 'Accounting Records and Stakeholders',
+    prompt: 'Al Porter has started a new business which is financed by £20,000 from his personal savings and a bank loan of £10,000.\n\n(a) Explain two reasons why Al should keep accounting records. (4 marks)\n(b) Identify three external stakeholders in Al\'s business. State the interest they will have in the accounting records. (6 marks)',
+    marks: 10,
+    ao: { ao1: 6, ao2: 4, ao3: 0 },
+    caseStudy: {
+      title: 'Business Context: Al Porter',
+      content: 'Al Porter is a new business owner. His startup capital consists of £20,000 personal savings and a £10,000 bank loan.'
+    },
+    markScheme: {
+      title: 'Mark Scheme (Cox 2021)',
+      content: `(a) Reasons (2 marks each, max 4):
+1. To monitor performance (profit/loss).
+2. To fulfill legal/tax obligations (HMRC).
+3. To provide information for decision making.
+4. To provide evidence for bank/lenders.
+
+(b) Stakeholders (2 marks each, max 6):
+1. Bank/Lender: To assess ability to repay the loan and interest.
+2. HMRC: To calculate the correct amount of tax due.
+3. Suppliers: To assess creditworthiness before offering trade credit.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-cox-02',
+    examYear: 2021,
+    questionNumber: 'Cox.02',
+    unit: 'The Double Entry Model',
+    title: 'Source Documents and Sales Ledger',
+    prompt: '(a) Identify the source document used by Alcaria to record each of the following transactions (3 marks):\n1. Alcaria sold goods to Sam Brass for £275.\n2. Sam Brass returned goods valued at £84 to Alcaria.\n3. Sam Brass sent a cheque, after deducting a cash discount of £18, to clear the balance.\n\n(b) Complete the account of Sam Brass in the books of Alcaria for the month of May 20-4. (9 marks)',
+    marks: 12,
+    ao: { ao1: 3, ao2: 9, ao3: 0 },
+    caseStudy: {
+      title: 'Business Context: Alcaria',
+      content: 'At 1 May 20-4, Sam Brass owed Alcaria £745.\n7 May: Sold goods to Sam Brass for £275.\n16 May: Sam Brass returned goods valued at £84.\n24 May: Sam Brass sent a cheque, after deducting a cash discount of £18, to clear the balance owing at 1 May.'
+    },
+    markScheme: {
+      title: 'Mark Scheme (Cox 2021)',
+      content: `(a) Source Documents:
+1. Sales Invoice
+2. Credit Note (Issued)
+3. Cheque counterfoil / Remittance advice
+
+(b) Sam Brass Account:
+Dr: 1 May Balance b/d £745; 7 May Sales £275. Total Dr: £1,020
+Cr: 16 May Sales Returns £84; 24 May Bank £727 (£745-£18); 24 May Discount Allowed £18. Total Cr so far: £829.
+31 May Balance c/d £191. (The £727+£18 clears the opening £745 balance).`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-cox-03',
+    examYear: 2021,
+    questionNumber: 'Cox.03',
+    unit: 'The Double Entry Model',
+    title: 'Source Documents and Purchases Ledger',
+    prompt: '(a) Identify source documents and accounts for (6 marks):\n1. Payment of wages by cheque.\n2. Return of goods to a credit supplier.\n\n(b) Complete the purchases ledger account of Fashion Frocks in the books of Hayley Ortez for June 20-1. Balance the account at 30 June. (9 marks)',
+    marks: 15,
+    ao: { ao1: 6, ao2: 9, ao3: 0 },
+    caseStudy: {
+      title: 'Business Context: Hayley Ortez',
+      content: '1 June: Balance b/f £1,275.\n8 June: Credit purchases £950.\n12 June: Bank transfer £1,205; Discount received £70.\n18 June: Returns £150.\n23 June: Credit purchases £650.'
+    },
+    markScheme: {
+      title: 'Mark Scheme (Cox 2021)',
+      content: `(a) 1. Source: Cheque counterfoil. Dr: Wages, Cr: Bank.
+2. Source: Debit Note / Credit Note (Received). Dr: Supplier, Cr: Purchases Returns.
+
+(b) Fashion Frocks Account:
+Cr: 1 June Bal b/f £1,275; 8 June Purchases £950; 23 June Purchases £650. Total Cr: £2,875.
+Dr: 12 June Bank £1,205; 12 June Discount Received £70; 18 June Purchases Returns £150. Total Dr: £1,425.
+30 June Balance c/d £1,450.`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-cox-04',
+    examYear: 2021,
+    questionNumber: 'Cox.04',
+    unit: 'The Double Entry Model',
+    title: 'Transaction Analysis and Double Entry',
+    prompt: '(a) Identify the source document for (5 marks):\n1. Credit purchases of shoes.\n2. Returns to manufacturer.\n3. Cash/cheques deposited into bank.\n4. Payment to supplier by cheque.\n5. Credit sales of trainers.\n\n(b) Identify accounts to be debited and credited for (8 marks):\n1. Shop till purchased on credit for £1,000.\n2. £5,000 paid into bank from personal savings.\n3. £1,200 paid to Shoe Traders (supplier).\n4. Shop rent of £750 paid by bank transfer.',
+    marks: 13,
+    ao: { ao1: 5, ao2: 8, ao3: 0 },
+    caseStudy: {
+      title: 'Business Context: Michel Cavares',
+      content: 'Michel Cavares owns a shoe business and uses a manual accounting system without control accounts.'
+    },
+    markScheme: {
+      title: 'Mark Scheme (Cox 2021)',
+      content: `(a) Source Documents:
+1. Purchase Invoice
+2. Debit Note
+3. Paying-in slip
+4. Cheque counterfoil
+5. Sales Invoice
+
+(b) Double Entry:
+1. Dr: Equipment (Shop Till), Cr: AJ Supplies
+2. Dr: Bank, Cr: Capital
+3. Dr: Shoe Traders, Cr: Bank
+4. Dr: Rent, Cr: Bank`
+    },
+    level: 'A-Level'
+  },
+  {
+    id: 'q-cox-05',
+    examYear: 2021,
+    questionNumber: 'Cox.05',
+    unit: 'The Double Entry Model',
+    title: 'Trial Balance Evaluation',
+    prompt: 'Assess the usefulness of the trial balance as a means of checking the accuracy of the ledgers.',
+    marks: 6,
+    ao: { ao1: 2, ao2: 0, ao3: 4 },
+    caseStudy: {
+      title: 'Accounting Concept',
+      content: 'A trial balance is a list of ledger balances at a point in time.'
+    },
+    markScheme: {
+      title: 'Mark Scheme (Cox 2021)',
+      content: `Arguments for usefulness:
+- Checks arithmetic accuracy of double entry.
+- Errors of omission/commission/principle do not prevent balancing but can be highlighted if totals differ.
+
+Limitations (not useful for):
+- Error of omission (transaction missing).
+- Error of commission (wrong account, same category).
+- Error of principle (wrong category, e.g., asset vs expense).
+- Error of original entry (wrong amount in both accounts).
+- Compensating errors.
+- Reversal of entries.`
+    },
+    level: 'A-Level'
   }
 ];
 
+// AQA A-Level Accounting — Business Scenario Case Studies
 export const MASTER_CASE_STUDIES: CaseStudyMaster[] = [
-    { name: 'Amazon Basin/Amazonia', aqaUnitMapping: ['Water and Carbon Cycles'], geographicContext: 'Tropical Rainforest', keyConcepts: ['Stores and transfers', 'rainfall', 'evapotranspiration'], criticalDetailExample: 'Illustrates water and carbon cycles, covering stores, transfers, rainfall, and evapotranspiration.', levels: ['A-Level'] },
-    { name: 'Amsterdam', aqaUnitMapping: ['Changing Places'], geographicContext: 'Urban Area (Europe)', keyConcepts: ['Rebranding', 'over-tourism'], criticalDetailExample: 'An example of successful city rebranding and the issue of over-tourism.', levels: ['A-Level'] },
-    { name: 'Apple Inc.', aqaUnitMapping: ['Global Systems and Global Governance'], geographicContext: 'Transnational Corporation (TNC)', keyConcepts: ['Global supply chain', 'spatial organisation', 'outsourcing', 'tax practices'], criticalDetailExample: 'A specified TNC case study, with its design hub in Silicon Valley, European HQ in Cork, Ireland, and outsourced manufacturing to Foxconn and Pegatron in China.', levels: ['A-Level'] },
-    { name: 'Australian Wildfires (2019/20)', aqaUnitMapping: ['Hazards'], geographicContext: 'Hazard Event', keyConcepts: ['Wildfires', 'hazard response'], criticalDetailExample: 'Used as a contemporary hazard event reference.', levels: ['A-Level'] },
-    { name: 'Banana Industry', aqaUnitMapping: ['Global Systems and Global Governance', 'Resource Security'], geographicContext: 'Global Trade', keyConcepts: ['World trade', 'food commodity', 'trade disputes'], criticalDetailExample: 'An example of world trade in a food commodity, involving production countries like Ecuador and trade disputes.', levels: ['A-Level'] },
-    { name: 'Bangladesh', aqaUnitMapping: ['Coastal Systems and Landscapes', 'Hazards'], geographicContext: 'LEDC Coastal Environment', keyConcepts: ['Sea level rise', 'coastal vulnerability'], criticalDetailExample: 'Cited in relation to extreme vulnerability to sea level rise and coastal change.', levels: ['A-Level'] },
-    { name: 'Bhote Koshi River in Nepal', aqaUnitMapping: ['Hazards'], geographicContext: 'Glacial Environment', keyConcepts: ['Glacial Lake Outburst Flood (GLOF)'], criticalDetailExample: 'Referenced regarding a Glacial Lake Outburst Flood (GLOF) event in August 1995.', levels: ['A-Level'] },
-    { name: 'Bosley Minn, Cheshire', aqaUnitMapping: ['Resource Security'], geographicContext: 'UK Rural Area', keyConcepts: ['Renewable energy', 'wind farm'], criticalDetailExample: 'Referenced for assessing the feasibility and impact of a proposed wind farm.', levels: ['A-Level'] },
-    { name: 'Bristol', aqaUnitMapping: ['Contemporary Urban Environments', 'Urban Issues and Challenges'], geographicContext: 'Urban Area (UK)', keyConcepts: ['Waste disposal', 'incineration', 'landfill', 'sustainability'], criticalDetailExample: 'An example of an urban area managing waste disposal using contrasting approaches, including incineration and landfill at Avonmouth. (GCSE: Sustainable City)', levels: ['A-Level', 'GCSE'] },
-    { name: 'Cheonggyecheon River, Seoul', aqaUnitMapping: ['Contemporary Urban Environments'], geographicContext: 'Urban Regeneration Project (Asia)', keyConcepts: ['River restoration', 'urban rebranding', 'sustainability'], criticalDetailExample: 'A case study of a major river restoration project in a dense urban catchment.', levels: ['A-Level'] },
-    { name: 'China', aqaUnitMapping: ['Global Systems and Global Governance', 'Changing Places'], geographicContext: 'Global Superpower', keyConcepts: ['Urban-rural inequalities', 'government controls', 'global manufacturing'], criticalDetailExample: 'Mentioned for urban-rural inequalities and its role as a major global manufacturer with trade flows to Sub-Saharan Africa.', levels: ['A-Level'] },
-    { name: 'Colorado Valley', aqaUnitMapping: ['Hazards', 'Resource Security'], geographicContext: 'Arid Environment', keyConcepts: ['Salinisation', 'irrigation'], criticalDetailExample: 'Cited in relation to salinisation caused by irrigation.', levels: ['A-Level'] },
-    { name: 'Docklands regeneration, London', aqaUnitMapping: ['Changing Places', 'Contemporary Urban Environments', 'Urban Issues and Challenges'], geographicContext: 'Urban Regeneration', keyConcepts: ['Policy impacts', 'regeneration'], criticalDetailExample: 'Used as an example of policy impacts on places, particularly from the Thatcher government era.', levels: ['A-Level', 'GCSE'] },
-    { name: 'Gili Trawangan, Indonesia', aqaUnitMapping: ['Hazards'], geographicContext: 'Tectonic Environment', keyConcepts: ['Seismic hazards', 'subduction'], criticalDetailExample: 'Cited for seismic hazards, situated on an island arc where the Indo-Australian Plate subducts the Eurasian Plate.', levels: ['A-Level'] },
-    { name: 'Lathom Solar Farm, West Lancashire', aqaUnitMapping: ['Resource Security'], geographicContext: 'UK Rural Area', keyConcepts: ['Renewable energy', 'solar farm'], criticalDetailExample: 'Referenced for assessing the impact of its construction.', levels: ['A-Level'] },
-    { name: 'Lympstone and Toxteth', aqaUnitMapping: ['Changing Places'], geographicContext: 'Contrasting UK Places', keyConcepts: ['Demographic comparison', 'socio-economic comparison'], criticalDetailExample: 'Used as a contrasting place study focused on demographic and socio-economic comparison.', levels: ['A-Level'] },
-    { name: 'Manchester’s Northern Quarter', aqaUnitMapping: ['Changing Places', 'Contemporary Urban Environments'], geographicContext: 'Urban Area (UK)', keyConcepts: ['Place identity', 'social economic impacts'], criticalDetailExample: 'Cited as a specific scale for investigating place identity and social economic impacts.', levels: ['A-Level'] },
-    { name: 'Medellín, Colombia', aqaUnitMapping: ['Changing Places', 'Contemporary Urban Environments'], geographicContext: 'Urban Regeneration (South America)', keyConcepts: ['Urban regeneration', 'social inequality', 'sustainable transport'], criticalDetailExample: 'A model for urban regeneration and sustainable city planning through investments in infrastructure and education.', levels: ['A-Level'] },
-    { name: 'Mumbai', aqaUnitMapping: ['Contemporary Urban Environments', 'Population and the Environment', 'Urban Issues and Challenges'], geographicContext: 'Megacity (LEDC)', keyConcepts: ['Poverty', 'migrant influx', 'slums'], criticalDetailExample: 'Referenced as an urban area showing high poverty levels and a migrant influx.', levels: ['A-Level', 'GCSE'] },
-    { name: 'Niger Delta, Nigeria', aqaUnitMapping: ['Resource Security', 'The Changing Economic World'], geographicContext: 'Energy Resource Location', keyConcepts: ['Oil production', 'natural gas', 'resource risk'], criticalDetailExample: 'Implicitly referenced in the context of energy resources where oil and natural gas production faces risks.', levels: ['A-Level', 'GCSE'] },
-    { name: 'Pevensey Bay', aqaUnitMapping: ['Coastal Systems and Landscapes'], geographicContext: 'UK Coastal Area', keyConcepts: ['Soft management', 'sustainable coastal defence'], criticalDetailExample: 'Cited as an example of a coastal area using a soft management approach for sustainable defence.', levels: ['A-Level'] },
-    { name: 'Philippines (The)', aqaUnitMapping: ['Hazards', 'The Challenge of Natural Hazards'], geographicContext: 'Multi-Hazardous Environment', keyConcepts: ['Typhoons', 'volcanic activity', 'earthquakes'], criticalDetailExample: 'Presented as a multi-hazardous environment, with events like Typhoon Haiyan (2013) and volcanic activity.', levels: ['A-Level', 'GCSE'] },
-    { name: 'Port Sunlight, the Wirral', aqaUnitMapping: ['Changing Places'], geographicContext: 'Model Village (UK)', keyConcepts: ['Paternalism', 'place-making', 'heritage'], criticalDetailExample: 'A model garden village shaped by the ideals of one man, William Hesketh Lever, demonstrating \'prosperity-sharing\' and place-making.', levels: ['A-Level'] },
-    { name: 'Puerto Rico', aqaUnitMapping: ['Population and the Environment', 'Hazards'], geographicContext: 'Hazard-Affected Area', keyConcepts: ['Out-migration', 'hurricane impact'], criticalDetailExample: 'Referenced regarding out-migration following the devastation caused by Hurricane Maria in 2017.', levels: ['A-Level'] },
-    { name: 'Sheffield (Eccleshall, Kelham Island and Neepsend)', aqaUnitMapping: ['Contemporary Urban Environments', 'Changing Places'], geographicContext: 'Urban Areas (UK)', keyConcepts: ['Urban resurgence', 'demographics', 'income'], criticalDetailExample: 'Cited as three specific areas to investigate urban resurgence and its effect on demographics and income.', levels: ['A-Level'] },
-    { name: 'Shimla, northern India', aqaUnitMapping: ['Resource Security'], geographicContext: 'Water Resource Location', keyConcepts: ['Water resources'], criticalDetailExample: 'Used as a specified place to study water resources.', levels: ['A-Level'] },
-    { name: 'Singapore', aqaUnitMapping: ['Global Systems and Global Governance'], geographicContext: 'Global Hub', keyConcepts: ['Global economy'], criticalDetailExample: 'Mentioned as a country that plays a large part in the global economy.', levels: ['A-Level'] },
-    { name: 'Southwold (Suffolk)', aqaUnitMapping: ['Changing Places', 'Coastal Systems and Landscapes'], geographicContext: 'UK Coastal Town', keyConcepts: ['High street change', 'house prices', 'coastal management'], criticalDetailExample: 'Used extensively for human and coastal NEA fieldwork, covering high street change and coastal management.', levels: ['A-Level'] },
-    { name: 'St. Michael’s on Wyre', aqaUnitMapping: ['Hazards', 'Water and Carbon Cycles'], geographicContext: 'UK Flood Location', keyConcepts: ['Flooding'], criticalDetailExample: 'Cited in the context of UK flooding.', levels: ['A-Level'] },
-    { name: 'Sub-Saharan Africa', aqaUnitMapping: ['Global Systems and Global Governance'], geographicContext: 'Global Region', keyConcepts: ['Trade flows'], criticalDetailExample: 'Referenced for trade flows, particularly with China.', levels: ['A-Level'] },
-    { name: 'The Sundarbans, Bangladesh', aqaUnitMapping: ['Coastal Systems and Landscapes'], geographicContext: 'LEDC Coastal Environment', keyConcepts: ['Coastal challenges', 'human responses'], criticalDetailExample: 'Referenced regarding challenges, opportunities, and evaluation of human responses in a coastal environment.', levels: ['A-Level'] },
-    { name: 'Tanzania', aqaUnitMapping: ['Population and the Environment'], geographicContext: 'LEDC', keyConcepts: ['Education', 'fertility rates'], criticalDetailExample: 'Referenced for knowledge related to education and fertility rates.', levels: ['A-Level'] },
-    { name: 'Torquay (Tormohun ward)', aqaUnitMapping: ['Changing Places'], geographicContext: 'Local Place (UK)', keyConcepts: ['History', 'demographic characteristics'], criticalDetailExample: 'Used as a specific local place study, describing its history and demographic characteristics.', levels: ['A-Level'] },
-    { name: 'World Trade Routes', aqaUnitMapping: ['Global Systems and Global Governance', 'Resource Security'], geographicContext: 'Global Chokepoints', keyConcepts: ['Energy resources', 'geopolitical risk', 'piracy'], criticalDetailExample: 'Movement of energy resources subject to risks, referencing the Straits of Hormuz and piracy off Somalia.', levels: ['A-Level'] },
-    { name: 'Rio de Janeiro', aqaUnitMapping: ['Urban Issues and Challenges'], geographicContext: 'NEE City (Brazil)', keyConcepts: ['Favelas', 'inequality', 'Olympic legacy'], criticalDetailExample: 'Focus on Rocinha favela improvements and the impact of hosting major sporting events.', levels: ['GCSE'] },
-    { name: 'Freiburg', aqaUnitMapping: ['Urban Issues and Challenges'], geographicContext: 'Sustainable City (Germany)', keyConcepts: ['Sustainability', 'green energy', 'waste recycling'], criticalDetailExample: 'Vauban district housing and solar energy initiatives.', levels: ['GCSE'] },
-    { name: 'Holderness Coast', aqaUnitMapping: ['Physical Landscapes in the UK'], geographicContext: 'UK Coastline', keyConcepts: ['Erosion', 'management', 'Mappleton'], criticalDetailExample: 'Fastest eroding coastline in Europe, protected by rock groynes at Mappleton.', levels: ['GCSE', 'A-Level'] },
-    { name: 'River Tees', aqaUnitMapping: ['Physical Landscapes in the UK'], geographicContext: 'UK River', keyConcepts: ['Landforms', 'High Force waterfall'], criticalDetailExample: 'Formation of High Force waterfall and meanders downstream.', levels: ['GCSE'] },
-    { name: 'Nigeria', aqaUnitMapping: ['The Changing Economic World'], geographicContext: 'NEE Country', keyConcepts: ['Development', 'TNCs', 'Aid'], criticalDetailExample: 'Shell Oil in the Niger Delta and the impact of aid on health.', levels: ['GCSE'] },
-    { name: 'Thar Desert', aqaUnitMapping: ['The Living World'], geographicContext: 'Hot Desert', keyConcepts: ['Development opportunities', 'challenges'], criticalDetailExample: 'Indira Gandhi Canal providing water for farming.', levels: ['GCSE'] },
+    { name: 'J. Smith Sole Trader', aqaUnitMapping: ['Financial Statements of Sole Traders', 'Accounting Concepts'], businessContext: 'Sole Trader', keyConcepts: ['Income statement', 'Statement of financial position', 'Accruals', 'Depreciation'], criticalDetailExample: 'Illustrates preparation of sole trader final accounts with adjustments for accruals, prepayments, and depreciation.', levels: ['A-Level'] },
+    { name: 'Thornton Ltd', aqaUnitMapping: ['Limited Company Accounts', 'Analysis and Interpretation of Financial Information'], businessContext: 'Private Limited Company', keyConcepts: ['Published accounts', 'Ratio analysis', 'Profitability', 'Liquidity'], criticalDetailExample: 'A medium-sized Ltd company used for ratio analysis comparison across two financial years.', levels: ['A-Level'] },
+    { name: 'Parker & Jones Partnership', aqaUnitMapping: ['Partnership Accounts'], businessContext: 'Partnership', keyConcepts: ['Appropriation account', 'Capital accounts', 'Goodwill', 'Admission of partner'], criticalDetailExample: 'Demonstrates partnership accounting including goodwill adjustments when a new partner is admitted.', levels: ['A-Level'] },
+    { name: 'GreenTech Manufacturing Ltd', aqaUnitMapping: ['Marginal Costing', 'Absorption and Activity Based Costing'], businessContext: 'Manufacturing Company', keyConcepts: ['Break-even', 'Contribution', 'Overhead absorption', 'Activity based costing'], criticalDetailExample: 'A manufacturing company used to contrast marginal and absorption costing approaches for decision-making.', levels: ['A-Level'] },
+    { name: 'Northern Rail Engineering', aqaUnitMapping: ['Standard Costing and Variance Analysis', 'Budgeting'], businessContext: 'Engineering Firm', keyConcepts: ['Standard costs', 'Material variances', 'Labour variances', 'Budgetary control'], criticalDetailExample: 'Illustrates variance analysis with material price/usage and labour rate/efficiency variances.', levels: ['A-Level'] },
+    { name: 'Bright Futures Academy', aqaUnitMapping: ['Budgeting'], businessContext: 'Not-for-profit Organisation', keyConcepts: ['Cash budgets', 'Trade receivables budget', 'Budgetary control'], criticalDetailExample: 'A not-for-profit scenario demonstrating cash flow management and budget preparation.', levels: ['A-Level'] },
+    { name: 'Harrison Capital Projects', aqaUnitMapping: ['Capital Investment Appraisal'], businessContext: 'Investment Scenario', keyConcepts: ['Payback period', 'ARR', 'NPV', 'Non-financial factors'], criticalDetailExample: 'Compares two investment proposals using payback, ARR, and NPV with discussion of qualitative factors.', levels: ['A-Level'] },
+    { name: 'Wilson Retail Incomplete Records', aqaUnitMapping: ['Incomplete Records'], businessContext: 'Retail Business', keyConcepts: ['Margins', 'Mark-ups', 'Statement of affairs', 'Missing figures'], criticalDetailExample: 'A retail business whose records were partially destroyed by fire, requiring reconstruction of accounts.', levels: ['A-Level'] },
+    { name: 'TechStart PLC', aqaUnitMapping: ['Limited Company Accounts', 'Accounting Standards (IAS/IFRS)'], businessContext: 'Public Limited Company', keyConcepts: ['Share capital', 'Reserves', 'IAS 1', 'Statement of changes in equity'], criticalDetailExample: 'A PLC scenario examining compliance with IAS 1 in published accounts, including statement of changes in equity.', levels: ['A-Level'] },
+    { name: 'Carter & Patel Audit Scenario', aqaUnitMapping: ['Ethics for Accountants', 'The Role of the Accountant in Business'], businessContext: 'Accountancy Practice', keyConcepts: ['Integrity', 'Objectivity', 'Confidentiality', 'Ethical dilemmas'], criticalDetailExample: 'An ethical dilemma involving a conflict of interest when an auditor discovers client irregularities.', levels: ['A-Level'] },
+    { name: 'CloudBooks Software Ltd', aqaUnitMapping: ['Impact of Technology on Accounting'], businessContext: 'Technology Company', keyConcepts: ['Cloud accounting', 'Automation', 'AI', 'Cyber security'], criticalDetailExample: 'Examines how technology is transforming accounting practices including cloud-based systems and AI-driven analytics.', levels: ['A-Level'] },
+    { name: 'Riverside Café', aqaUnitMapping: ['The Double Entry Model', 'Verification of Accounting Records'], businessContext: 'Small Business', keyConcepts: ['Double entry', 'Bank reconciliation', 'Control accounts', 'Suspense accounts'], criticalDetailExample: 'A small business scenario illustrating common bookkeeping errors and their correction through suspense accounts.', levels: ['A-Level'] },
+];
+
+export const MULTIPLE_CHOICE_QUESTIONS: MultipleChoiceQuestion[] = [
+  {
+    id: 'mcq-aqa-01',
+    topic: 'The Role of the Accountant in Business',
+    question: 'Which of the following is a liability for a business?',
+    options: ['Accounts Receivable', 'Inventory', 'Accrued Expenses', 'Prepaid Rent'],
+    correctAnswer: 2, // Accrued Expenses
+    explanation: 'Accrued expenses represent amounts owed for expenses incurred but not yet paid, making them a current liability on the Statement of Financial Position.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-02',
+    topic: 'The Role of the Accountant in Business',
+    question: 'Which stakeholder group is primarily interested in a business\'s ability to pay its debts as they fall due?',
+    options: ['Shareholders', 'Employees', 'Suppliers', 'HM Revenue and Customs'],
+    correctAnswer: 2, // Suppliers
+    explanation: 'Suppliers (trade creditors) are primarily interested in liquidity to ensure they will be paid for goods or services provided on credit.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-03',
+    topic: 'The Double Entry Model',
+    question: 'A business pays £500 for insurance by cheque. Which accounts should be debited and credited?',
+    options: [
+      'Debit Insurance, Credit Cash',
+      'Debit Bank, Credit Insurance',
+      'Debit Insurance, Credit Bank',
+      'Debit Cash, Credit Insurance'
+    ],
+    correctAnswer: 2, // Debit Insurance, Credit Bank
+    explanation: 'Paying for an expense reduces an asset (Bank) and increases an expense (Insurance). Debiting an expense increases it; crediting an asset decreases it.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-04',
+    topic: 'Verification of Accounting Records',
+    question: 'Which of the following errors would be revealed by a trial balance?',
+    options: [
+      'A transaction omitted entirely from the books',
+      'A transaction entered in the wrong class of account',
+      'A transaction entered in the wrong person\'s account',
+      'One side of a transaction entered twice'
+    ],
+    correctAnswer: 3, // One side of a transaction entered twice
+    explanation: 'A trial balance only reveals errors where the total debits do not equal the total credits (arithmetical errors). Errors of omission, principle, and commission affect both sides equally and remain hidden.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-05',
+    topic: 'Limited Company Accounts',
+    question: 'Where is the Dividend Paid by a limited company recorded in the final accounts?',
+    options: [
+      'Income Statement',
+      'Statement of Financial Position',
+      'Statement of Changes in Equity',
+      'Manufacturing Account'
+    ],
+    correctAnswer: 2, // Statement of Changes in Equity
+    explanation: 'Dividends paid are a distribution of profit and are recorded in the Statement of Changes in Equity (SOCE) under the retained earnings column.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-06',
+    topic: 'Partnership Accounts',
+    question: 'In the absence of a partnership agreement, how are profits and losses shared?',
+    options: [
+      'In the ratio of capital contributions',
+      'Equally among all partners',
+      'Based on the number of years in the business',
+      'According to the amount of work performed'
+    ],
+    correctAnswer: 1, // Equally
+    explanation: 'Under the Partnership Act 1890, in the absence of an agreement, profits and losses are shared equally, regardless of capital contributed or time worked.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-07',
+    topic: 'Accounting Concepts',
+    question: 'Which accounting concept requires that revenue and costs are recognised as they are earned or incurred, not as money is received or paid?',
+    options: [
+      'Prudence',
+      'Accruals (Matching)',
+      'Going Concern',
+      'Materiality'
+    ],
+    correctAnswer: 1, // Accruals
+    explanation: 'The accruals (or matching) concept states that revenue and costs are matched to the period in which they occur, ensuring profit is accurately calculated for that timeframe.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-08',
+    topic: 'Absorption and Activity Based Costing',
+    question: 'Which of the following is considered an indirect cost in a manufacturing business?',
+    options: [
+      'Direct materials used in production',
+      'Wages of production line workers',
+      'Factory rent and rates',
+      'Royalties paid per unit produced'
+    ],
+    correctAnswer: 2, // Factory rent
+    explanation: 'Indirect costs (overheads) cannot be easily traced to a specific unit of production. Factory rent is a fixed overhead shared across all units.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-09',
+    topic: 'Marginal Costing',
+    question: 'How is the contribution per unit calculated?',
+    options: [
+      'Selling Price - Fixed Costs',
+      'Selling Price - Total Costs',
+      'Selling Price - Variable Costs',
+      'Total Revenue - Total Variable Costs'
+    ],
+    correctAnswer: 2, // Selling Price - Variable Costs
+    explanation: 'Contribution per unit is the selling price minus the variable cost per unit. It represents the amount each unit contributes towards covering fixed costs and then generating profit.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-10',
+    topic: 'Analysis and Interpretation of Financial Information',
+    question: 'A business has a current ratio of 2.5:1 and a liquid (acid test) ratio of 0.8:1. What does this suggest?',
+    options: [
+      'The business has too much cash',
+      'The business has a high level of inventory',
+      'The business cannot pay its current liabilities',
+      'The business is highly geared'
+    ],
+    correctAnswer: 1, // High level of inventory
+    explanation: 'The liquid ratio excludes inventory. A significantly lower liquid ratio compared to the current ratio suggests that a large portion of current assets is tied up in inventory.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-11',
+    topic: 'Ethics for Accountants',
+    question: 'Which fundamental ethical principle requires an accountant to be straightforward and honest in all professional and business relationships?',
+    options: [
+      'Objectivity',
+      'Integrity',
+      'Professional Competence',
+      'Confidentiality'
+    ],
+    correctAnswer: 1, // Integrity
+    explanation: 'Integrity implies fair dealing and truthfulness. Accountants must not be associated with reports or information they believe to be false or misleading.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-12',
+    topic: 'Standard Costing and Variance Analysis',
+    question: 'A material price variance is calculated as:',
+    options: [
+      '(Standard Price - Actual Price) × Standard Quantity',
+      '(Standard Quantity - Actual Quantity) × Standard Price',
+      '(Standard Price - Actual Price) × Actual Quantity',
+      '(Standard Quantity - Actual Quantity) × Actual Price'
+    ],
+    correctAnswer: 2, // (SP-AP) * AQ
+    explanation: 'The material price variance measures the difference between what we expected to pay and what we actually paid for the quantity of material purchased.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-13',
+    topic: 'Capital Investment Appraisal',
+    question: 'Which investment appraisal method takes into account the time value of money?',
+    options: [
+      'Payback Period',
+      'Accounting Rate of Return (ARR)',
+      'Net Present Value (NPV)',
+      'Gross Profit Margin'
+    ],
+    correctAnswer: 2, // NPV
+    explanation: 'Net Present Value (NPV) uses discounting to reflect that money received today is worth more than the same amount received in the future.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-14',
+    topic: 'Accounting Standards (IAS/IFRS)',
+    question: 'According to IAS 1, which of the following must be included in a complete set of financial statements?',
+    options: [
+      'A Chairman\'s Statement',
+      'A Statement of Cash Flows',
+      'A Marketing Report',
+      'An Environmental Audit'
+    ],
+    correctAnswer: 1, // Statement of Cash Flows
+    explanation: 'IAS 1 specifies that a complete set of financial statements includes a Statement of Financial Position, Statement of Profit or Loss, Statement of Changes in Equity, and a Statement of Cash Flows.',
+    levels: ['A-Level']
+  },
+  {
+    id: 'mcq-aqa-15',
+    topic: 'Incomplete Records',
+    question: 'If a business has a mark-up of 25%, what is its margin?',
+    options: [
+      '20%',
+      '25%',
+      '33.3%',
+      '15%'
+    ],
+    correctAnswer: 0, // 20%
+    explanation: 'Margin = Mark-up / (1 + Mark-up). So, 0.25 / 1.25 = 0.20 or 20%.',
+    levels: ['A-Level']
+  }
 ];

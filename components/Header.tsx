@@ -20,8 +20,8 @@ const Header: React.FC<HeaderProps> = ({ user, onNavigate, isAdmin, onSwitchLeve
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                 <div className="flex justify-between items-center h-16">
                     <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-2xl font-bold text-stone-800 dark:text-stone-100">
-                        <span className="text-3xl">🌍</span>
-                        <span>Geo Pro</span>
+                        <span className="text-3xl">🧮</span>
+                        <span>Accounting Pro</span>
                     </button>
                     <div className="flex items-center gap-4">
                         <button 

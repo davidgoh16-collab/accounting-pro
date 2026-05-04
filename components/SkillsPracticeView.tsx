@@ -145,7 +145,7 @@ const SkillsPracticeView: React.FC<SkillsPracticeViewProps> = ({ user, onBack })
         return (
             <HubLayout
                 title="Skills & Structure"
-                subtitle={`Master essential skills for ${level} Geography.`}
+                subtitle={`Master essential skills for ${level} Accounting.`}
                 gradient="bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500"
                 onBack={onBack}
             >

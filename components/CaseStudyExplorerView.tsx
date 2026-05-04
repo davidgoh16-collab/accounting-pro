@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CaseStudyLocation, AuthUser } from '../types';
-import { CASE_STUDY_LOCATIONS, TOPIC_COLORS, GEOGRAPHY_TYPES } from '../case-study-database';
+import { CASE_STUDY_LOCATIONS, TOPIC_COLORS, ACCOUNTING_CATEGORIES } from '../case-study-database';
 import { generateCaseStudyInfo } from '../services/geminiService';
 
 // To satisfy TypeScript since we are loading Leaflet via script tag
@@ -97,7 +97,7 @@ const CaseStudyExplorerView: React.FC<CaseStudyExplorerViewProps> = ({ onBack, u
     const markerClusterGroupRef = useRef<any>(null);
 
     const [mapReady, setMapReady] = useState(false);
-    const [geographyFilter, setGeographyFilter] = useState('All');
+    const [categoryFilter, setCategoryFilter] = useState('All');
     const [selectedTopic, setSelectedTopic] = useState('All');
     const [selectedStudy, setSelectedStudy] = useState<CaseStudyLocation | null>(null);
 
@@ -108,16 +108,16 @@ const CaseStudyExplorerView: React.FC<CaseStudyExplorerViewProps> = ({ onBack, u
 
     const filteredTopics = useMemo(() => {
         const allTopics = [...new Set(levelFilteredLocations.map(cs => cs.topic))];
-        if (geographyFilter === 'All') return allTopics.sort();
-        return [...new Set(levelFilteredLocations.filter(cs => cs.geography === geographyFilter).map(cs => cs.topic))].sort();
-    }, [geographyFilter, levelFilteredLocations]);
+        if (categoryFilter === 'All') return allTopics.sort();
+        return [...new Set(levelFilteredLocations.filter(cs => cs.category === categoryFilter).map(cs => cs.topic))].sort();
+    }, [categoryFilter, levelFilteredLocations]);
 
     const filteredCaseStudies = useMemo(() => {
         return levelFilteredLocations.filter(cs =>
-            (geographyFilter === 'All' || cs.geography === geographyFilter) &&
+            (categoryFilter === 'All' || cs.category === categoryFilter) &&
             (selectedTopic === 'All' || cs.topic === selectedTopic)
         ).sort((a, b) => a.name.localeCompare(b.name));
-    }, [geographyFilter, selectedTopic, levelFilteredLocations]);
+    }, [categoryFilter, selectedTopic, levelFilteredLocations]);
 
     // Initialize map
     useEffect(() => {

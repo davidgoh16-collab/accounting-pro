@@ -70,10 +70,10 @@ const LoginView: React.FC = () => {
                 {/* Main View (Microsoft) */}
                 {!isAlternateLogin && (
                     <div className="animate-fade-in">
-                        <span className="text-6xl">🌍</span>
-                        <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100 mt-4">Welcome to Geo Pro</h1>
+                        <span className="text-6xl">🧮</span>
+                        <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100 mt-4">Welcome to Accounting Pro</h1>
                         <p className="text-stone-600 dark:text-stone-400 mt-4">
-                            Sign in with your Microsoft account to access your personalized dashboard and save your progress.
+                            Sign in with your Microsoft account to access your personalised AQA A-Level Accounting dashboard.
                         </p>
                         <button
                             onClick={signInWithMicrosoft}

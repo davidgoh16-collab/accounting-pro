@@ -1,6 +1,6 @@
 {
-  "short_name": "Geo Pro",
-  "name": "Geo Pro: Geography Tutor",
+  "short_name": "Accounting Pro",
+  "name": "Accounting Pro: AQA A-Level Accounting",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/921/921490.png",
@@ -15,6 +15,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#4f46e5",
+  "theme_color": "#6366f1",
   "background_color": "#f5f5f4"
 }
