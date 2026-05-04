@@ -365,6 +365,7 @@ export interface VideoResource {
     level: UserLevel;
     topic?: string;
     paper?: 'Paper 1' | 'Paper 2' | 'Paper 3';
+    playlists?: string[];
 }
 
 export interface VideoQuizContent {
