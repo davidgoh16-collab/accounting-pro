@@ -220,7 +220,7 @@ const BreakEvenSimulator: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -469,7 +469,7 @@ const CashFlowSimulator: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -700,7 +700,7 @@ const InvestmentAppraisalSimulator: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -901,7 +901,7 @@ const VarianceAnalysisSimulator: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -1197,7 +1197,7 @@ const RatioAnalysisSimulator: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
