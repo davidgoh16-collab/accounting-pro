@@ -634,7 +634,6 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }
                                             )
                                         })}
                                     </div>
- </div>
 
                             {selectedAnswer && (
                                 <motion.div 
@@ -688,6 +687,8 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }
                                     </div>
                                 </motion.div>
                             )}
+                                </div>
+                            ) : null}
                         </motion.div>
                     </AnimatePresence>
                 </div>
