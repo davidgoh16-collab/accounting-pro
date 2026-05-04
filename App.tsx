@@ -729,24 +729,8 @@ const App: React.FC = () => {
                                             shadowColor="shadow-teal-500/20"
                                             accentColor="text-teal-600 hover:text-teal-700"
                                         />
-                                        <HubCard
-                                            icon={<span className="text-4xl">💼</span>}
-                                            title="Scenario Explorer"
-                                            description="Explore interactive business scenarios to deepen your understanding of accounting concepts."
-                                            onClick={() => handleNavigate('simulations_hub')}
-                                            shadowColor="shadow-emerald-500/20"
-                                            accentColor="text-emerald-600 hover:text-emerald-700"
-                                        />
                                     </>
                                 )}
-                                <HubCard
-                                    icon={<span className="text-4xl">📊</span>}
-                                    title="Scenario Explorer"
-                                    description="Interactive map and detailed insights for all your core accounting scenarios."
-                                    onClick={() => handleNavigate('case_study_explorer')}
-                                    shadowColor="shadow-emerald-500/20"
-                                    accentColor="text-emerald-600 hover:text-emerald-700"
-                                />
                             </div>
                         </section>
 
