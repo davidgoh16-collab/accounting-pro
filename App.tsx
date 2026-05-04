@@ -301,9 +301,11 @@ const App: React.FC = () => {
     });
 
     const checkAdmin = (email: string | null, uid: string) => {
-        const adminUIDs = ['JxQuyECQcIcrx2xe3xmp6vSSt6j2', 'YEAWHlpT9vSYNkQni3OU3Sr87wd2'];
-        if (adminUIDs.includes(uid)) return true;
-        return email?.includes('admin') || false; 
+        const envUIDs = import.meta.env.VITE_ADMIN_USER_IDS
+            ? import.meta.env.VITE_ADMIN_USER_IDS.split(',').map((id: string) => id.trim())
+            : ['JxQuyECQcIcrx2xe3xmp6vSSt6j2', 'YEAWHlpT9vSYNkQni3OU3Sr87wd2'];
+        if (envUIDs.includes(uid)) return true;
+        return email?.includes('admin') || false;
     };
 
     useEffect(() => {
