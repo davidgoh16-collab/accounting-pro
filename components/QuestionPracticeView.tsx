@@ -102,7 +102,16 @@ const StructuredPlanView: React.FC<{
     let planStructure: { key: string; label: string; placeholder: string }[] = [];
 
     // Adjusted for both GCSE and A-Level marks
-    if (marks === 20) {
+    if (marks === 25) {
+            planStructure = [
+                { key: 'intro', label: 'Introduction', placeholder: 'Define key terms, set out the decision/issue (e.g. accept overseas contract; lower-priced materials), and signpost your line of reasoning.' },
+                { key: 'financial', label: 'Financial Analysis', placeholder: 'Show the relevant numbers — contribution per unit, NPV, payback, ratios, variance reconciliation, cash flow effect. Quote figures from the case.' },
+                { key: 'forArg', label: 'Arguments For', placeholder: 'Develop two or three reasons supporting the proposal. Use evidence from the scenario and apply accounting concepts.' },
+                { key: 'againstArg', label: 'Arguments Against', placeholder: 'Develop counter-arguments — risks, ethical issues, stakeholder impact, qualitative factors that the numbers miss.' },
+                { key: 'nonFinancial', label: 'Non-financial / Ethical Factors', placeholder: 'Quality, reputation, employees, environment, professional ethics, long-term strategy.' },
+                { key: 'conclusion', label: 'Justified Recommendation', placeholder: 'State your decision clearly and justify it by weighing the strongest financial and non-financial points. AQA require a justified recommendation.' },
+            ];
+    } else if (marks === 20) {
             planStructure = [
                 { key: 'intro', label: 'Introduction', placeholder: 'Define key terms, state your argument, and signpost your essay.' },
                 { key: 'strand1', label: 'Strand 1: Place/Environment', placeholder: 'What are the specific characteristics of your case study locations?' },
@@ -127,10 +136,11 @@ const StructuredPlanView: React.FC<{
             ];
     } else if (marks === 6) {
             planStructure = [
-                { key: 'trend', label: 'Trend / Overview', placeholder: 'What is the overall pattern or trend in the data?' },
-                { key: 'evidence', label: 'Evidence', placeholder: 'Quote specific facts, figures, and dates from the resource.' },
-                { key: 'anomaly', label: 'Anomaly', placeholder: 'Point out any data that doesn\'t fit the trend.' },
-                { key: 'manipulation', label: 'Manipulation/Reasoning', placeholder: 'Manipulate the data (range, %) or offer geographical reasoning if asked.' },
+                { key: 'point1', label: 'Point 1 (Advantage / For)', placeholder: 'Identify one benefit or supporting factor. Use specifics from the scenario (figures, ratios, stakeholder).' },
+                { key: 'develop1', label: 'Develop Point 1', placeholder: 'Explain why it matters — link to profitability, liquidity, control, ethics, or stakeholder interest.' },
+                { key: 'point2', label: 'Point 2 (Disadvantage / Against)', placeholder: 'Identify a counter-point or risk arising from the proposal.' },
+                { key: 'develop2', label: 'Develop Point 2', placeholder: 'Explain the consequences — impact on the business, decision-makers or financial statements.' },
+                { key: 'judgement', label: 'Justified Judgement', placeholder: 'A short conclusion weighing the points, e.g. "should accept because…" — required for the assess command word.' },
             ];
     } else if (marks === 4) {
             planStructure = [
@@ -1083,12 +1093,25 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
                     )}
 
                     <select value={marksFilter} onChange={e => setMarksFilter(parseInt(e.target.value, 10))} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="4">4 Marks</option>
-                        <option value="6">6 Marks (AO3/Data)</option>
-                        {user.level !== 'IGCSE' && <option value="9">9 Marks</option>}
-                        {user.level === 'IGCSE' && <option value="8">8 Marks</option>}
-                        {user.level === 'IGCSE' && <option value="12">12 Marks</option>}
-                        {user.level === 'A-Level' && <option value="20">20 Marks (Essay)</option>}
+                        {user.level === 'A-Level' ? (
+                            <>
+                                <option value="1">1 Mark (Section A MCQ)</option>
+                                <option value="3">3 Marks (Short Explain)</option>
+                                <option value="6">6 Marks (Section B Assess)</option>
+                                <option value="7">7 Marks (Section A Calculation)</option>
+                                <option value="10">10 Marks (Section A Calculation)</option>
+                                <option value="14">14 Marks (Section B Structured)</option>
+                                <option value="25">25 Marks (Section C Evaluate)</option>
+                            </>
+                        ) : (
+                            <>
+                                <option value="4">4 Marks</option>
+                                <option value="6">6 Marks (AO3/Data)</option>
+                                {user.level !== 'IGCSE' && <option value="9">9 Marks</option>}
+                                {user.level === 'IGCSE' && <option value="8">8 Marks</option>}
+                                {user.level === 'IGCSE' && <option value="12">12 Marks</option>}
+                            </>
+                        )}
                     </select>
 
                     <button onClick={handleGenerateQuestion} disabled={isGenerating} className={`w-full p-3 bg-blue-500 text-white font-bold rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-transform transform hover:scale-105 flex items-center justify-center gap-2 disabled:bg-stone-400 disabled:cursor-wait disabled:transform-none disabled:shadow-none ${unitFilter === 'All Units' ? 'sm:col-span-2 lg:col-span-1' : ''}`}>
