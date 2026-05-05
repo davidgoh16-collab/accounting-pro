@@ -71,17 +71,18 @@ const ManualRagGrid: React.FC<{
     paperMapping: Record<string, string>;
 }> = ({ topics, ratings, onRate, onSelectTopic, paperMapping }) => {
 
-    // Group topics by paper
+    // Group topics by paper, preserving the order they appear in `topics` (spec order).
+    // Only Paper 1 and Paper 2 are shown.
     const groupedTopics = useMemo(() => {
         const groups: Record<string, string[]> = {};
         topics.forEach(topic => {
-            const paper = paperMapping[topic] || 'Other';
+            const paper = paperMapping[topic];
+            if (paper !== 'Paper 1' && paper !== 'Paper 2') return;
             if (!groups[paper]) groups[paper] = [];
             groups[paper].push(topic);
         });
 
-        // Sort keys to ensure Paper 1, Paper 2, Paper 3, Other order
-        const sortedKeys = Object.keys(groups).sort();
+        const sortedKeys = ['Paper 1', 'Paper 2'].filter(p => groups[p]?.length);
         return { groups, sortedKeys };
     }, [topics, paperMapping]);
 
@@ -207,8 +208,13 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
     }, [user.level]);
 
     const paperMapping = useMemo(() => {
-        if (user.level === 'IGCSE') return IGCSE_PAPER_MAPPING;
-        return user.level === 'GCSE' ? GCSE_PAPER_MAPPING : ALEVEL_PAPER_MAPPING;
+        const base = user.level === 'IGCSE'
+            ? IGCSE_PAPER_MAPPING
+            : user.level === 'GCSE' ? GCSE_PAPER_MAPPING : ALEVEL_PAPER_MAPPING;
+        // The spec only has two papers, so fold any Paper 3 topics into Paper 1.
+        return Object.fromEntries(
+            Object.entries(base).map(([topic, paper]) => [topic, paper === 'Paper 2' ? 'Paper 2' : 'Paper 1'])
+        ) as Record<string, string>;
     }, [user.level]);
 
     const allTopics = useMemo(() => {
@@ -216,11 +222,16 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
             .filter(cs => cs.levels.includes(user.level || 'A-Level'))
             .map(cs => cs.topic);
 
-        return Array.from(new Set([
+        const combined = new Set([
             ...relevantUnits.filter(u => u !== 'All Units'),
-            ...caseStudyTopics
-        ])).sort();
-    }, [user.level, relevantUnits]);
+            ...caseStudyTopics,
+        ]);
+
+        // Preserve specification order (relevantUnits order) and only include Paper 1 / Paper 2 topics.
+        return relevantUnits
+            .filter(u => u !== 'All Units' && combined.has(u))
+            .filter(u => paperMapping[u] === 'Paper 1' || paperMapping[u] === 'Paper 2');
+    }, [user.level, relevantUnits, paperMapping]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -306,13 +317,12 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
                     return { topic, metrics, masteryScore: score, status };
                 });
 
-                // Sort by status (Red first) then score (low to high)
+                // Sort by specification order (Paper 1 topics first, then Paper 2, each in spec order)
+                const paperOrder: Record<string, number> = { 'Paper 1': 0, 'Paper 2': 1 };
                 results.sort((a, b) => {
-                    const statusOrder = { Red: 0, Amber: 1, Green: 2 };
-                    if (statusOrder[a.status] !== statusOrder[b.status]) {
-                        return statusOrder[a.status] - statusOrder[b.status];
-                    }
-                    return a.masteryScore - b.masteryScore;
+                    const paperDiff = (paperOrder[paperMapping[a.topic]] ?? 99) - (paperOrder[paperMapping[b.topic]] ?? 99);
+                    if (paperDiff !== 0) return paperDiff;
+                    return allTopics.indexOf(a.topic) - allTopics.indexOf(b.topic);
                 });
 
                 setRagResults(results);
@@ -325,7 +335,7 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
         };
 
         if (user) fetchData();
-    }, [user, allTopics]); // Added allTopics to dependency array as it's a derived value
+    }, [user, allTopics, paperMapping]);
 
     const handleManualRate = async (itemId: string, rating: 'Red' | 'Amber' | 'Green') => {
         const newRatings = { ...manualRatings, [itemId]: rating };
