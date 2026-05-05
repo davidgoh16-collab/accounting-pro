@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'geo-pro-v2.3';
+const CACHE_NAME = 'geo-pro-v2.4';
 const urlsToCache = [
   '/',
   '/index.html',
