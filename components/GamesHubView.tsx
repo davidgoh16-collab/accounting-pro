@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Page, AuthUser } from '../types';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
@@ -16,6 +15,9 @@ interface GamesHubViewProps {
         blockBlast: boolean;
         swipeQuizzes: boolean;
     };
+    remainingSeconds?: number;
+    isBlocked?: boolean;
+    cooldownUntil?: number | null;
 }
 
 const TopicSelectionModal: React.FC<{
@@ -33,7 +35,6 @@ const TopicSelectionModal: React.FC<{
         const caseStudyTopics = new Set(CASE_STUDY_LOCATIONS.filter(c => c.levels.includes(level)).map(cs => cs.topic));
         const allTopics = new Set(['All Topics', ...gameTopics, ...caseStudyTopics]);
 
-        // Explicitly add topics from specification to ensure list is populated for new modes (e.g. IGCSE) even if no games/case studies exist yet
         let specTopics = {};
         if (level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
         else if (level === 'GCSE') specTopics = GCSE_SPEC_TOPICS;
@@ -81,11 +82,12 @@ const TopicSelectionModal: React.FC<{
     );
 };
 
-const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, user, featureFlags }) => {
+const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, user, featureFlags, remainingSeconds, isBlocked, cooldownUntil }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedGame, setSelectedGame] = useState<{ page: Page, title: string } | null>(null);
 
     const handleOpenModal = (page: Page, title: string) => {
+        if (isBlocked) return;
         setSelectedGame({ page, title });
         setModalOpen(true);
     };
@@ -104,6 +106,30 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                 gradient="bg-gradient-to-r from-teal-500 via-cyan-500 to-sky-500"
                 onBack={() => onNavigate('dashboard')}
             >
+                {remainingSeconds !== undefined && (
+                    <div className={`w-full max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl flex items-center gap-3 font-semibold ${
+                        isBlocked
+                            ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+                            : remainingSeconds <= 60
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
+                            : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                    }`}>
+                        <span className="text-xl">⏱</span>
+                        {isBlocked ? (
+                            <span>
+                                Game time used up this hour.{' '}
+                                {cooldownUntil && (
+                                    <>You can play again at <strong>{new Date(cooldownUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>.</>
+                                )}
+                            </span>
+                        ) : (
+                            <span>
+                                Game time remaining this hour:{' '}
+                                <strong>{Math.floor(remainingSeconds / 60)}m {remainingSeconds % 60}s</strong>
+                            </span>
+                        )}
+                    </div>
+                )}
                 <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
                     <HubCard
                         icon={<span className="text-4xl">🐦</span>}
@@ -113,7 +139,7 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                         shadowColor="shadow-teal-500/20"
                         accentColor="text-teal-600 hover:text-teal-700"
                         actionText="Play Now"
-                        disabled={featureFlags?.birdGame === false}
+                        disabled={featureFlags?.birdGame === false || isBlocked === true}
                     />
                     <HubCard
                         icon={<span className="text-4xl">🧱</span>}
@@ -123,7 +149,7 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                         shadowColor="shadow-rose-500/20"
                         accentColor="text-rose-600 hover:text-rose-700"
                         actionText="Play Now"
-                        disabled={featureFlags?.blockBlast === false}
+                        disabled={featureFlags?.blockBlast === false || isBlocked === true}
                     />
                     <HubCard
                         icon={<span className="text-4xl">↔️</span>}
@@ -133,7 +159,7 @@ const GamesHubView: React.FC<GamesHubViewProps> = ({ onNavigate, onStartGame, us
                         shadowColor="shadow-fuchsia-500/20"
                         accentColor="text-fuchsia-600 hover:text-fuchsia-700"
                         actionText="Play Now"
-                        disabled={featureFlags?.swipeQuizzes === false}
+                        disabled={featureFlags?.swipeQuizzes === false || isBlocked === true}
                     />
                     <div className="lg:col-span-3">
                         <HubCard

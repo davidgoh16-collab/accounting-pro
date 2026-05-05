@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthUser, CompletedSession, ChatSessionLog, LessonProgress, ClassGroup } from '../types';
 import { getAllUsers, db, getClasses, createClass, addClassMember, removeClassMember, updateClassDetails, addClassMembers, updateUserRole, deleteClass, deleteUserAccount } from '../firebase';
@@ -33,6 +32,7 @@ const FeatureSettingsPanel: React.FC = () => {
     const [limit, setLimit] = useState<number>(50);
     const [imageLimit, setImageLimit] = useState<number>(5);
     const [songLimit, setSongLimit] = useState<number>(1);
+    const [gameTimeLimitMinutes, setGameTimeLimitMinutes] = useState<number>(10);
     const [toggles, setToggles] = useState({
         birdGame: true,
         blockBlast: true,
@@ -55,6 +55,7 @@ const FeatureSettingsPanel: React.FC = () => {
                     setLimit(data.dailyRequestLimit ?? 50);
                     setImageLimit(data.dailyImageLimit ?? 5);
                     setSongLimit(data.dailySongLimit ?? 1);
+                    setGameTimeLimitMinutes(data.gameTimeLimitMinutes ?? 10);
                     setToggles(prev => ({ ...prev, ...data.featureToggles }));
                 }
             } catch (e) {
@@ -73,6 +74,7 @@ const FeatureSettingsPanel: React.FC = () => {
                 dailyRequestLimit: limit,
                 dailyImageLimit: imageLimit,
                 dailySongLimit: songLimit,
+                gameTimeLimitMinutes: gameTimeLimitMinutes,
                 featureToggles: toggles
             }, { merge: true });
             alert("Settings saved successfully!");
@@ -145,6 +147,18 @@ const FeatureSettingsPanel: React.FC = () => {
                             type="number"
                             value={songLimit}
                             onChange={(e) => setSongLimit(parseInt(e.target.value))}
+                            className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
+                        />
+                    </div>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+                        <div>
+                            <p className="font-semibold text-stone-700 dark:text-stone-200">Game Time Limit Per Hour (minutes)</p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400">Maximum minutes students can play games per hour. Timer pauses when they exit a game. (Default: 10)</p>
+                        </div>
+                        <input
+                            type="number"
+                            value={gameTimeLimitMinutes}
+                            onChange={(e) => setGameTimeLimitMinutes(parseInt(e.target.value))}
                             className="w-24 p-2 text-center rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 font-bold"
                         />
                     </div>
@@ -715,7 +729,7 @@ const LearningProgressViewer: React.FC<{ user: AuthUser }> = ({ user }) => {
                                                 <span key={lessonId} className={`text-[10px] px-2 py-1 rounded border ${progress.completed ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-stone-50 border-stone-200 text-stone-500'}`}>
                                                     {lessonId.replace(/[^0-9.]/g, '')}: {progress.score.toFixed(0)}%
                                                 </span>
-                                            )})}
+                                            )}}
                                         </div>
                                     )}
                                 </div>
