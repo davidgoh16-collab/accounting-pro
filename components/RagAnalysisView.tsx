@@ -208,8 +208,13 @@ const RagAnalysisView: React.FC<RagAnalysisViewProps> = ({ user, onBack }) => {
     }, [user.level]);
 
     const paperMapping = useMemo(() => {
-        if (user.level === 'IGCSE') return IGCSE_PAPER_MAPPING;
-        return user.level === 'GCSE' ? GCSE_PAPER_MAPPING : ALEVEL_PAPER_MAPPING;
+        const base = user.level === 'IGCSE'
+            ? IGCSE_PAPER_MAPPING
+            : user.level === 'GCSE' ? GCSE_PAPER_MAPPING : ALEVEL_PAPER_MAPPING;
+        // The spec only has two papers, so fold any Paper 3 topics into Paper 1.
+        return Object.fromEntries(
+            Object.entries(base).map(([topic, paper]) => [topic, paper === 'Paper 2' ? 'Paper 2' : 'Paper 1'])
+        ) as Record<string, string>;
     }, [user.level]);
 
     const allTopics = useMemo(() => {
