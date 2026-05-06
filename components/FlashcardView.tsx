@@ -6,7 +6,7 @@ import { TOPIC_COLORS } from '../case-study-database';
 import { FlashcardItem, AuthUser } from '../types';
 import { db, logUserActivity } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
+import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS, YEAR12_TOPICS, YEAR13_TOPICS } from '../constants';
 import { generateFlashcards } from '../services/geminiService';
 
 type KnownStatus = 'known' | 'unknown';
@@ -63,7 +63,7 @@ const FlashcardView: React.FC<FlashcardViewProps> = ({ onQuiz, user, onBack }) =
             Object.keys(ALEVEL_SPEC_TOPICS).forEach(t => allAvailableTopics.add(t));
         }
 
-        return ['All Topics', ...Array.from(allAvailableTopics)].sort();
+        return Array.from(allAvailableTopics);
     }, [allItems, user.level]);
     
     // Derived sub-topics based on user level and selected main topic
@@ -233,12 +233,24 @@ const FlashcardView: React.FC<FlashcardViewProps> = ({ onQuiz, user, onBack }) =
                     </div>
                     
                     <div className="relative">
-                        <select 
-                            value={topicFilter} 
+                        <select
+                            value={topicFilter}
                             onChange={e => setTopicFilter(e.target.value)}
                             className="w-48 pl-4 pr-10 py-2 rounded-lg font-semibold bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 shadow-sm border border-stone-200 dark:border-stone-700 appearance-none cursor-pointer focus:ring-2 focus:ring-fuchsia-500 focus:outline-none text-sm truncate"
                         >
-                            {topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                            <option value="All Topics">All Topics</option>
+                            {user.level === 'A-Level' ? (
+                                <>
+                                    <optgroup label="Year 12">
+                                        {YEAR12_TOPICS.filter(t => topics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                    </optgroup>
+                                    <optgroup label="Year 13">
+                                        {YEAR13_TOPICS.filter(t => topics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                    </optgroup>
+                                </>
+                            ) : (
+                                topics.sort().map(t => <option key={t} value={t}>{t}</option>)
+                            )}
                         </select>
                     </div>
 

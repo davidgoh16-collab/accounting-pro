@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { AuthUser, RevisionSession, RevisionMethod } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, COURSE_LESSONS, IGCSE_SPEC_TOPICS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, COURSE_LESSONS, IGCSE_SPEC_TOPICS, YEAR12_TOPICS, YEAR13_TOPICS } from '../constants';
 import { db } from '../firebase';
 import { collection, query, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
 
@@ -513,7 +513,18 @@ const RevisionPlannerContent: React.FC<RevisionPlannerContentProps> = ({ user })
                             <label className="text-xs font-bold text-stone-500 uppercase">Unit / Broad Topic</label>
                             <select value={newTopic} onChange={e => setNewTopic(e.target.value)} className="w-full mt-1 p-2 rounded-lg bg-stone-100 dark:bg-stone-800 border-none focus:ring-2 focus:ring-cyan-500 text-sm text-stone-800 dark:text-stone-200">
                                 <option value="" disabled>Select unit...</option>
-                                {availableTopics.map(t => <option key={t} value={t}>{t}</option>)}
+                                {user.level === 'A-Level' ? (
+                                    <>
+                                        <optgroup label="Year 12">
+                                            {YEAR12_TOPICS.filter(t => availableTopics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                        </optgroup>
+                                        <optgroup label="Year 13">
+                                            {YEAR13_TOPICS.filter(t => availableTopics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                        </optgroup>
+                                    </>
+                                ) : (
+                                    availableTopics.map(t => <option key={t} value={t}>{t}</option>)
+                                )}
                             </select>
                         </div>
 
