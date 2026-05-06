@@ -159,8 +159,13 @@ const LearningHubView: React.FC<LearningHubViewProps> = ({ user, onBack }) => {
     }, [user]);
 
     const handleLessonComplete = async (score: number) => {
-        await fetchProgress();
-        setActiveLesson(null);
+        try {
+            await fetchProgress();
+        } catch (e) {
+            console.error("Error refreshing progress after lesson", e);
+        } finally {
+            setActiveLesson(null);
+        }
     };
 
     const hasLessons = Object.values(lessonsByTopic).some((arr: CourseLesson[]) => arr.length > 0);
