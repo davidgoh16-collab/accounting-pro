@@ -298,11 +298,10 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
 
     const handleFinish = async () => {
         const finalPercentage = totalActivities > 0 ? (score / totalActivities) * 100 : 100;
-        const passed = finalPercentage >= 60;
         try {
             await setDoc(doc(db, 'users', user.uid, 'learning_progress', lesson.chapter), {
                 [lesson.id]: {
-                    completed: passed,
+                    completed: true,
                     score: finalPercentage,
                     completedAt: new Date().toISOString(),
                     lastBlockIndex: 0,
