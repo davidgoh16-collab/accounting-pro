@@ -156,8 +156,11 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
                 }
                 
                 if (isMounted.current) {
-                    setContent(data);
-                    const activities = data.blocks.filter(b => b.type !== 'info').length;
+                    const validBlocks = data.blocks.filter((b): b is LessonBlock => b != null);
+                    const clampedIndex = Math.min(currentBlockIndex, Math.max(0, validBlocks.length - 1));
+                    if (clampedIndex !== currentBlockIndex) setCurrentBlockIndex(clampedIndex);
+                    setContent({ ...data, blocks: validBlocks });
+                    const activities = validBlocks.filter(b => b.type !== 'info').length;
                     setTotalActivities(activities);
                     
                     const preLoadedImages: Record<number, string> = {};
@@ -170,9 +173,9 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
                     setLoading(false);
 
                     // Initialize state for current block (whether it's 0 or restored index)
-                    initializeBlockState(data.blocks[currentBlockIndex]);
+                    initializeBlockState(validBlocks[clampedIndex]);
 
-                    const needsGenerationIndices = data.blocks
+                    const needsGenerationIndices = validBlocks
                         .map((b, i) => ((b.type === 'info' || b.type === 'diagram_match') && b.imagePrompt && !b.staticImageUrl) ? i : -1)
                         .filter(i => i !== -1);
                     
@@ -295,21 +298,21 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
 
     const handleFinish = async () => {
         const finalPercentage = totalActivities > 0 ? (score / totalActivities) * 100 : 100;
-        const passed = finalPercentage >= 60; 
+        const passed = finalPercentage >= 60;
         try {
             await setDoc(doc(db, 'users', user.uid, 'learning_progress', lesson.chapter), {
                 [lesson.id]: {
-                    completed: passed, 
+                    completed: passed,
                     score: finalPercentage,
                     completedAt: new Date().toISOString(),
-                    lastBlockIndex: 0, // Reset for next time
+                    lastBlockIndex: 0,
                     rawScore: 0,
-                    // We can keep savedContent or remove it depending on whether we want re-generation
                 }
             }, { merge: true });
-            onComplete(finalPercentage);
         } catch (e) {
             console.error("Error saving completion", e);
+        } finally {
+            onComplete(finalPercentage);
         }
     };
 
@@ -391,6 +394,20 @@ const ActiveLessonView: React.FC<ActiveLessonViewProps> = ({ lesson, user, initi
 
     const currentBlock = content.blocks[currentBlockIndex];
     const progress = ((currentBlockIndex) / content.blocks.length) * 100;
+
+    if (!currentBlock) {
+        return (
+            <div className="p-8 text-center flex flex-col items-center justify-center h-[50vh]">
+                <span className="text-4xl mb-4">⚠️</span>
+                <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Block unavailable</h3>
+                <p className="text-stone-600 dark:text-stone-400 mb-6">This lesson block could not be loaded.</p>
+                <div className="flex gap-3">
+                    <button onClick={onBack} className="px-6 py-2 bg-stone-200 dark:bg-stone-700 rounded-lg font-bold">Exit Lesson</button>
+                    <button onClick={handleNext} className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold">Skip Block</button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-3xl mx-auto flex flex-col min-h-[85vh]">
