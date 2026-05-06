@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FlashcardItem, CaseStudyQuizQuestion, AuthUser } from '../types';
 import { generateBatchQuizQuestions, generateFlashcards } from '../services/geminiService';
 import { logUserActivity, auth } from '../firebase';
-import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
+import { GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS, YEAR12_TOPICS, YEAR13_TOPICS } from '../constants';
 import confetti from 'canvas-confetti';
 
 // Fisher-Yates shuffle algorithm
@@ -292,7 +292,7 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }
         let specTopics = GCSE_SPEC_TOPICS;
         if (user.level === 'A-Level') specTopics = ALEVEL_SPEC_TOPICS;
         if (user.level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
-        return ['All Topics', ...Object.keys(specTopics).sort()];
+        return Object.keys(specTopics);
     }, [user]);
 
     const subTopics = useMemo(() => {
@@ -346,7 +346,19 @@ const QuizModeView: React.FC<QuizModeViewProps> = ({ initialDeck, onBack, user }
                                     onChange={e => setSetupTopic(e.target.value)}
                                     className="w-full px-5 py-4 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white/80 dark:bg-stone-800/80 text-stone-800 dark:text-stone-200 font-bold focus:ring-4 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 outline-none transition-all appearance-none cursor-pointer"
                                 >
-                                    {topics.map(t => <option key={t} value={t}>{t}</option>)}
+                                    <option value="All Topics">All Topics</option>
+                                    {user?.level === 'A-Level' ? (
+                                        <>
+                                            <optgroup label="Year 12">
+                                                {YEAR12_TOPICS.filter(t => topics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                            </optgroup>
+                                            <optgroup label="Year 13">
+                                                {YEAR13_TOPICS.filter(t => topics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                            </optgroup>
+                                        </>
+                                    ) : (
+                                        topics.sort().map(t => <option key={t} value={t}>{t}</option>)
+                                    )}
                                 </select>
                             </div>
 

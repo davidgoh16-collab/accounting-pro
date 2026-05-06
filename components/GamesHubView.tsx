@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Page, AuthUser } from '../types';
 import { CASE_STUDY_LOCATIONS } from '../case-study-database';
 import { GAME_QUESTIONS } from '../game-database';
-import { IGCSE_SPEC_TOPICS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { IGCSE_SPEC_TOPICS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, YEAR12_TOPICS, YEAR13_TOPICS } from '../constants';
 import HubLayout from './HubLayout';
 import HubCard from './HubCard';
 
@@ -33,7 +33,7 @@ const TopicSelectionModal: React.FC<{
         const level = user.level || 'A-Level';
         const gameTopics = new Set(GAME_QUESTIONS.filter(q => q.levels.includes(level)).map(q => q.topic));
         const caseStudyTopics = new Set(CASE_STUDY_LOCATIONS.filter(c => c.levels.includes(level)).map(cs => cs.topic));
-        const allTopics = new Set(['All Topics', ...gameTopics, ...caseStudyTopics]);
+        const allTopics = new Set([...gameTopics, ...caseStudyTopics]);
 
         let specTopics = {};
         if (level === 'IGCSE') specTopics = IGCSE_SPEC_TOPICS;
@@ -42,7 +42,7 @@ const TopicSelectionModal: React.FC<{
 
         Object.keys(specTopics).forEach(t => allTopics.add(t));
 
-        return Array.from(allTopics).sort();
+        return Array.from(allTopics);
     }, [user.level]);
 
     if (!isOpen) return null;
@@ -59,13 +59,19 @@ const TopicSelectionModal: React.FC<{
                 <p className="text-stone-600 mt-2 mb-4">Choose a topic to focus on, or select 'All Topics' for a mixed challenge.</p>
                 
                 <label htmlFor="topic-select" className="font-semibold text-stone-700">Topic ({user.level})</label>
-                <select 
+                <select
                     id="topic-select"
-                    value={selectedTopic} 
-                    onChange={e => setSelectedTopic(e.target.value)} 
+                    value={selectedTopic}
+                    onChange={e => setSelectedTopic(e.target.value)}
                     className="w-full mt-2 p-3 border border-stone-300 rounded-lg bg-white text-stone-800 focus:ring-2 focus:ring-teal-500"
                 >
-                    {topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                    <option value="All Topics">All Topics</option>
+                    <optgroup label="Year 12">
+                        {YEAR12_TOPICS.filter(t => topics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                    </optgroup>
+                    <optgroup label="Year 13">
+                        {YEAR13_TOPICS.filter(t => topics.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                    </optgroup>
                 </select>
 
                 <div className="mt-6 flex gap-4">

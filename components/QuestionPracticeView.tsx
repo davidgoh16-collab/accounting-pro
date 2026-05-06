@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Question, SessionData, CaseStudyMaster, MarkedModelAnswer, PracticeMode, ChatMessage, AIFeedback, CompletedSession, AnswerSegment, AuthUser, ChatSessionLog, DraftSession } from '../types';
-import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS } from '../constants';
+import { ALEVEL_UNITS, GCSE_UNITS, IGCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_SPEC_TOPICS, IGCSE_SPEC_TOPICS, YEAR12_TOPICS, YEAR13_TOPICS } from '../constants';
 import { MASTER_CASE_STUDIES } from '../database';
 import { getHint, getMotivationalMessage, generateQuestion, generateFigure, generateModelAnswer, streamTutorResponse, generateCaseStudyApplication, markStudentAnswer, generateSessionSummary, getImageLimitStatus } from '../services/geminiService';
 import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -1082,7 +1082,18 @@ const QuestionPracticeView: React.FC<QuestionPracticeViewProps> = ({ user, sessi
             <div className="max-w-7xl mx-auto mt-12">
                 <div className={`grid grid-cols-1 sm:grid-cols-2 ${unitFilter !== 'All Units' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 mb-4`}>
                     <select value={unitFilter} onChange={e => setUnitFilter(e.target.value)} className="w-full p-3 border border-stone-300 dark:border-stone-700 rounded-lg bg-white/80 dark:bg-stone-800/80 dark:text-stone-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        {availableUnits.filter(u => u !== 'All Units').map(unit => <option key={unit} value={unit}>{unit}</option>)}
+                        {user.level === 'A-Level' ? (
+                            <>
+                                <optgroup label="Year 12">
+                                    {YEAR12_TOPICS.filter(t => availableUnits.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                </optgroup>
+                                <optgroup label="Year 13">
+                                    {YEAR13_TOPICS.filter(t => availableUnits.includes(t)).map(t => <option key={t} value={t}>{t}</option>)}
+                                </optgroup>
+                            </>
+                        ) : (
+                            availableUnits.filter(u => u !== 'All Units').map(unit => <option key={unit} value={unit}>{unit}</option>)
+                        )}
                     </select>
 
                     {unitFilter !== 'All Units' && (

@@ -406,6 +406,30 @@ export const ALEVEL_SPEC_TOPICS: Record<string, string[]> = {
     'Impact of Technology on Accounting': ['Cloud accounting', 'Digital bookkeeping', 'AI and automation', 'Cyber security'],
 };
 
+export const YEAR12_TOPICS: string[] = [
+    'The Role of the Accountant in Business',
+    'Types of Business Organisation',
+    'The Double Entry Model',
+    'Verification of Accounting Records',
+    'Accounting Concepts',
+    'Financial Statements of Sole Traders',
+    'Limited Company Accounts',
+    'Analysis and Interpretation of Financial Information',
+    'Budgeting',
+    'Marginal Costing',
+];
+
+export const YEAR13_TOPICS: string[] = [
+    'Standard Costing and Variance Analysis',
+    'Absorption and Activity Based Costing',
+    'Capital Investment Appraisal',
+    'Incomplete Records',
+    'Partnership Accounts',
+    'Accounting Standards (IAS/IFRS)',
+    'Ethics for Accountants',
+    'Impact of Technology on Accounting',
+];
+
 export const ALEVEL_PAPER_MAPPING: Record<string, string> = {
     'The Role of the Accountant in Business': 'Paper 3',
     'Types of Business Organisation': 'Paper 1',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthUser, Page, UserLevel, MemoryRecallSession } from '../types';
 import { collection, query, orderBy, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { IGCSE_UNITS, IGCSE_SPEC_TOPICS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_UNITS, ALEVEL_SPEC_TOPICS } from '../constants';
+import { IGCSE_UNITS, IGCSE_SPEC_TOPICS, GCSE_UNITS, GCSE_SPEC_TOPICS, ALEVEL_UNITS, ALEVEL_SPEC_TOPICS, YEAR12_TOPICS, YEAR13_TOPICS } from '../constants';
 
 interface Props {
     user: AuthUser;
@@ -105,9 +105,24 @@ const MemoryRecallHubView: React.FC<Props> = ({ user, onNavigate, onBack }) => {
                                 }}
                             >
                                 <option value="">Choose a unit...</option>
-                                {availableUnits.map(u => (
-                                    <option key={u} value={u}>{u}</option>
-                                ))}
+                                {level === 'A-Level' ? (
+                                    <>
+                                        <optgroup label="Year 12">
+                                            {YEAR12_TOPICS.filter(t => availableUnits.includes(t)).map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </optgroup>
+                                        <optgroup label="Year 13">
+                                            {YEAR13_TOPICS.filter(t => availableUnits.includes(t)).map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </optgroup>
+                                    </>
+                                ) : (
+                                    availableUnits.map(u => (
+                                        <option key={u} value={u}>{u}</option>
+                                    ))
+                                )}
                             </select>
                         </div>
 
