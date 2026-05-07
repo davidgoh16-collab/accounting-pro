@@ -247,8 +247,13 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Serve index.html for all other routes (SPA)
+// Serve index.html for all other routes (SPA), but never for asset/file requests.
+// Returning index.html for a missing /assets/*.js leads to a MIME type error
+// ("Expected a JavaScript-or-Wasm module script but the server responded with text/html").
 app.get(/.*/, (req, res) => {
+  if (req.path.startsWith('/assets/') || /\.[a-zA-Z0-9]+$/.test(req.path)) {
+    return res.status(404).send('Not found');
+  }
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
