@@ -259,8 +259,11 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Serve index.html for all other routes (SPA)
-app.get(/.*/, (req, res) => {
+// Serve index.html for SPA routes only — never for asset/file requests
+app.get('*', (req, res) => {
+  if (path.extname(req.path)) {
+    return res.status(404).end();
+  }
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
