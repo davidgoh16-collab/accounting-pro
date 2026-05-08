@@ -40,7 +40,8 @@ const FeatureSettingsPanel: React.FC = () => {
         swipeQuizzes: false,
         aiTutor: true,
         ragAssessment: true,
-        songGenerator: true
+        songGenerator: true,
+        learningAcademy: true
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -187,6 +188,7 @@ const FeatureSettingsPanel: React.FC = () => {
                             { key: 'aiTutor', label: 'AI Tutor & Feedback', desc: 'Gemini-powered feedback and hints.' },
                             { key: 'ragAssessment', label: 'RAG Self-Assessment', desc: 'Topic confidence tracking.' },
                             { key: 'songGenerator', label: 'Song Generator', desc: 'AI educational songs.' },
+                            { key: 'learningAcademy', label: 'Learning Academy', desc: 'Interactive lessons and syllabus progress tracking.' },
                         ].map((feature) => (
                             <div key={feature.key} className="flex items-center justify-between p-4 bg-white dark:bg-stone-700 rounded-xl border border-stone-200 dark:border-stone-600">
                                 <div>
