@@ -243,7 +243,7 @@ const App: React.FC = () => {
     const [selectedSimulationId, setSelectedSimulationId] = useState<string>('break_even_analysis');
     const [memoryRecallSessionParams, setMemoryRecallSessionParams] = useState<{sessionId: string, topicId: string, subTopicId: string, isResume: boolean} | null>(null);
     const [questionPracticeParams, setQuestionPracticeParams] = useState<{initialTopic: string, initialSubTopic: string, autoGenerate: boolean} | null>(null);
-    const [featureFlags, setFeatureFlags] = useState({ birdGame: true, blockBlast: true, practiceQuizzes: true, swipeQuizzes: false, aiTutor: true, ragAssessment: true, songGenerator: true });
+    const [featureFlags, setFeatureFlags] = useState({ birdGame: true, blockBlast: true, practiceQuizzes: true, swipeQuizzes: false, aiTutor: true, ragAssessment: true, songGenerator: true, learningAcademy: true });
     const [gameTimeLimitMinutes, setGameTimeLimitMinutes] = useState<number>(10);
 
     const GAME_PAGES = new Set<Page>(['flappy_accountant', 'block_blast', 'swipe_quiz']);
@@ -390,7 +390,7 @@ const App: React.FC = () => {
                                 <h2 className="text-2xl font-bold text-stone-700 dark:text-stone-200 mb-6 flex items-center gap-3"><span className="text-3xl">🧠</span> Learning & Progress</h2>
                                 <GradeDashboard user={user} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    <HubCard icon={<span className="text-4xl">🎓</span>} title="Learning Academy" description="Complete interactive lessons, master content with AI tutoring, and track your syllabus progress." onClick={() => handleNavigate('learning_hub')} shadowColor="shadow-indigo-500/20" accentColor="text-indigo-600 hover:text-indigo-700" actionText="Start Learning" />
+                                    <HubCard icon={<span className="text-4xl">🎓</span>} title="Learning Academy" description="Complete interactive lessons, master content with AI tutoring, and track your syllabus progress." onClick={() => handleNavigate('learning_hub')} shadowColor="shadow-indigo-500/20" accentColor="text-indigo-600 hover:text-indigo-700" actionText="Start Learning" disabled={!featureFlags.learningAcademy} />
                                     <HubCard icon={<span className="text-4xl">🎦</span>} title="Video Learning" description="Watch curated A-Level videos with AI-powered interactive quizzes to check understanding." onClick={() => handleNavigate('video_learning')} shadowColor="shadow-red-500/20" accentColor="text-red-600 hover:text-red-700" actionText="Watch & Learn" />
                                     <HubCard icon={<span className="text-4xl">📅</span>} title="Revision Planner" description="Optimise your memory with spaced repetition scheduling and interactive forgetting curves." onClick={() => handleNavigate('revision_planner')} shadowColor="shadow-cyan-500/20" accentColor="text-cyan-600 hover:text-cyan-700" />
                                     <HubCard icon={<span className="text-4xl">🗂️</span>} title="Flashcards & Quizzes" description="Master key terms and case studies with digital flashcards and custom quizzes." onClick={() => handleNavigate('flashcard_quiz_hub')} shadowColor="shadow-fuchsia-500/20" accentColor="text-fuchsia-600 hover:text-fuchsia-700" disabled={!featureFlags.practiceQuizzes} />
