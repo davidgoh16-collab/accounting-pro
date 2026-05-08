@@ -25,7 +25,19 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json({ limit: '10mb' }));
+
+// Custom MIME type handler for TypeScript/JSX files
+app.use((req, res, next) => {
+  if (req.path.endsWith('.tsx') || req.path.endsWith('.ts') ||
+      req.path.endsWith('.jsx') || req.path.endsWith('.js')) {
+    res.type('application/javascript');
+  }
+  next();
+});
+
+// Try to serve from dist first, then fall back to current directory
 app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname)));
 
 // Initialize Gemini Client
 const getAiClient = () => {
