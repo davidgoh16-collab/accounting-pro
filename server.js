@@ -35,9 +35,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Try to serve from dist first, then fall back to current directory
+// Try to serve from dist first
 app.use(express.static(path.join(__dirname, 'dist')));
-app.use(express.static(path.join(__dirname)));
 
 // Initialize Gemini Client
 const getAiClient = () => {
