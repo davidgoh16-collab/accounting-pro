@@ -68,7 +68,7 @@ app.post('/api/generate-content', async (req, res) => {
     });
   } catch (error) {
     console.error("Error in /api/generate-content:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "An internal server error occurred" });
   }
 });
 
@@ -92,10 +92,10 @@ app.get('/api/proxy-video', async (req, res) => {
       return res.status(400).send('Only HTTPS URLs are allowed');
     }
 
-    // Strict SSRF protection - only allow requests to Google APIs
+    // Strict SSRF protection - only allow requests to Google APIs file endpoints
     const ALLOWED_HOSTS = ['generativelanguage.googleapis.com'];
-    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname)) {
-       return res.status(403).send('Forbidden: Target host not allowed');
+    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname) || !parsedUrl.pathname.startsWith('/v1beta/files/')) {
+       return res.status(403).send('Forbidden: Target host or path not allowed');
     }
 
     // Append API Key securely
@@ -128,7 +128,7 @@ app.get('/api/proxy-video', async (req, res) => {
 
   } catch (error) {
     console.error("Error in /api/proxy-video:", error);
-    res.status(500).send(error.message || 'Failed to proxy video');
+    res.status(500).send('An internal server error occurred while proxying video');
   }
 });
 
@@ -157,7 +157,7 @@ app.post('/api/generate-content-stream', async (req, res) => {
   } catch (error) {
     console.error("Error in /api/generate-content-stream:", error);
     if (!res.headersSent) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "An internal server error occurred" });
     } else {
       res.end();
     }
@@ -180,7 +180,7 @@ app.post('/api/generate-images', async (req, res) => {
     });
   } catch (error) {
     console.error("Error in /api/generate-images:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "An internal server error occurred" });
   }
 });
 
@@ -210,7 +210,7 @@ app.post('/api/generate-song', async (req, res) => {
   } catch (error) {
     console.error("Error in /api/generate-song:", error);
     if (!res.headersSent) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "An internal server error occurred" });
     } else {
       res.end();
     }
@@ -240,7 +240,7 @@ app.post('/api/safeguarding-alert', async (req, res) => {
     res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error in /api/safeguarding-alert:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "An internal server error occurred" });
   }
 });
 
