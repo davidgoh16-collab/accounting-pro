@@ -93,8 +93,11 @@ app.get('/api/proxy-video', async (req, res) => {
     }
 
     // Strict SSRF protection - only allow requests to Google APIs file endpoints
+    // and prevent bypass via URL encoding (e.g., %2f..%2f) by decoding first and matching strictly.
     const ALLOWED_HOSTS = ['generativelanguage.googleapis.com'];
-    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname) || !parsedUrl.pathname.startsWith('/v1beta/files/')) {
+    const decodedPath = decodeURIComponent(parsedUrl.pathname);
+    const pathRegex = /^\/v1beta\/files\/[a-zA-Z0-9_-]+$/;
+    if (!ALLOWED_HOSTS.includes(parsedUrl.hostname) || !pathRegex.test(decodedPath)) {
        return res.status(403).send('Forbidden: Target host or path not allowed');
     }
 
