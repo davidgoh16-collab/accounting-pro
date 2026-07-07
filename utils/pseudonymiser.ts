@@ -25,7 +25,19 @@ export interface Person {
 export const EMAIL_REGEX = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 export const TOKEN_REGEX = /(?:Student|Staff|Id)_[0-9A-F]{8}/gi;
 
-const TOKEN_PREFIX_PATTERN = /(?:S(?:t(?:u(?:d(?:e(?:n(?:t(?:_[0-9A-F]{0,8})?)?)?)?)?)?)?|S(?:t(?:a(?:f(?:f(?:_[0-9A-F]{0,8})?)?)?)?)?|I(?:d(?:_[0-9A-F]{0,8})?)?)$/i;
+// True if `s` is itself a prefix of a real token (Student_/Staff_/Id_ + up to 8 hex) —
+// hold back ONLY a trailing partial token across chunks, never a word ending in s/i.
+const MAX_TOKEN_LEN = 16;
+const TOKEN_TEMPLATES = ['STUDENT_', 'STAFF_', 'ID_'];
+function isTokenPrefix(s: string): boolean {
+    if (!s) return false;
+    const up = s.toUpperCase();
+    for (const tpl of TOKEN_TEMPLATES) {
+        if (tpl.startsWith(up)) return true;
+        if (up.startsWith(tpl) && /^[0-9A-F]{0,8}$/.test(up.slice(tpl.length))) return true;
+    }
+    return false;
+}
 
 const NAME_STOPWORDS = new Set([
     'the', 'and', 'for', 'year', 'form', 'class', 'date', 'name', 'student',
@@ -277,15 +289,33 @@ export function rehydrateDeep<T = any>(value: T, mapping: PseudonymMapping): T {
     return value;
 }
 
+const BINARY_KEYS = new Set(['data', 'inlineData', 'fileBase64', 'imageBase64', 'base64Data', 'audioBase64']);
+
+// Deep-scrub every string in a structure (skips base64 keys). Use at a request
+// boundary to tokenise nested inputs (e.g. { profile: { name, email }, ... }).
+export function scrubDeep<T = any>(value: T, mapping?: PseudonymMapping): T {
+    if (typeof value === 'string') return scrubText(value, mapping) as unknown as T;
+    if (Array.isArray(value)) return value.map((v) => scrubDeep(v, mapping)) as unknown as T;
+    if (value && typeof value === 'object') {
+        const out: Record<string, any> = {};
+        for (const [k, v] of Object.entries(value)) {
+            out[k] = BINARY_KEYS.has(k) ? v : scrubDeep(v, mapping);
+        }
+        return out as unknown as T;
+    }
+    return value;
+}
+
 export function createStreamRehydrator(
     mapping: PseudonymMapping,
     emit: (chunk: string) => void
 ): { push(chunk: string): void; flush(): void } {
     let pending = '';
+    // Hold back the LONGEST trailing suffix that is itself a token prefix; emit the rest.
     const findHoldback = (buffer: string): number => {
-        for (let start = 0; start < buffer.length; start++) {
-            const suffix = buffer.slice(start);
-            if (TOKEN_PREFIX_PATTERN.test(suffix) && suffix.length > 0) return start;
+        const max = Math.min(buffer.length, MAX_TOKEN_LEN);
+        for (let len = max; len >= 1; len--) {
+            if (isTokenPrefix(buffer.slice(buffer.length - len))) return buffer.length - len;
         }
         return buffer.length;
     };
