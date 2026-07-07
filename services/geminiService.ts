@@ -10,6 +10,13 @@ import { getSpecContext } from '../utils/contentUtils';
 import { fetchStudentPerformance, fetchTopicPerformance } from './adminService';
 import { AQA_ALEVEL_SPEC, AQA_GCSE_SPEC, EDEXCEL_IGCSE_SPEC } from '../data/specifications';
 import { sanitizeForFirestore } from '../utils/firestoreUtils';
+import { buildMapping, buildSelfMapping, scrubText, rehydrateText, createStreamRehydrator, PseudonymMapping } from '../utils/pseudonymiser';
+
+const selfMapping = (): PseudonymMapping => buildSelfMapping(
+    auth.currentUser
+        ? { uid: auth.currentUser.uid, displayName: auth.currentUser.displayName, email: auth.currentUser.email }
+        : null
+);
 
 // --- MODEL CONFIGURATION ---
 // Using stable versions to prevent 400 Bad Request errors.
@@ -314,9 +321,10 @@ const cleanJson = (text: string): string => {
 
 export const detectDistress = async (text: string): Promise<boolean> => {
     const ai = getAiClient();
+    const safeText = scrubText(text, selfMapping());
     const prompt = `Analyze the following student message for signs of severe emotional distress, anxiety, self-harm intent, or serious safeguarding concerns.
 
-    Message: "${text}"
+    Message: "${safeText}"
 
     Return strictly JSON: { "isDistress": boolean, "reason": "string" }
 
@@ -465,18 +473,20 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     await checkDailyLimit();
     const ai = getAiClient();
     const user = auth.currentUser;
+    const mapping = selfMapping();
+    const rehydrator = createStreamRehydrator(mapping, onChunk);
 
-    // Background Distress Check
+    // Background Distress Check (uses the raw message; detectDistress scrubs internally)
     detectDistress(message).then(isDistressed => {
         if (isDistressed && user) {
             logSafeguardingAlert(message, user.uid);
         }
     });
 
-    const contents: any[] = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+    const contents: any[] = history.filter(m => m.role !== 'system').map(msg => ({ role: msg.role, parts: [{ text: scrubText(msg.text, mapping) }] }));
 
     // Add user message
-    contents.push({ role: 'user', parts: [{ text: message }] });
+    contents.push({ role: 'user', parts: [{ text: scrubText(message, mapping) }] });
 
     const modelName = mode === 'fast' ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
 
@@ -537,7 +547,7 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     const collectedSources: Set<string> = new Set();
 
     for await (const chunk of responseStream) {
-        onChunk(chunk.text || '');
+        rehydrator.push(chunk.text || '');
 
         // Extract grounding metadata if present (GroundingChunks)
         // Note: The SDK structure for grounding metadata might vary, we check candidates[0]
@@ -554,8 +564,9 @@ export const streamChatResponse = async (history: ChatMessage[], message: string
     // Append collected sources to the end of the message if Research Mode was active and sources were found
     if (contextMode === 'research' && collectedSources.size > 0) {
         const sourcesList = Array.from(collectedSources).map(s => `- ${s}`).join('\n');
-        onChunk(`\n\n### 📚 Sources:\n${sourcesList}`);
+        rehydrator.push(`\n\n### 📚 Sources:\n${sourcesList}`);
     }
+    rehydrator.flush();
 };
 
 export const getHint = async (question: Question): Promise<string> => {
@@ -605,9 +616,11 @@ export const generateModelAnswer = async (question: Question): Promise<MarkedMod
 export const streamTutorResponse = async (question: Question, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
+    const rehydrator = createStreamRehydrator(mapping, onChunk);
     const systemInstruction = `You are an interactive Accounting tutor...`;
-    const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
-    contents.push({ role: 'user', parts: [{ text: message }] });
+    const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: scrubText(msg.text, mapping) }] }));
+    contents.push({ role: 'user', parts: [{ text: scrubText(message, mapping) }] });
     const responseStream = await ai.models.generateContentStream({
         model: 'gemini-3-flash-preview',
         contents,
@@ -616,7 +629,8 @@ export const streamTutorResponse = async (question: Question, history: ChatMessa
             safetySettings: SAFETY_SETTINGS
         }
     });
-    for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
+    for await (const chunk of responseStream) { rehydrator.push(chunk.text || ''); }
+    rehydrator.flush();
 };
 
 export const generateCaseStudyApplication = async (question: Question, caseStudyName: string): Promise<{ summary: string; application: string }> => {
@@ -681,6 +695,8 @@ export const processMultipleQuestionsFromWork = async (
 
     CRITICAL INSTRUCTION: Do NOT include any of these instructions or prompt text in your output fields. The output must strictly be the transcribed and evaluated student work.
 
+    PRIVACY: If a student's name appears anywhere on the page (e.g. a handwritten header), do NOT include it in any output field.
+
     Provide output strictly as a JSON array containing objects matching this interface:
     [
         {
@@ -733,6 +749,7 @@ export const processMultipleQuestionsFromWork = async (
 export const markStudentAnswer = async (question: Question, studentAnswer: string, attachment?: { mimeType: string; data: string }): Promise<AIFeedback> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
     const examinerType = question.level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
 
     const prompt = `You are an expert ${examinerType} Accounting examiner. Mark the following student answer.
@@ -747,9 +764,9 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
     ${question.markScheme?.content || `No specific mark scheme provided. Use expert judgment based on ${examinerType} standards.`}
 
     Student Answer:
-    "${studentAnswer}"
+    "${scrubText(studentAnswer, mapping)}"
 
-    ${attachment ? '(Note: The student also provided an image/document attachment which you should consider if visible)' : ''}
+    ${attachment ? '(Note: The student also provided an image/document attachment which you should consider if visible. If a student name appears on the page, do NOT include it in any output field.)' : ''}
 
     Provide output in strict JSON format matching this structure:
     {
@@ -792,13 +809,14 @@ export const markStudentAnswer = async (question: Question, studentAnswer: strin
         fullText += (chunk.text || '');
     }
 
-    return JSON.parse(cleanJson(fullText || '{}'));
+    return JSON.parse(cleanJson(rehydrateText(fullText || '{}', mapping)));
 };
 
 export const generateSessionSummary = async (question: Question, feedback: AIFeedback): Promise<string> => {
     // Summary is generated automatically after marking. It should count as part of the flow.
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
     const prompt = `You are an accounting teacher writing a concise, one-sentence summary for a student's practice session.
 
     Question Title: ${question.title || question.prompt}
@@ -810,10 +828,10 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-3.1-pro-preview',
-            contents: prompt,
+            contents: scrubText(prompt, mapping),
             config: { safetySettings: SAFETY_SETTINGS }
         });
-        return response.text?.trim() || 'Session complete.';
+        return rehydrateText(response.text?.trim() || 'Session complete.', mapping);
     } catch (e) {
         console.error("Error generating session summary", e);
         return 'Session complete.';
@@ -823,12 +841,15 @@ export const generateSessionSummary = async (question: Question, feedback: AIFee
 export const streamMathsTutorResponse = async (problem: MathsProblem, skill: MathsSkill, history: ChatMessage[], message: string, onChunk: (chunk: string) => void): Promise<void> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
+    const rehydrator = createStreamRehydrator(mapping, onChunk);
     const responseStream = await ai.models.generateContentStream({
         model: 'gemini-2.5-pro',
-        contents: [{role: 'user', parts: [{text: message}]}],
+        contents: [{role: 'user', parts: [{text: scrubText(message, mapping)}]}],
         config: { safetySettings: SAFETY_SETTINGS }
     });
-    for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
+    for await (const chunk of responseStream) { rehydrator.push(chunk.text || ''); }
+    rehydrator.flush();
 };
 
 export const generateCaseStudyInfo = async (study: CaseStudyLocation): Promise<{ summary: string; imageUrl: string }> => {
@@ -975,11 +996,15 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
     await checkDailyLimit();
     const ai = getAiClient();
 
+    // Pseudonymise: Gemini only ever sees Student_XXXXXXXX / Staff_XXXXXXXX tokens,
+    // never real names, emails, or Firebase uids. The mapping stays client-side and
+    // is used to resolve tool-call arguments and rehydrate the displayed response.
+    const mapping = buildMapping(contextData.users);
+    const rehydrator = createStreamRehydrator(mapping, onChunk);
+
     // Prepare Data Summary
     const userSummary = contextData.users.map(u => ({
-        id: u.uid,
-        name: u.displayName,
-        email: u.email,
+        id: mapping.uidToToken.get(u.uid),
         level: u.level,
         role: u.role
     }));
@@ -996,11 +1021,11 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
             functionDeclarations: [
                 {
                     name: "fetchStudentPerformance",
-                    description: "Fetches detailed performance data for a specific student using their User ID (uid) or Email. Use this when asked about a student's progress, grades, assignments, or time spent.",
+                    description: "Fetches detailed performance data for a specific student using their Student ID token. Use this when asked about a student's progress, grades, assignments, or time spent.",
                     parameters: {
                         type: "OBJECT",
                         properties: {
-                            identifier: { type: "STRING", description: "The User UID or Email address" }
+                            identifier: { type: "STRING", description: "The Student ID token exactly as it appears in the data context, e.g. Student_A4F21B9C" }
                         },
                         required: ["identifier"]
                     }
@@ -1035,11 +1060,15 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
     - Supported types: 'bar', 'pie', 'line', 'area'.
     - Structure: { "type": "...", "title": "...", "data": [...], "xKey": "...", "yKey": "..." }
 
+    Privacy Rules:
+    - Students and staff are identified ONLY by pseudonymous Student ID / Staff ID tokens (e.g. Student_A4F21B9C). Refer to them by these IDs in all prose, tables, and chart data.
+    - Never invent, guess, or ask for a real name or email address.
+
     Tone: Professional, helpful, data-driven.
     `;
 
-    const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] }));
-    contents.push({ role: 'user', parts: [{ text: message }] });
+    const contents = history.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: scrubText(msg.text, mapping) }] }));
+    contents.push({ role: 'user', parts: [{ text: scrubText(message, mapping) }] });
 
     // Initial Request with Tools
     const result = await ai.models.generateContent({
@@ -1064,14 +1093,14 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
             const fnName = part.functionCall.name;
             const args = part.functionCall.args as any;
 
-            onChunk(`\n\n*Analyzing data for ${args.identifier || args.topic}...*\n\n`);
+            rehydrator.push(`\n\n*Analyzing data for ${args.identifier || args.topic}...*\n\n`);
 
             let toolResultStr = "{}";
             try {
                 if (fnName === 'fetchStudentPerformance') {
-                    // Resolve Email to UID if needed
-                    let uid = args.identifier;
-                    const foundUser = contextData.users.find(u => u.email === args.identifier || u.uid === args.identifier || u.displayName === args.identifier);
+                    // Resolve Student ID token to uid (fall back to raw email/uid/name for robustness)
+                    let uid = mapping.tokenToUid.get(args.identifier) ?? args.identifier;
+                    const foundUser = contextData.users.find(u => u.uid === uid || u.email === args.identifier || u.uid === args.identifier || u.displayName === args.identifier);
                     if (foundUser) uid = foundUser.uid;
 
                     const data = await fetchStudentPerformance(uid);
@@ -1105,7 +1134,7 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
 
                     // Summarize data to save context window
                     const summary = {
-                        student: foundUser?.displayName,
+                        student: mapping.uidToToken.get(uid),
                         engagement: {
                             totalSessions: data.sessions.length,
                             completedLessons: Object.keys(data.learningProgress).length,
@@ -1126,6 +1155,10 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
             } catch (e: any) {
                 toolResultStr = JSON.stringify({ error: e.message });
             }
+
+            // Defence-in-depth: strip any name/email that might have leaked into free-text fields
+            // (e.g. session titles, feedback comments) before this tool result goes to Gemini.
+            toolResultStr = scrubText(toolResultStr, mapping);
 
             // Send Tool Response back to Model
             // Construct the next turn
@@ -1156,16 +1189,18 @@ export const streamAdminChat = async (history: ChatMessage[], message: string, c
             });
 
             for await (const chunk of secondStream) {
-                onChunk(chunk.text || '');
+                rehydrator.push(chunk.text || '');
             }
+            rehydrator.flush();
             return; // Done
         }
     }
 
     // No tool call, just stream the text
     if (result.text) {
-        onChunk(result.text);
+        rehydrator.push(result.text);
     }
+    rehydrator.flush();
 };
 
 export const generateQuizQuestion = async (item: FlashcardItem): Promise<CaseStudyQuizQuestion> => {
@@ -1628,6 +1663,7 @@ export const generateLessonContent = async (lessonTitle: string, chapter: string
 export const validateLessonAnswer = async (question: string, userAnswer: string, correctAnswer: string, keywords?: string[]): Promise<boolean> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
 
     const prompt = `You are an automated grading assistant for an Accounting lesson.
 
@@ -1635,7 +1671,7 @@ export const validateLessonAnswer = async (question: string, userAnswer: string,
     Correct Answer/Key Concept: "${correctAnswer}"
     Required Keywords: ${keywords ? JSON.stringify(keywords) : "None"}
 
-    Student Answer: "${userAnswer}"
+    Student Answer: "${scrubText(userAnswer, mapping)}"
 
     Task: Determine if the student's answer is factually correct and demonstrates understanding of the key concept.
 
@@ -1718,15 +1754,17 @@ export const generateVideoQuestions = async (videoTitle: string, level: string):
 export const chatWithPreRelease = async (history: ChatMessage[], message: string, imageBase64: string | null, onChunk: (chunk: string) => void): Promise<void> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
+    const rehydrator = createStreamRehydrator(mapping, onChunk);
 
     // Construct history with the new model input format
     // gemini-2.5-pro supports multimodal inputs
     const contents: any[] = history.map(msg => ({
         role: msg.role === 'model' ? 'model' : 'user',
-        parts: [{ text: msg.text }]
+        parts: [{ text: scrubText(msg.text, mapping) }]
     }));
 
-    const userParts: any[] = [{ text: message }];
+    const userParts: any[] = [{ text: scrubText(message, mapping) }];
 
     if (imageBase64) {
         // Remove data URL prefix if present for the API call
@@ -1741,7 +1779,9 @@ export const chatWithPreRelease = async (history: ChatMessage[], message: string
 
     contents.push({ role: 'user', parts: userParts });
 
-    const systemInstruction = `You are an expert Accounting tutor assisting a student with their course content and exam preparation. The student is looking at a specific page of the resource booklet (provided as an image). Answer their questions specifically about the data, tables, financial statements, or scenarios shown in the image. Be precise, quote figures if visible, and explain accounting principles related to the resource.`;
+    const systemInstruction = `You are an expert Accounting tutor assisting a student with their course content and exam preparation. The student is looking at a specific page of the resource booklet (provided as an image). Answer their questions specifically about the data, tables, financial statements, or scenarios shown in the image. Be precise, quote figures if visible, and explain accounting principles related to the resource.
+
+    PRIVACY: If a student's name appears anywhere on the page, do NOT include it in any output field.`;
 
     const responseStream = await ai.models.generateContentStream({
         model: 'gemini-2.5-pro', // Use Pro for vision capabilities
@@ -1752,7 +1792,8 @@ export const chatWithPreRelease = async (history: ChatMessage[], message: string
         }
     });
 
-    for await (const chunk of responseStream) { onChunk(chunk.text || ''); }
+    for await (const chunk of responseStream) { rehydrator.push(chunk.text || ''); }
+    rehydrator.flush();
 };
 
 export const generatePreReleaseQuestion = async (imageBase64: string): Promise<GeneratedQuestionData> => handleApiCall(async () => {
@@ -1763,7 +1804,9 @@ export const generatePreReleaseQuestion = async (imageBase64: string): Promise<G
 
     Format as JSON object: { "questionNumber": "03.X", "marks": number, "prompt": "string", "markScheme": { "content": "string" } }
 
-    Ensure the question requires using the resource (e.g., "Using Figure X...", "Describe the pattern...", "Calculate...").`;
+    Ensure the question requires using the resource (e.g., "Using Figure X...", "Describe the pattern...", "Calculate...").
+
+    PRIVACY: If a student's name appears anywhere on the page, do NOT include it in any output field.`;
 
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
@@ -1814,7 +1857,9 @@ export const parseTimetableFile = async (data: string, mimeType: string = 'image
         "duration": "Xh Ym" (e.g. "1h 30m")
     }
 
-    Ignore non-accounting exams.`;
+    Ignore non-accounting exams.
+
+    PRIVACY: If a student's name appears anywhere on the page, do NOT include it in any output field.`;
 
     // Handle CSV as text prompt if possible, or blob.
     // If it is CSV, we can just decode base64 and pass as text part?
@@ -1922,7 +1967,9 @@ export const digitizeHandwrittenWork = async (imageBase64: string, level: UserLe
         "timeTaken": "string"
     }
 
-    If score/feedback is not visible, estimate or leave blank/0. Use "unit" for broad topics like "Coasts", "Hazards". If no time is found, leave "timeTaken" empty.`;
+    If score/feedback is not visible, estimate or leave blank/0. Use "unit" for broad topics like "Coasts", "Hazards". If no time is found, leave "timeTaken" empty.
+
+    PRIVACY: If a student's name appears anywhere on the page (e.g. a handwritten header), do NOT include it in any output field.`;
 
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-pro',
@@ -1948,18 +1995,19 @@ export const evaluateMemoryRecallAttempt = async (
 ): Promise<{ score: number; highlightedSummary: string; encouragement: string }> => {
     await checkDailyLimit();
     const ai = getAiClient();
+    const mapping = selfMapping();
     const examinerType = level === 'IGCSE' ? 'Edexcel International GCSE' : 'AQA';
 
     const prompt = `You are an expert ${examinerType} Accounting tutor helping a student with a "blurting" or "active recall" exercise.
 
     Original Topic Summary:
     """
-    ${summaryText}
+    ${scrubText(summaryText, mapping)}
     """
 
     Student's Recall Attempt (from memory):
     """
-    ${studentAttempt}
+    ${scrubText(studentAttempt, mapping)}
     """
 
     Task:
@@ -1985,7 +2033,7 @@ export const evaluateMemoryRecallAttempt = async (
         }
     });
 
-    return JSON.parse(cleanJson(response.text || '{}'));
+    return JSON.parse(cleanJson(rehydrateText(response.text || '{}', mapping)));
 };
 
 export const generateSong = async (

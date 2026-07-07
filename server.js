@@ -38,6 +38,22 @@ app.use((req, res, next) => {
 // Try to serve from dist first
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Defence-in-depth: mask any email address in outbound Gemini payloads, in case
+// upstream client code fails to scrub it. Skips binary/base64 fields (inlineData.data).
+const EMAIL_REGEX = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+const maskEmailsDeep = (value) => {
+  if (typeof value === 'string') return value.replace(EMAIL_REGEX, '[EMAIL]');
+  if (Array.isArray(value)) return value.map(maskEmailsDeep);
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [key, val] of Object.entries(value)) {
+      out[key] = (key === 'data' || key === 'inlineData') ? val : maskEmailsDeep(val);
+    }
+    return out;
+  }
+  return value;
+};
+
 // Initialize Gemini Client
 const getAiClient = () => {
   const API_KEY = process.env.GEMINI_API_KEY;
@@ -58,8 +74,8 @@ app.post('/api/generate-content', async (req, res) => {
 
     const response = await ai.models.generateContent({
       model: model,
-      contents: contents,
-      config: config
+      contents: maskEmailsDeep(contents),
+      config: maskEmailsDeep(config)
     });
 
     res.json({
@@ -139,8 +155,8 @@ app.post('/api/generate-content-stream', async (req, res) => {
 
     const responseStream = await ai.models.generateContentStream({
       model: model,
-      contents: contents,
-      config: config
+      contents: maskEmailsDeep(contents),
+      config: maskEmailsDeep(config)
     });
 
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -171,8 +187,8 @@ app.post('/api/generate-images', async (req, res) => {
 
     const response = await ai.models.generateImages({
       model: model,
-      prompt: prompt,
-      config: config
+      prompt: maskEmailsDeep(prompt),
+      config: maskEmailsDeep(config)
     });
 
     res.json({
@@ -191,7 +207,7 @@ app.post('/api/generate-song', async (req, res) => {
 
     const responseStream = await ai.models.generateContentStream({
       model: "lyria-3-pro-preview",
-      contents: prompt,
+      contents: maskEmailsDeep(prompt),
       config: {
         responseModalities: ["AUDIO", "TEXT"],
       },
