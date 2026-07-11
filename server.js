@@ -11,6 +11,45 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 8080;
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 100;
+const rateLimitMap = new Map();
+
+// Cleanup old entries every minute
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of rateLimitMap.entries()) {
+    if (now - data.startTime > RATE_LIMIT_WINDOW_MS) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, RATE_LIMIT_WINDOW_MS);
+
+// Rate limiting middleware for API routes
+app.use('/api/', (req, res, next) => {
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  const now = Date.now();
+
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, { count: 1, startTime: now });
+    return next();
+  }
+
+  const data = rateLimitMap.get(ip);
+  if (now - data.startTime > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(ip, { count: 1, startTime: now });
+    return next();
+  }
+
+  data.count++;
+  if (data.count > MAX_REQUESTS_PER_WINDOW) {
+    return res.status(429).json({ error: 'Too many requests, please try again later.' });
+  }
+
+  next();
+});
+
 // Security Headers
 app.disable('x-powered-by');
 app.use((req, res, next) => {
@@ -275,7 +314,7 @@ app.get('/health', (req, res) => {
 });
 
 // Serve index.html for SPA routes only — never for asset/file requests
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
   if (path.extname(req.path)) {
     return res.status(404).end();
   }
