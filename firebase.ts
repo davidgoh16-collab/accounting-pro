@@ -204,6 +204,10 @@ export const getCourseFiles = async (level: string): Promise<{name: string, path
 };
 
 export const downloadFileAsBase64 = async (path: string): Promise<{ data: string; mimeType: string }> => {
+    if (path.includes('..')) {
+        throw new Error('Invalid path: path traversal detected');
+    }
+
     if (fileCache[path]) {
         return fileCache[path];
     }
@@ -246,6 +250,10 @@ export const downloadFileAsBase64 = async (path: string): Promise<{ data: string
 };
 
 export const uploadBase64Image = async (path: string, base64Data: string): Promise<string> => {
+    if (path.includes('..')) {
+        throw new Error('Invalid path: path traversal detected');
+    }
+
     try {
         const storageRef = ref(storage, path);
 
